@@ -1,44 +1,30 @@
-import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import axios from 'axios'
+import React from 'react';
+import Navbar from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/components/navbar.jsx';
+import Hero from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/components/hero.jsx';
+import CompanyLogos from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/components/companyLogos.jsx';
+import WhyChooseUs from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/components/whyChooseUs.jsx';
+import WhatIntern from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/components/whatIntern.jsx';
+// import Testimonials from './components/Testimonials';
+import FeaturedInternships from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/components/featuredInternhip.jsx';
+// import CompanyReviews from './components/CompanyReviews';
+// import JoinSection from './components/JoinSection';
+// import Footer from './components/Footer';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
-
-  const fetchAPI = async () => {
-    const response = await axios.get('http://localhost:3000/api')
-    console.log(response.data)
-  }
-  useEffect(() => {
-    fetchAPI()
-  }, [])
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="App">
+      <Navbar />
+      <Hero />
+      <CompanyLogos />
+      <WhyChooseUs />
+      <WhatIntern />
+      <FeaturedInternships />
+      {/* <CompanyReviews />
+      <JoinSection />
+      <Footer /> */}
+    </div>
+  );
 }
 
-export default App
+export default App;
