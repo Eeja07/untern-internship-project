@@ -45,8 +45,8 @@ const WhyChooseUs = () => {
   ];
 
   return (
-    <div className="why-choose-us">
-      <div className="container">
+    <div className="why-choose-us" style={{ backgroundColor: '#DBE2EF' }}>
+      <div className="container" style={{ maxWidth: '1500px', margin: '0 auto' }}>
         <div className="section-header-wcu">
           <h2>Why you must choose <span className="palette3">Untern</span></h2>
         </div>
