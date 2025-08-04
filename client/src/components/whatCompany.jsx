@@ -9,7 +9,6 @@ import arwright from '/home/eeja/Downloads/Github/Untern-webApp-internship-winni
 import jeff from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/jeff.svg';
 import eeja from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/eeja.webp';
 import { Star } from 'lucide-react';
-import '../App.css';
 
 const WhatCompany = () => {
     // FIX: Initialize the state for the carousel's index

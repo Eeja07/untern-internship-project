@@ -7,7 +7,6 @@ import arwright from '/home/eeja/Downloads/Github/Untern-webApp-internship-winni
 import jeff from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/jeff.svg';
 import eeja from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/eeja.webp';
 import { Grid, Star } from 'lucide-react';
-import '../App.css';
 
 const WhatIntern = () => {
     const [currentIndex, setCurrentIndex] = useState(0);

@@ -1,35 +1,181 @@
 import React from 'react';
-// import './Navbar.css';
+import { useAuth } from './AuthContext';
 
-const Navbar = () => {
+const Navbar = ({ onForStudentsClick, onGetStartedClick, onForCompaniesClick }) => {
+  const { isAuthenticated, user, logout } = useAuth();
+
+  const handleForStudentsClick = (e) => {
+    e.preventDefault();
+    console.log('For Students clicked', { onForStudentsClick }); // Add this line
+    if (onForStudentsClick) {
+      onForStudentsClick();
+    }
+  };
+  const handleForCompaniesClick = (e) => {
+    e.preventDefault();
+    console.log('For Companies clicked', { onForCompaniesClick }); // Add this line
+    if (onForCompaniesClick) {
+      onForCompaniesClick();
+    }
+  };
+  const handleGetStartedClick = (e) => {
+    e.preventDefault();
+    if (onGetStartedClick) {
+      onGetStartedClick();
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+  };
+
   return (
-    <nav className="navbar">
-      <div className="nav-container">
-        <div className="nav-logo">
-          <h2>Untern</h2>
-          
+    <nav style={{
+      background: 'white',
+      boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+      padding: '1rem 0',
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      width: '100%',
+      zIndex: 999
+    }}>
+      <div style={{
+        maxWidth: '1500px',
+        margin: '0 auto',
+        padding: '0 20px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }}>
+        <div>
+          <h2 style={{
+            color: '#3B82F6',
+            fontWeight: 700,
+            margin: 0
+          }}>Untern</h2>
         </div>
-        <ul className="nav-menu">
-          <li className="nav-item">
-            <a href="/" className="nav-link">Home</a>
+        <ul style={{
+          display: 'flex',
+          listStyle: 'none',
+          gap: '2rem',
+          margin: 0,
+          padding: 0
+        }}>
+          <li>
+            <a href="/" style={{
+              textDecoration: 'none',
+              color: '#64748B',
+              fontWeight: 500,
+              transition: 'color 0.3s'
+            }}
+            onMouseEnter={(e) => e.target.style.color = '#3B82F6'}
+            onMouseLeave={(e) => e.target.style.color = '#64748B'}>Home</a>
           </li>
-          <li className="nav-item">
-            <a href="#for-students" className="nav-link">For Students</a>
+          <li>
+            <a href="#for-students" style={{
+              textDecoration: 'none',
+              color: '#64748B',
+              fontWeight: 500,
+              transition: 'color 0.3s'
+            }}
+            onMouseEnter={(e) => e.target.style.color = '#3B82F6'}
+            onMouseLeave={(e) => e.target.style.color = '#64748B'}
+            onClick={handleForStudentsClick}>For Students</a>
           </li>
-          <li className="nav-item">
-            <a href="#for-companies" className="nav-link">For Companies</a>
+          <li>
+            <a href="#for-companies" style={{
+              textDecoration: 'none',
+              color: '#64748B',
+              fontWeight: 500,
+              transition: 'color 0.3s'
+            }}
+            onMouseEnter={(e) => e.target.style.color = '#3B82F6'}
+            onMouseLeave={(e) => e.target.style.color = '#64748B'}
+            onClick={handleForCompaniesClick}>For Companies</a>
           </li>
-          <li className="nav-item">
-            <a href="#faq" className="nav-link">FAQ</a>
+          <li>
+            <a href="#faq" style={{
+              textDecoration: 'none',
+              color: '#64748B',
+              fontWeight: 500,
+              transition: 'color 0.3s'
+            }}
+            onMouseEnter={(e) => e.target.style.color = '#3B82F6'}
+            onMouseLeave={(e) => e.target.style.color = '#64748B'}>FAQ</a>
           </li>
-          <li className="nav-item">
-            <a href="#blog" className="nav-link">Blog</a>
+          <li>
+            <a href="#blog" style={{
+              textDecoration: 'none',
+              color: '#64748B',
+              fontWeight: 500,
+              transition: 'color 0.3s'
+            }}
+            onMouseEnter={(e) => e.target.style.color = '#3B82F6'}
+            onMouseLeave={(e) => e.target.style.color = '#64748B'}>Blog</a>
           </li>
-          <li className="nav-item">
-            <a href="#about" className="nav-link">About</a>
+          <li>
+            <a href="#about" style={{
+              textDecoration: 'none',
+              color: '#64748B',
+              fontWeight: 500,
+              transition: 'color 0.3s'
+            }}
+            onMouseEnter={(e) => e.target.style.color = '#3B82F6'}
+            onMouseLeave={(e) => e.target.style.color = '#64748B'}>About</a>
           </li>
         </ul>
-        <button className="get-started-btn">Get Started</button>
+        
+        <div>
+          {isAuthenticated ? (
+            <div className="user-menu" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <span className="user-welcome" style={{ color: '#64748B', fontSize: '0.9rem' }}>
+                Welcome, {user?.email?.split('@')[0]}
+              </span>
+              <button 
+                className="logout-btn" 
+                onClick={handleLogout}
+                style={{
+                  background: 'transparent',
+                  color: '#64748B',
+                  border: '1px solid #64748B',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  transition: 'all 0.3s'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#64748B';
+                  e.target.style.color = 'white';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'transparent';
+                  e.target.style.color = '#64748B';
+                }}
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <button style={{
+              background: '#112D4E',
+              color: 'white',
+              border: 'none',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '8px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'background 0.3s'
+            }}
+            onMouseEnter={(e) => e.target.style.background = '#2563EB'}
+            onMouseLeave={(e) => e.target.style.background = '#112D4E'}
+            onClick={handleGetStartedClick}>
+              Get Started
+            </button>
+          )}
+        </div>
       </div>
     </nav>
   );

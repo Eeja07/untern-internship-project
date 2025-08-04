@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Navbar from '../components/navbar.jsx';
-import FooterHome from '../components/footerHome.jsx';
-import SearchResultCard from '../components/searchResultCards.jsx';
+import Navbar from './navbar.jsx';
+import FooterHome from './footerHome.jsx';
+import SearchResultCard from './searchResultCards.jsx';
 
 const SearchPage = () => {
   const location = useLocation();
@@ -12,24 +12,11 @@ const SearchPage = () => {
   const [originalResults, setOriginalResults] = useState([]); // Store original search results
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const [filters, setFilters] = useState({
     type: 'all',
     location: 'all',
     duration: 'all'
   });
-
-  // Check for mobile screen size
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   // Get search query from URL and perform search only once
   useEffect(() => {
@@ -204,92 +191,36 @@ const SearchPage = () => {
     <>
       <Navbar />
       
-      <div style={{
-        marginTop: '80px',
-        minHeight: 'calc(100vh - 80px)'
-      }}>
-        <div style={{
-          background: '#f8fafc',
-          padding: '3rem 0 2rem',
-          borderBottom: '1px solid #e2e8f0'
-        }}>
-          <div style={{
-            maxWidth: '1200px',
-            margin: '0 auto',
-            padding: '0 20px'
-          }}>
-            <div>
-              <h1 style={{
-                color: '#1e293b',
-                marginBottom: '2rem',
-                fontSize: '2rem',
-                fontWeight: 700
-              }}>Search Results</h1>
+      <div className="search-page">
+        <div className="search-header">
+          <div className="container">
+            <div className="search-header-content">
+              <h1>Search Results</h1>
               
               {/* Search Bar */}
-              <form style={{ marginBottom: '1.5rem' }} onSubmit={handleSearch}>
-                <div style={{
-                  display: 'flex',
-                  gap: '1rem',
-                  maxWidth: '600px',
-                  flexDirection: isMobile ? 'column' : 'row'
-                }}>
+              <form className="search-form-page" onSubmit={handleSearch}>
+                <div className="search-input-container">
                   <input
                     type="text"
                     placeholder="Search for internships..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{
-                      flex: 1,
-                      padding: '0.75rem 1rem',
-                      border: '2px solid #e2e8f0',
-                      borderRadius: '8px',
-                      fontSize: '1rem',
-                      outline: 'none',
-                      transition: 'border-color 0.3s'
-                    }}
-                    onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
-                    onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
+                    className="search-input-page"
                   />
-                  <button type="submit" style={{
-                    background: '#3b82f6',
-                    color: 'white',
-                    border: 'none',
-                    padding: '0.75rem 1.5rem',
-                    borderRadius: '8px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'background 0.3s'
-                  }}
-                  onMouseEnter={(e) => e.target.style.background = '#2563eb'}
-                  onMouseLeave={(e) => e.target.style.background = '#3b82f6'}>
+                  <button type="submit" className="search-btn-page">
                     Search
                   </button>
                   <button
                     type="button"
+                    className="clear-btn"
                     onClick={clearSearch}
-                    style={{
-                      background: '#6b7280',
-                      color: 'white',
-                      border: 'none',
-                      padding: '0.75rem 1rem',
-                      borderRadius: '8px',
-                      fontWeight: 500,
-                      cursor: 'pointer',
-                      transition: 'background 0.3s'
-                    }}
-                    onMouseEnter={(e) => e.target.style.background = '#4b5563'}
-                    onMouseLeave={(e) => e.target.style.background = '#6b7280'}
                   >
                     Clear
                   </button>
                 </div>
               </form>
 
-              <div style={{
-                color: '#64748b',
-                fontSize: '0.9rem'
-              }}>
+              <div className="search-info">
                 {searchTerm && hasSearched && !isLoading && (
                   <p>
                     Showing {searchResults.length} results for "<strong>{new URLSearchParams(location.search).get('q') || searchTerm}</strong>"
@@ -300,48 +231,19 @@ const SearchPage = () => {
           </div>
         </div>
 
-        <div style={{ padding: '2rem 0' }}>
-          <div style={{
-            maxWidth: '1200px',
-            margin: '0 auto',
-            padding: '0 20px',
-            display: 'grid',
-            gridTemplateColumns: isMobile ? '1fr' : '250px 1fr',
-            gap: isMobile ? '1.5rem' : '2rem'
-          }}>
+        <div className="search-content">
+          <div className="container">
+            <div className="search-layout">
               
               {/* Filters Sidebar */}
-              <div style={{
-                background: 'white',
-                padding: '1.5rem',
-                borderRadius: '12px',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-                height: 'fit-content'
-              }}>
-                <h3 style={{
-                  marginBottom: '1.5rem',
-                  color: '#1e293b',
-                  fontSize: '1.1rem'
-                }}>Filter Results</h3>
+              <div className="filters-sidebar">
+                <h3>Filter Results</h3>
                 
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={{
-                    display: 'block',
-                    marginBottom: '0.5rem',
-                    color: '#374151',
-                    fontWeight: 500
-                  }}>Job Type:</label>
+                <div className="filter-group">
+                  <label>Job Type:</label>
                   <select
                     value={filters.type}
                     onChange={(e) => handleFilterChange('type', e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      background: 'white',
-                      color: '#374151'
-                    }}
                   >
                     <option value="all">All Types</option>
                     <option value="remote">Remote</option>
@@ -352,24 +254,11 @@ const SearchPage = () => {
                   </select>
                 </div>
 
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={{
-                    display: 'block',
-                    marginBottom: '0.5rem',
-                    color: '#374151',
-                    fontWeight: 500
-                  }}>Location:</label>
+                <div className="filter-group">
+                  <label>Location:</label>
                   <select
                     value={filters.location}
                     onChange={(e) => handleFilterChange('location', e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      background: 'white',
-                      color: '#374151'
-                    }}
                   >
                     <option value="all">All Locations</option>
                     <option value="jakarta">Jakarta</option>
@@ -379,24 +268,11 @@ const SearchPage = () => {
                   </select>
                 </div>
 
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={{
-                    display: 'block',
-                    marginBottom: '0.5rem',
-                    color: '#374151',
-                    fontWeight: 500
-                  }}>Duration:</label>
+                <div className="filter-group">
+                  <label>Duration:</label>
                   <select
                     value={filters.duration}
                     onChange={(e) => handleFilterChange('duration', e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      background: 'white',
-                      color: '#374151'
-                    }}
                   >
                     <option value="all">All Durations</option>
                     <option value="3">3 months</option>
@@ -407,20 +283,13 @@ const SearchPage = () => {
               </div>
 
               {/* Search Results */}
-              <div style={{ minHeight: '400px' }}>
+              <div className="search-results">
                 {isLoading ? (
-                  <div style={{
-                    textAlign: 'center',
-                    padding: '3rem',
-                    color: '#6b7280'
-                  }}>
+                  <div className="loading">
                     <p>Loading results...</p>
                   </div>
                 ) : searchResults.length > 0 ? (
-                  <div style={{
-                    display: 'grid',
-                    gap: '1.5rem'
-                  }}>
+                  <div className="results-grid">
                     {searchResults.map(internship => (
                       <SearchResultCard
                         key={internship.id}
@@ -429,27 +298,16 @@ const SearchPage = () => {
                     ))}
                   </div>
                 ) : hasSearched ? (
-                  <div style={{
-                    textAlign: 'center',
-                    padding: '3rem',
-                    color: '#6b7280'
-                  }}>
-                    <h3 style={{
-                      color: '#374151',
-                      marginBottom: '1rem'
-                    }}>No results found</h3>
+                  <div className="no-results">
+                    <h3>No results found</h3>
                     <p>Try adjusting your search terms or filters.</p>
+                    <button className="back-home-btn" onClick={clearSearch}>
+                      Back to Home
+                    </button>
                   </div>
                 ) : (
-                  <div style={{
-                    textAlign: 'center',
-                    padding: '3rem',
-                    color: '#6b7280'
-                  }}>
-                    <h3 style={{
-                      color: '#374151',
-                      marginBottom: '1rem'
-                    }}>Start your search</h3>
+                  <div className="no-search">
+                    <h3>Start your search</h3>
                     <p>Enter keywords to find internships that match your interests.</p>
                   </div>
                 )}
@@ -457,7 +315,8 @@ const SearchPage = () => {
             </div>
           </div>
         </div>
-      
+      </div>
+
       <FooterHome />
     </>
   );

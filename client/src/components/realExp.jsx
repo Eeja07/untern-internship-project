@@ -6,7 +6,6 @@ import picRealExp4 from "../assets/realExp4.webp";
 import picRealExp5 from "../assets/realExp5.webp";
 import arwleft from "../assets/arwleft.svg";
 import arwright from "../assets/arwright.svg";
-import '../App.css';
 
 const RealExperience = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -134,8 +133,22 @@ const RealExperience = () => {
             </button>
           </div>
         </div>
-        <div className="get-started-btn-container " >
-          <button className="get-started-btn">
+        <div className="get-started-btn-container" style={{
+          display: 'block',
+          padding: '3rem 0rem',
+          textAlign: 'center'
+        }}>
+          <button className="get-started-btn" style={{
+            fontSize: '1.75rem',
+            background: '#112d4e',
+            color: '#fff',
+            border: 'none',
+            padding: '.75rem 1.5rem',
+            borderRadius: '8px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            transition: 'background .3s'
+          }}  >
             Get Started
           </button>
         </div>

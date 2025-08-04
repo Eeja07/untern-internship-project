@@ -30,8 +30,16 @@ const CompanyLogos = () => {
   };
 
   return (
-    <div className="company-logos">
-      <p className="company-text">Apply your dream company</p>
+    <div style={{
+      padding: '4rem 0',
+      background: 'white'
+    }}>
+      <p style={{
+        textAlign: 'center',
+        fontSize: '2rem',
+        color: '#112D4E',
+        marginBottom: '3rem'
+      }}>Apply your dream company</p>
       <style>
         {`
           @keyframes scroll-right {

@@ -1,5 +1,4 @@
 import React from "react";
-import '../App.css';
 import yt from "../assets/ytFooter.svg";
 import fb from "../assets/fbFooter.svg";
 import tt from "../assets/ttFooter.svg";
