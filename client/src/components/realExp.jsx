@@ -7,7 +7,7 @@ import picRealExp5 from "../assets/realExp5.webp";
 import arwleft from "../assets/arwleft.svg";
 import arwright from "../assets/arwright.svg";
 
-const RealExperience = () => {
+const RealExperience = ({ onGetStartedClick }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const experiences = [
     picRealExp1,
@@ -139,16 +139,20 @@ const RealExperience = () => {
           textAlign: 'center'
         }}>
           <button className="get-started-btn" style={{
-            fontSize: '1.75rem',
-            background: '#112d4e',
-            color: '#fff',
-            border: 'none',
-            padding: '.75rem 1.5rem',
-            borderRadius: '8px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'background .3s'
-          }}  >
+              background: '#112D4E',
+              color: 'white',
+              border: 'none',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '8px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'background 0.3s',
+              fontSize: '1.75rem'
+            }}
+            onMouseEnter={(e) => e.target.style.background = '#2563EB'}
+            onMouseLeave={(e) => e.target.style.background = '#112D4E'}
+            onClick={onGetStartedClick}
+          >
             Get Started
           </button>
         </div>

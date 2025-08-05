@@ -41,12 +41,23 @@ api.interceptors.response.use(
   }
 );
 
+// ...existing code...
+
 // Authentication API calls
 export const authAPI = {
   // Register a new user
   register: async (userData) => {
     try {
-      const response = await api.post('/register', userData);
+      // Map frontend field names to backend field names
+      const backendData = {
+        ...userData,
+        user_type: userData.userType || userData.user_type || 'student' // Map userType to user_type
+      };
+      
+      // Remove the frontend field to avoid confusion
+      delete backendData.userType;
+      
+      const response = await api.post('/register', backendData);
       if (response.data.success && response.data.token) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
@@ -60,8 +71,28 @@ export const authAPI = {
   // Login user
   login: async (credentials) => {
     try {
-      const response = await api.post('/login', credentials);
+      // Extract expectedUserType for client-side validation
+      const { expectedUserType, ...loginCredentials } = credentials;
+      
+      // Map frontend field names to backend field names for login too
+      const backendData = {
+        ...loginCredentials,
+        user_type: loginCredentials.userType || loginCredentials.user_type
+      };
+      
+      // Remove the frontend field to avoid confusion
+      delete backendData.userType;
+      
+      const response = await api.post('/login', backendData);
       if (response.data.success && response.data.token) {
+        // Validate user type matches the expected type for the login context
+        if (expectedUserType && response.data.user.userType !== expectedUserType) {
+          throw { 
+            success: false, 
+            message: `This account is not authorized for ${expectedUserType} access` 
+          };
+        }
+        
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
       }

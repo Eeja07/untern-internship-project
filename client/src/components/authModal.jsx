@@ -70,12 +70,12 @@ const AuthModal = ({ isOpen, onClose }) => {
 
     try {
       setLoading(true);
-
       if (isLogin) {
         await login({
           email: formData.email,
           password: formData.password,
-          userType: 'student' // Add user type for student login
+          userType: 'student', // Add user type for student login
+          expectedUserType: 'student' // Add expected user type validation
         });
       } else {
         await register({

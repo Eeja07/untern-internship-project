@@ -1,7 +1,13 @@
 import React from 'react';
 // import './FeaturedInternships.css';
 
-const FeaturedInternships = () => {
+const FeaturedInternships = ({ onForStudentsClick }) => {
+  const handleForStudentsClick = (e) => {
+    e.preventDefault();
+    if (onForStudentsClick) {
+      onForStudentsClick();
+    }
+  };
   const internships_1 = [
     {
       id: 1,
@@ -67,7 +73,7 @@ const FeaturedInternships = () => {
       <div className="container-fi" style={{maxWidth:'1500px', margin:'0 auto'}}>
         <div className="section-header" style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4rem 0'}}>
           <h2 style={{fontWeight: '100'}}>Featured Internship</h2>
-          <button style={{ backgroundColor: '#112D4E',color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '5px', cursor: 'pointer', fontSize: '1.125rem', fontWeight: '600' }} className="view-all-btn">View All →</button>
+          <button onClick={handleForStudentsClick} style={{ backgroundColor: '#112D4E',color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '5px', cursor: 'pointer', fontSize: '1.125rem', fontWeight: '600' }} className="view-all-btn">View All →</button>
         </div>
         <div className="internships-grid" style={{ display: 'flex', flexDirection: 'column'}}>
           <div className="internship-grid1" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -102,7 +108,7 @@ const FeaturedInternships = () => {
                       <span>{internship.duration}</span>
                     </div>
                   </div>
-                  <button className="apply-btn" style={{fontWeight:'600', marginTop:'1rem', marginLeft:'auto', marginRight:'auto', backgroundColor: '#112D4E', color: 'white', borderRadius: '5px', cursor: 'pointer', padding: '0.75rem 1.5rem', border: 'none', boxShadow: '0 2px 19px rgba(0, 0, 0, 0.1)', display: 'block', transition: 'all 0.3s ease' }} onMouseEnter={(e) => { e.target.style.backgroundColor = '#0d1f3a'; e.target.style.transform = 'translateY(-2px)'; }} onMouseLeave={(e) => { e.target.style.backgroundColor = '#112D4E'; e.target.style.transform = 'translateY(0)'; }}>Apply Now</button>
+                  <button className="apply-btn" onClick={handleForStudentsClick} style={{fontWeight:'600', marginTop:'1rem', marginLeft:'auto', marginRight:'auto', backgroundColor: '#112D4E', color: 'white', borderRadius: '5px', cursor: 'pointer', padding: '0.75rem 1.5rem', border: 'none', boxShadow: '0 2px 19px rgba(0, 0, 0, 0.1)', display: 'block', transition: 'all 0.3s ease' }} onMouseEnter={(e) => { e.target.style.backgroundColor = '#0d1f3a'; e.target.style.transform = 'translateY(-2px)'; }} onMouseLeave={(e) => { e.target.style.backgroundColor = '#112D4E'; e.target.style.transform = 'translateY(0)'; }}>Apply Now</button>
                 </div>
               ))}
             </div>
@@ -139,7 +145,7 @@ const FeaturedInternships = () => {
                       <span>{internship.duration}</span>
                     </div>
                   </div>
-                  <button className="apply-btn" style={{fontWeight:'600',marginTop:'1rem', marginLeft:'auto', marginRight:'auto', backgroundColor: '#112D4E', color: 'white', borderRadius: '5px', cursor: 'pointer', padding: '0.75rem 1.5rem', border: 'none', boxShadow: '0 2px 19px rgba(0, 0, 0, 0.1)', display: 'block', transition: 'all 0.3s ease' }} onMouseEnter={(e) => { e.target.style.backgroundColor = '#0d1f3a'; e.target.style.transform = 'translateY(-2px)'; }} onMouseLeave={(e) => { e.target.style.backgroundColor = '#112D4E'; e.target.style.transform = 'translateY(0)'; }}>Apply Now</button>
+                  <button className="apply-btn" onClick={handleForStudentsClick} style={{fontWeight:'600',marginTop:'1rem', marginLeft:'auto', marginRight:'auto', backgroundColor: '#112D4E', color: 'white', borderRadius: '5px', cursor: 'pointer', padding: '0.75rem 1.5rem', border: 'none', boxShadow: '0 2px 19px rgba(0, 0, 0, 0.1)', display: 'block', transition: 'all 0.3s ease' }} onMouseEnter={(e) => { e.target.style.backgroundColor = '#0d1f3a'; e.target.style.transform = 'translateY(-2px)'; }} onMouseLeave={(e) => { e.target.style.backgroundColor = '#112D4E'; e.target.style.transform = 'translateY(0)'; }}>Apply Now</button>
                 </div>
               ))}
             </div>

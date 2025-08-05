@@ -73,12 +73,12 @@ const CompanyAuthModal = ({ isOpen, onClose }) => {
 
     try {
       setLoading(true);
-
       if (isLogin) {
         await login({
           email: formData.email,
           password: formData.password,
-          userType: 'company' // Add user type for company login
+          userType: 'company', // Add user type for company login
+          expectedUserType: 'company' // Add expected user type validation
         });
       } else {
         await register({

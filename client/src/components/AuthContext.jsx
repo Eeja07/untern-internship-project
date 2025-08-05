@@ -3,8 +3,14 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authAPI, utils } from './api';
 
 // Create the auth context
-const AuthContext = createContext({});
-
+// Update context untuk include userType
+const AuthContext = createContext({
+  isAuthenticated: false,
+  userType: null, // 'student' or 'company'
+  user: null,
+  login: () => {},
+  logout: () => {}
+});
 // Hook to use auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -136,9 +142,13 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Get user type from user object
+  const userType = user?.userType || user?.type || null;
+
   // Context value
   const value = {
     user,
+    userType,
     isAuthenticated,
     loading,
     login,

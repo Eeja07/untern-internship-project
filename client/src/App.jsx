@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './components/AuthContext.jsx';
 import HomePage from './components/homePage.jsx';
 import SearchPage from './components/searchPage.jsx';
+import InternshipsPage from './components/InternshipsPage.jsx';
 
 function App() {
   return (
@@ -45,6 +46,21 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/search" element={<SearchPage />} />
+          <Route path="/internships" element={<InternshipsPage />} />
+          {/* Student routes */}
+          <Route path="/discover-internships" element={<SearchPage />} />
+          <Route path="/profile" element={<div>Profile Page - Coming Soon</div>} />
+          <Route path="/applications" element={<div>Applications Page - Coming Soon</div>} />
+          <Route path="/success-stories" element={<div>Success Stories Page - Coming Soon</div>} />
+          <Route path="/company-reviews" element={<div>Company Reviews Page - Coming Soon</div>} />
+          <Route path="/certifications" element={<div>Certifications Page - Coming Soon</div>} />
+          {/* Company routes */}
+          <Route path="/post-internship" element={<div>Post Internship Page - Coming Soon</div>} />
+          <Route path="/manage-applications" element={<div>Manage Applications Page - Coming Soon</div>} />
+          <Route path="/pricing" element={<div>Pricing Page - Coming Soon</div>} />
+          <Route path="/partnerships" element={<div>Partnerships Page - Coming Soon</div>} />
+          <Route path="/analytics" element={<div>Analytics Page - Coming Soon</div>} />
+          <Route path="/post-certifications" element={<div>Post Certifications Page - Coming Soon</div>} />
         </Routes>
       </div>
     </AuthProvider>

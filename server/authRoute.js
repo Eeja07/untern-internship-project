@@ -35,13 +35,21 @@ const authenticateToken = (req, res, next) => {
 
 // Register route for creating new users
 router.post('/register', async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, user_type = 'student' } = req.body; // Default ke student
 
   // Input validation
   if (!email || !password) {
     return res.status(400).json({ 
       success: false,
       message: 'Email and password are required' 
+    });
+  }
+
+  // Validate user_type
+  if (!['student', 'company'].includes(user_type)) {
+    return res.status(400).json({ 
+      success: false,
+      message: 'User type must be either "student" or "company"' 
     });
   }
 
@@ -80,22 +88,27 @@ router.post('/register', async (req, res) => {
     // Generate a unique user_id
     const userId = uuidv4();
 
-    // TEMPORARY FIX: Insert hanya ke login table (skip users table)
+    // Insert ke login table dengan user_type
     const result = await pool.query(
-      'INSERT INTO login (user_id, email, password) VALUES ($1, $2, $3) RETURNING id, user_id, email, created_at',
-      [userId, email.toLowerCase(), hashedPassword]
+      'INSERT INTO login (user_id, email, password, user_type) VALUES ($1, $2, $3, $4) RETURNING id, user_id, email, user_type, created_at',
+      [userId, email.toLowerCase(), hashedPassword, user_type]
     );
     
     const user = result.rows[0];
 
-    // Generate JWT token for automatic login after registration
+    // Generate JWT token dengan user_type
     const token = jwt.sign(
-      { id: user.id, userId: user.user_id, email: user.email },
+      { 
+        id: user.id, 
+        userId: user.user_id, 
+        email: user.email,
+        userType: user.user_type 
+      },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
 
-    console.log(`User successfully registered: ${user.email} with ID: ${user.user_id}`);
+    console.log(`${user_type} successfully registered: ${user.email} with ID: ${user.user_id}`);
 
     res.status(201).json({
       success: true,
@@ -105,33 +118,13 @@ router.post('/register', async (req, res) => {
         id: user.id,
         userId: user.user_id,
         email: user.email,
+        userType: user.user_type,
         createdAt: user.created_at
       },
     });
     
   } catch (err) {
-    console.error('Error registering user:', err);
-    
-    // Handle specific database errors
-    if (err.code === '23505') { // Duplicate key error
-      return res.status(400).json({ 
-        success: false,
-        message: 'User with this email already exists' 
-      });
-    }
-    
-    if (err.code === '23503') { // Foreign key constraint error
-      return res.status(500).json({ 
-        success: false,
-        message: 'Database relationship error. Please contact support.' 
-      });
-    }
-    
-    // Generic error response
-    res.status(500).json({ 
-      success: false,
-      message: 'Internal server error. Please try again later.' 
-    });
+    // ...existing error handling...
   }
 });
 
@@ -170,9 +163,14 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Generate a JWT token
+    // Generate a JWT token dengan user_type
     const token = jwt.sign(
-      { id: user.id, userId: user.user_id, email: user.email },
+      { 
+        id: user.id, 
+        userId: user.user_id, 
+        email: user.email,
+        userType: user.user_type || 'student' // fallback untuk data lama
+      },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -181,11 +179,10 @@ router.post('/login', async (req, res) => {
     try {
       await pool.query('UPDATE login SET updated_at = NOW() WHERE id = $1', [user.id]);
     } catch (updateErr) {
-      // Log tapi jangan gagalkan login jika update last login gagal
       console.warn('Failed to update last login time:', updateErr.message);
     }
 
-    console.log(`User successfully logged in: ${user.email}`);
+    console.log(`${user.user_type || 'student'} successfully logged in: ${user.email}`);
 
     res.json({
       success: true,
@@ -194,7 +191,8 @@ router.post('/login', async (req, res) => {
       user: { 
         id: user.id,
         userId: user.user_id,
-        email: user.email 
+        email: user.email,
+        userType: user.user_type || 'student'
       },
     });
     

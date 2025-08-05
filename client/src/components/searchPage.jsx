@@ -19,6 +19,19 @@ const SearchPage = () => {
     duration: 'all'
   });
 
+  // Modal states for footer navigation
+  const [isStudentModalOpen, setIsStudentModalOpen] = useState(false);
+  const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
+
+  // Handlers for footer modals
+  const handleForStudentsClick = () => {
+    setIsStudentModalOpen(true);
+  };
+
+  const handleForCompaniesClick = () => {
+    setIsCompanyModalOpen(true);
+  };
+
   // Check for mobile screen size
   useEffect(() => {
     const checkMobile = () => {
@@ -458,7 +471,7 @@ const SearchPage = () => {
           </div>
         </div>
       
-      <FooterHome />
+      <FooterHome onForStudentsClick={handleForStudentsClick} onForCompaniesClick={handleForCompaniesClick} />
     </>
   );
 };

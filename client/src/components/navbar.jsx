@@ -6,14 +6,12 @@ const Navbar = ({ onForStudentsClick, onGetStartedClick, onForCompaniesClick }) 
 
   const handleForStudentsClick = (e) => {
     e.preventDefault();
-    console.log('For Students clicked', { onForStudentsClick }); // Add this line
     if (onForStudentsClick) {
       onForStudentsClick();
     }
   };
   const handleForCompaniesClick = (e) => {
     e.preventDefault();
-    console.log('For Companies clicked', { onForCompaniesClick }); // Add this line
     if (onForCompaniesClick) {
       onForCompaniesClick();
     }

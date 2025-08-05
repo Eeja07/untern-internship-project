@@ -6,7 +6,7 @@ import mae from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/
 import typ from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/typ.svg';
 import bytp from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/bytp.svg';
 
-const WhyChooseUs = () => {
+const WhyChooseUs = ({ onGetStartedClick }) => {
   const studentFeatures = [
     {
       title: 'Apply for internship',
@@ -83,7 +83,7 @@ const WhyChooseUs = () => {
             fontWeight: 600,
             transform: 'rotate(-12deg)',
             boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.5)',
-            marginBottom: '3rem'
+            marginBottom: '1rem'
           }}>
             <span>For Student</span>
           </div>
@@ -95,7 +95,7 @@ const WhyChooseUs = () => {
             backgroundColor: 'white',
             padding: '2rem',
             borderRadius: '15px',
-            marginBottom: '3rem'
+            marginBottom: '1rem'
           }}>
             {studentFeatures.map((feature, index) => (
               <div key={index} style={{
@@ -163,7 +163,7 @@ const WhyChooseUs = () => {
             fontWeight: 600,
             transform: 'rotate(-12deg)',
             boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.5)',
-            marginBottom: '3rem'
+            marginBottom: '1rem'
           }}>
             <span>For Company</span>
           </div>
@@ -175,7 +175,7 @@ const WhyChooseUs = () => {
             backgroundColor: 'white',
             padding: '2rem',
             borderRadius: '15px',
-            marginBottom: '3rem'
+            marginBottom: '1rem'
           }}>
             {companyFeatures.map((feature, index) => (
               <div key={index} style={{
@@ -245,7 +245,8 @@ const WhyChooseUs = () => {
             transition: 'background 0.3s'
           }}
           onMouseEnter={(e) => e.target.style.background = '#2563EB'}
-          onMouseLeave={(e) => e.target.style.background = '#112D4E'}>
+          onMouseLeave={(e) => e.target.style.background = '#112D4E'}
+          onClick={onGetStartedClick}>
             Get Started
           </button>
         </div>
