@@ -1,9 +1,12 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './components/AuthContext.jsx';
-import HomePage from './components/homePage.jsx';
-import SearchPage from './components/searchPage.jsx';
-import InternshipsPage from './components/InternshipsPage.jsx';
+import { AuthProvider } from './components/auth/AuthContext.jsx';
+import HomePage from './components/homePage/homePage.jsx';
+import StudentDashboard from './components/studentDashboard/StudentDashboard.jsx';
+import CompanyDashboard from './components/companyDashboard/CompanyDashboard.jsx';
+import Faq from './components/faq/FAQPage.jsx';
+import Blog from './components/blog/BlogPage.jsx';
+import AboutUs from './components/about/aboutPage.jsx';
 
 function App() {
   return (
@@ -44,11 +47,10 @@ function App() {
         color: '#333'
       }}>
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/search" element={<SearchPage />} />
-          <Route path="/internships" element={<InternshipsPage />} />
+          <Route path="/" element={<HomePage/>} />
+          <Route path="/student-dashboard" element={<StudentDashboard/>} />
+          <Route path="/company-dashboard" element={<CompanyDashboard/>} />
           {/* Student routes */}
-          <Route path="/discover-internships" element={<SearchPage />} />
           <Route path="/profile" element={<div>Profile Page - Coming Soon</div>} />
           <Route path="/applications" element={<div>Applications Page - Coming Soon</div>} />
           <Route path="/success-stories" element={<div>Success Stories Page - Coming Soon</div>} />
@@ -61,6 +63,9 @@ function App() {
           <Route path="/partnerships" element={<div>Partnerships Page - Coming Soon</div>} />
           <Route path="/analytics" element={<div>Analytics Page - Coming Soon</div>} />
           <Route path="/post-certifications" element={<div>Post Certifications Page - Coming Soon</div>} />
+          <Route path="/faq" element={<Faq/>} />
+          <Route path="/blog" element={<Blog/>} />
+          <Route path="/about" element={<AboutUs/>} />
         </Routes>
       </div>
     </AuthProvider>
