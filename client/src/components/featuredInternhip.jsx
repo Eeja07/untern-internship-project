@@ -1,11 +1,27 @@
 import React from 'react';
-// import './FeaturedInternships.css';
+import { useAuth } from './AuthContext';
+import { useNavigate } from 'react-router-dom';
 
-const FeaturedInternships = ({ onForStudentsClick }) => {
-  const handleForStudentsClick = (e) => {
-    e.preventDefault();
+const FeaturedInternships = ({ onForStudentsClick, onClose }) => {
+  const { isAuthenticated, userType } = useAuth();
+  const navigate = useNavigate();
+  const handleForStudentsClick = () => {
+    // If user is already authenticated as a student, navigate directly to internships
+    if (isAuthenticated && userType === 'student') {
+      navigate('/student-dashboard');
+      return;
+    }
+    
+    // If user is authenticated as company, show message
+    if (isAuthenticated && userType === 'company') {
+      alert('You are already logged in as a company. Please log out to access student features.');
+      return;
+    }
+    
+    // If not authenticated, proceed with student registration/login modal
+    onClose(); // Close the get started modal first
     if (onForStudentsClick) {
-      onForStudentsClick();
+      onForStudentsClick(); // This should open the student auth modal
     }
   };
   const internships_1 = [
@@ -73,7 +89,7 @@ const FeaturedInternships = ({ onForStudentsClick }) => {
       <div className="container-fi" style={{maxWidth:'1500px', margin:'0 auto'}}>
         <div className="section-header" style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4rem 0'}}>
           <h2 style={{fontWeight: '100'}}>Featured Internship</h2>
-          <button onClick={handleForStudentsClick} style={{ backgroundColor: '#112D4E',color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '5px', cursor: 'pointer', fontSize: '1.125rem', fontWeight: '600' }} className="view-all-btn">View All →</button>
+          <button onClick={handleForStudentsClick} style={{ backgroundColor: '#112D4E',color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '5px', cursor: 'pointer', fontSize: '1.125rem', fontWeight: '600' }}onMouseEnter={(e) => { e.target.style.backgroundColor = '#2563EB'; e.target.style.transform = 'translateY(0px)'; }} onMouseLeave={(e) => { e.target.style.backgroundColor = '#112D4E'; e.target.style.transform = 'translateY(0)'; }} className="view-all-btn">View All →</button>
         </div>
         <div className="internships-grid" style={{ display: 'flex', flexDirection: 'column'}}>
           <div className="internship-grid1" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -108,7 +124,7 @@ const FeaturedInternships = ({ onForStudentsClick }) => {
                       <span>{internship.duration}</span>
                     </div>
                   </div>
-                  <button className="apply-btn" onClick={handleForStudentsClick} style={{fontWeight:'600', marginTop:'1rem', marginLeft:'auto', marginRight:'auto', backgroundColor: '#112D4E', color: 'white', borderRadius: '5px', cursor: 'pointer', padding: '0.75rem 1.5rem', border: 'none', boxShadow: '0 2px 19px rgba(0, 0, 0, 0.1)', display: 'block', transition: 'all 0.3s ease' }} onMouseEnter={(e) => { e.target.style.backgroundColor = '#0d1f3a'; e.target.style.transform = 'translateY(-2px)'; }} onMouseLeave={(e) => { e.target.style.backgroundColor = '#112D4E'; e.target.style.transform = 'translateY(0)'; }}>Apply Now</button>
+                  <button className="apply-btn" onClick={handleForStudentsClick} style={{fontWeight:'600', marginTop:'1rem', marginLeft:'auto', marginRight:'auto', backgroundColor: '#112D4E', color: 'white', borderRadius: '5px', cursor: 'pointer', padding: '0.75rem 1.5rem', border: 'none', boxShadow: '0 2px 19px rgba(0, 0, 0, 0.1)', display: 'block', transition: 'all 0.3s ease' }} onMouseEnter={(e) => { e.target.style.backgroundColor = '#2563EB'; e.target.style.transform = 'translateY(-2px)'; }} onMouseLeave={(e) => { e.target.style.backgroundColor = '#112D4E'; e.target.style.transform = 'translateY(0)'; }}>Apply Now</button>
                 </div>
               ))}
             </div>
@@ -145,7 +161,7 @@ const FeaturedInternships = ({ onForStudentsClick }) => {
                       <span>{internship.duration}</span>
                     </div>
                   </div>
-                  <button className="apply-btn" onClick={handleForStudentsClick} style={{fontWeight:'600',marginTop:'1rem', marginLeft:'auto', marginRight:'auto', backgroundColor: '#112D4E', color: 'white', borderRadius: '5px', cursor: 'pointer', padding: '0.75rem 1.5rem', border: 'none', boxShadow: '0 2px 19px rgba(0, 0, 0, 0.1)', display: 'block', transition: 'all 0.3s ease' }} onMouseEnter={(e) => { e.target.style.backgroundColor = '#0d1f3a'; e.target.style.transform = 'translateY(-2px)'; }} onMouseLeave={(e) => { e.target.style.backgroundColor = '#112D4E'; e.target.style.transform = 'translateY(0)'; }}>Apply Now</button>
+                  <button className="apply-btn" onClick={handleForStudentsClick} style={{fontWeight:'600',marginTop:'1rem', marginLeft:'auto', marginRight:'auto', backgroundColor: '#112D4E', color: 'white', borderRadius: '5px', cursor: 'pointer', padding: '0.75rem 1.5rem', border: 'none', boxShadow: '0 2px 19px rgba(0, 0, 0, 0.1)', display: 'block', transition: 'all 0.3s ease' }} onMouseEnter={(e) => { e.target.style.backgroundColor = '#2563EB'; e.target.style.transform = 'translateY(-2px)'; }} onMouseLeave={(e) => { e.target.style.backgroundColor = '#112D4E'; e.target.style.transform = 'translateY(0)'; }}>Apply Now</button>
                 </div>
               ))}
             </div>

@@ -60,7 +60,7 @@ const RealExperience = ({ onGetStartedClick }) => {
                 padding: '10px'
               }}
             >
-              <img src={arwleft} alt="Previous" className="arrow-icon" style={{ backgroundColor: '#112D4E', padding: '10px 20px', borderRadius: '10px' }} />
+              <img src={arwleft} alt="Previous"onMouseEnter={(e) => { e.target.style.backgroundColor = '#2563EB'; e.target.style.transform = 'translateY(0px)'; }} onMouseLeave={(e) => { e.target.style.backgroundColor = '#112D4E'; e.target.style.transform = 'translateY(0)'; }} className="arrow-icon" style={{ backgroundColor: '#112D4E', padding: '10px 20px', borderRadius: '10px' }} />
             </button>
             
             <div className="carousel-wrapper" style={{ 
@@ -129,7 +129,7 @@ const RealExperience = ({ onGetStartedClick }) => {
                 padding: '10px'
               }}
             >
-              <img src={arwright} alt="Next" className="arrow-icon" style={{ backgroundColor: '#112D4E', padding: '10px 20px', borderRadius: '10px' }}/>
+              <img src={arwright}onMouseEnter={(e) => { e.target.style.backgroundColor = '#2563EB'; e.target.style.transform = 'translateY(0px)'; }} onMouseLeave={(e) => { e.target.style.backgroundColor = '#112D4E'; e.target.style.transform = 'translateY(0)'; }} alt="Next" className="arrow-icon" style={{ backgroundColor: '#112D4E', padding: '10px 20px', borderRadius: '10px' }}/>
             </button>
           </div>
         </div>

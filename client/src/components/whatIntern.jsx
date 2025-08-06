@@ -63,11 +63,11 @@ const WhatIntern = () => {
 return (
     <div className="container-what-intern" style={{maxWidth:'1500px', margin: '0 auto' }}>
         <div className="section-1-what-intern" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding:'2rem 0'}}>
-            <button className="btn-left-what-intern" style={{ backgroundColor: '#112D4E', borderRadius: '10px', padding: '0.5rem 2rem', border: 'none', cursor: 'pointer' }} onClick={handlePrevious}>
+            <button onMouseEnter={(e) => { e.target.style.backgroundColor = '#2563EB'; e.target.style.transform = 'translateY(0px)'; }} onMouseLeave={(e) => { e.target.style.backgroundColor = '#112D4E'; e.target.style.transform = 'translateY(0)'; }} className="btn-left-what-intern" style={{ backgroundColor: '#112D4E', borderRadius: '10px', padding: '0.5rem 2rem', border: 'none', cursor: 'pointer' }} onClick={handlePrevious}>
                 <img src={arwleft} alt="Left Arrow" className="left-arrow-icon" />
             </button>
             <h2 style={{ textAlign: 'center', fontWeight: '100' }} className="section-what-intern-title">What <span style={{ fontWeight: 'bold' }}>Intern</span> Think About <span className="palette3">Untern</span></h2>
-            <button className="btn-right-what-intern" style={{ backgroundColor: '#112D4E', borderRadius: '10px', padding: '0.5rem 2rem', border: 'none', cursor: 'pointer' }} onClick={handleNext}>
+            <button onMouseEnter={(e) => { e.target.style.backgroundColor = '#2563EB'; e.target.style.transform = 'translateY(0px)'; }} onMouseLeave={(e) => { e.target.style.backgroundColor = '#112D4E'; e.target.style.transform = 'translateY(0)'; }} className="btn-right-what-intern" style={{ backgroundColor: '#112D4E', borderRadius: '10px', padding: '0.5rem 2rem', border: 'none', cursor: 'pointer' }} onClick={handleNext}>
                 <img src={arwright} alt="Right Arrow" className="right-arrow-icon" />
             </button>
         </div>

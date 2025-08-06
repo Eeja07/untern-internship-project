@@ -25,7 +25,7 @@ const GetStartedModal = ({ isOpen, onClose, onStudentSelect, onCompanySelect }) 
     // If user is already authenticated as a student, navigate directly to internships
     if (isAuthenticated && userType === 'student') {
       onClose();
-      navigate('/internships');
+      navigate('/student-dashboard');
       return;
     }
     
@@ -167,7 +167,7 @@ const GetStartedModal = ({ isOpen, onClose, onStudentSelect, onCompanySelect }) 
             style={{
               flex: 1,
               padding: '1rem 1.5rem',
-              background: isAuthenticated && userType === 'student' ? '#28a745' : '#112D4E',
+              background: isAuthenticated && userType === 'student' ? '#112D4E' : '#112D4E',
               color: 'white',
               border: 'none',
               borderRadius: '12px',
@@ -183,16 +183,12 @@ const GetStartedModal = ({ isOpen, onClose, onStudentSelect, onCompanySelect }) 
             }}
             onMouseEnter={(e) => {
               if (isAuthenticated && userType === 'student') {
-                e.target.style.background = '#1e7e34';
-              } else {
-                e.target.style.background = '#2563EB';
+                e.target.style.background = '#112D4E';
               }
               e.target.style.transform = 'translateY(-2px)';
             }}
             onMouseLeave={(e) => {
               if (isAuthenticated && userType === 'student') {
-                e.target.style.background = '#28a745';
-              } else {
                 e.target.style.background = '#112D4E';
               }
               e.target.style.transform = 'translateY(0)';
@@ -200,7 +196,7 @@ const GetStartedModal = ({ isOpen, onClose, onStudentSelect, onCompanySelect }) 
           >
             <span style={{ fontSize: '1.5rem' }}>🎓</span>
             <span>
-              {isAuthenticated && userType === 'student' ? 'Go to Internships' : 'Student'}
+              {isAuthenticated && userType === 'student' ? 'Go to Dashboard' : 'Student'}
             </span>
           </button>
 
@@ -210,7 +206,7 @@ const GetStartedModal = ({ isOpen, onClose, onStudentSelect, onCompanySelect }) 
             style={{
               flex: 1,
               padding: '1rem 1.5rem',
-              background: isAuthenticated && userType === 'company' ? '#28a745' : '#112D4E',
+              background: isAuthenticated && userType === 'company' ? '#112D4E' : '#112D4E',
               color: 'white',
               border: 'none',
               borderRadius: '12px',
@@ -226,16 +222,12 @@ const GetStartedModal = ({ isOpen, onClose, onStudentSelect, onCompanySelect }) 
             }}
             onMouseEnter={(e) => {
               if (isAuthenticated && userType === 'company') {
-                e.target.style.background = '#1e7e34';
-              } else {
-                e.target.style.background = '#2563EB';
+                e.target.style.background = '#112D4E';
               }
               e.target.style.transform = 'translateY(-2px)';
             }}
             onMouseLeave={(e) => {
               if (isAuthenticated && userType === 'company') {
-                e.target.style.background = '#28a745';
-              } else {
                 e.target.style.background = '#112D4E';
               }
               e.target.style.transform = 'translateY(0)';

@@ -1,21 +1,48 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 
-const Navbar = ({ onForStudentsClick, onGetStartedClick, onForCompaniesClick }) => {
+const Navbar = ({ onForStudentsClick, onClose,onGetStartedClick, onForCompaniesClick }) => {
   const { isAuthenticated, user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const handleForStudentsClick = (e) => {
     e.preventDefault();
+    if (isAuthenticated && user?.userType === 'student') {
+      navigate('/student-dashboard');
+      return;
+    }
+    // If user is authenticated as company, show message
+    if (isAuthenticated && user?.userType === 'company') {
+      alert('You are already logged in as a company. Please log out to access student features.');
+      return;
+    }
     if (onForStudentsClick) {
       onForStudentsClick();
     }
   };
+  
   const handleForCompaniesClick = (e) => {
     e.preventDefault();
+    
+    // If user is already authenticated as a company, navigate directly to company dashboard
+    if (isAuthenticated && user?.userType === 'company') {  
+      navigate('/company-dashboard');
+      return;
+    }
+    
+    // If user is authenticated as student, show message
+    if (isAuthenticated && user?.userType === 'student') {
+      alert('You are already logged in as a student. Please log out to access company features.');
+      return;
+    }
+    
+    // If not authenticated, proceed with company registration/login modal
     if (onForCompaniesClick) {
       onForCompaniesClick();
     }
   };
+  
   const handleGetStartedClick = (e) => {
     e.preventDefault();
     if (onGetStartedClick) {
@@ -72,7 +99,7 @@ const Navbar = ({ onForStudentsClick, onGetStartedClick, onForCompaniesClick }) 
             onMouseLeave={(e) => e.target.style.color = '#64748B'}>Home</a>
           </li>
           <li>
-            <a href="#for-students" style={{
+            <a href="" style={{
               textDecoration: 'none',
               color: '#64748B',
               fontWeight: 500,
@@ -83,7 +110,7 @@ const Navbar = ({ onForStudentsClick, onGetStartedClick, onForCompaniesClick }) 
             onClick={handleForStudentsClick}>For Students</a>
           </li>
           <li>
-            <a href="#for-companies" style={{
+            <a href="" style={{
               textDecoration: 'none',
               color: '#64748B',
               fontWeight: 500,
@@ -94,34 +121,37 @@ const Navbar = ({ onForStudentsClick, onGetStartedClick, onForCompaniesClick }) 
             onClick={handleForCompaniesClick}>For Companies</a>
           </li>
           <li>
-            <a href="#faq" style={{
+            <a href="/faq" style={{
               textDecoration: 'none',
               color: '#64748B',
               fontWeight: 500,
               transition: 'color 0.3s'
             }}
             onMouseEnter={(e) => e.target.style.color = '#3B82F6'}
-            onMouseLeave={(e) => e.target.style.color = '#64748B'}>FAQ</a>
+            onMouseLeave={(e) => e.target.style.color = '#64748B'}
+            >FAQ</a>
           </li>
           <li>
-            <a href="#blog" style={{
+            <a href="/blog" style={{
               textDecoration: 'none',
               color: '#64748B',
               fontWeight: 500,
               transition: 'color 0.3s'
             }}
             onMouseEnter={(e) => e.target.style.color = '#3B82F6'}
-            onMouseLeave={(e) => e.target.style.color = '#64748B'}>Blog</a>
+            onMouseLeave={(e) => e.target.style.color = '#64748B'}
+            >Blog</a>
           </li>
           <li>
-            <a href="#about" style={{
+            <a href="/about" style={{
               textDecoration: 'none',
               color: '#64748B',
               fontWeight: 500,
               transition: 'color 0.3s'
             }}
             onMouseEnter={(e) => e.target.style.color = '#3B82F6'}
-            onMouseLeave={(e) => e.target.style.color = '#64748B'}>About</a>
+            onMouseLeave={(e) => e.target.style.color = '#64748B'}
+            >About</a>
           </li>
         </ul>
         

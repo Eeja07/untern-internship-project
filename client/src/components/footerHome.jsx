@@ -80,7 +80,7 @@ const FooterHome = ({ onForStudentsClick, onForCompaniesClick }) => {
                                 </div>
                         </div>
                         <div className="footer-link2" style={{ display: 'flex', flexDirection: 'column', margin: '0', flex: '1', minWidth: '200px' }}>
-                                <h2 onClick={handleStudentNavigation()} style={{ color: 'white', fontSize: '1.25rem', margin: '0', padding: '1rem 0'}}>For Students</h2>
+                                <h2 onClick={handleStudentNavigation()} style={{ color: 'white', fontSize: '1.25rem', margin: '0', padding: '1rem 0', cursor:'pointer'}}>For Students</h2>
                                 <a onClick={handleStudentNavigation('/discover-internships')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer'}}>Discover Internships</a>
                                 <a onClick={handleStudentNavigation('/profile')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer'}}>Build Your Profile</a>
                                 <a onClick={handleStudentNavigation('/applications')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer' }}>Track Your Applications</a>
@@ -89,7 +89,7 @@ const FooterHome = ({ onForStudentsClick, onForCompaniesClick }) => {
                                 <a onClick={handleStudentNavigation('/certifications')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer' }}>Receive Internship Certifications</a>
                         </div>
                         <div className="footer-link3" style={{ display: 'flex', flexDirection: 'column', margin: '0', flex: '1', minWidth: '200px'}}>
-                                <h2 onClick={handleCompaniesNavigation()} style={{ color: 'white', fontSize: '1.25rem', margin: '0', padding: '1rem 0' }}>For Companies</h2>
+                                <h2 onClick={handleCompaniesNavigation()} style={{ color: 'white', fontSize: '1.25rem', margin: '0', padding: '1rem 0', cursor:'pointer'}}>For Companies</h2>
                                 <a onClick={handleCompaniesNavigation('/post-internship')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer'}}>Post Internship Openings</a>
                                 <a onClick={handleCompaniesNavigation('/manage-applications')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer' }}>Manage Internship Applications</a>
                                 <a onClick={handleCompaniesNavigation('/pricing')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer' }}>Check Pricing Information</a>
@@ -114,13 +114,13 @@ const FooterHome = ({ onForStudentsClick, onForCompaniesClick }) => {
                         </div>
                 </div>
                 <div className="footer-links2" style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', marginTop: '40px', gap: '20px' }}>
-                        <div className="footer-link5" style={{ display: 'flex', flexDirection: 'column', margin: '0', flex: '1' }}>
+                        <div className="footer-link5" style={{ display: 'flex', flexDirection: 'column', margin: '0', flex: '1', cursor: 'pointer' }}>
                                 <h2 onClick={() => navigate('/about')} style={{ color: 'white', fontSize: '1.25rem', margin: '0', padding: '1rem 0' }}>About Us</h2>
                         </div>
-                        <div className="footer-link6" style={{ display: 'flex', flexDirection: 'column', margin: '0', flex: '1' }}>
+                        <div className="footer-link6" style={{ display: 'flex', flexDirection: 'column', margin: '0', flex: '1', cursor: 'pointer' }}>
                                 <h2 onClick={() => navigate('/privacy')} style={{ color: 'white', fontSize: '1.25rem', margin: '0', padding: '1rem 0' }}>Privacy Policy</h2>
                         </div>
-                        <div className="footer-link7" style={{ display: 'flex', flexDirection: 'column', margin: '0', flex: '1' }}>
+                        <div className="footer-link7" style={{ display: 'flex', flexDirection: 'column', margin: '0', flex: '1', cursor: 'pointer' }}>
                                 <h2 onClick={() => navigate('/terms')} style={{ color: 'white', fontSize: '1.25rem', margin: '0', padding: '1rem 0' }}>Terms of Services</h2>
                         </div>
                         <div className="footer-link8" style={{ display: 'flex', flexDirection: 'column', margin: '0', flex: '1', padding: '1rem 0', alignItems: 'flex-start' }}>
