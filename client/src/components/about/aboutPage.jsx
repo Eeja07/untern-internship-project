@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../homePage/navbar.jsx';
 import FooterHome from '../homePage/footerHome.jsx';
-import Mission from './mission.jsx';
-import Story from './story.jsx';
+import Mission from './story.jsx';
+import Story from './mission.jsx';
 import Team from './team.jsx';
 import Values from './values.jsx';
 

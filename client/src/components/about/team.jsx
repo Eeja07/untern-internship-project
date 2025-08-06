@@ -1,4 +1,5 @@
-import React from 'react';
+import eeja from '../../assets/eeja.webp';
+
 
 const Team = () => {
   const teamMembers = [
@@ -6,19 +7,19 @@ const Team = () => {
       name: "Mahija Ibad",
       role: "CEO",
       bio: "Visionary leader with 4+ years experience in Tech and business strategy. Passionate about connecting students with meaningful opportunities.",
-      image: "MI"
+      image: eeja
     },
     {
       name: "Mahija Ibad",
       role: "CTO",
-      bio: "Tech lead with expertise in full-stack development and platform architecture. Previously at Microsoft and several successful startups.",
-      image: "MI"
+      bio: "Tech lead with expertise in full-stack development and platform architecture. Previously at several successful startups.",
+      image: eeja
     },
     {
       name: "Mahija Ibad",
       role: "CFO",
       bio: "Financial strategist with deep expertise in business operations, growth planning, and investor relations in the education sector.",
-      image: "MI"
+      image: eeja
     }
   ];
 
@@ -62,16 +63,20 @@ const Team = () => {
                 width: '100px',
                 height: '100px',
                 borderRadius: '50%',
-                backgroundColor: '#112D4E',
-                color: 'white',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.5rem',
-                fontWeight: 'bold',
-                margin: '0 auto 20px'
+                overflow: 'hidden',
+                margin: '0 auto 20px',
+                border: '3px solid #112D4E'
               }}>
-                {member.image}
+                <img 
+                  src={member.image} 
+                  alt={member.name}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                    transform: 'scale(1.5)',
+                  }}
+                />
               </div>
               <h3 style={{ 
                 fontSize: '1.4rem',
