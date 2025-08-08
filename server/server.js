@@ -8,6 +8,16 @@ require('dotenv').config(); // Load environment variables from .env file
 // Initialize the Express app
 const app = express();
 
+// Import route files
+const authRoutes = require('./authRoutes');
+const studentRoutes = require('./studentRoutes');
+const companyRoutes = require('./companyRoutes');
+const generalRoutes = require('./generalRoutes');
+
+// Middleware
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
 // Enhanced CORS configuration
 app.use(cors({
     origin: function (origin, callback) {
@@ -35,25 +45,16 @@ app.use(cors({
     optionsSuccessStatus: 200 // For legacy browser support
 }));
 
-// Add debugging middleware untuk melihat incoming requests
-app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-    console.log('Origin:', req.headers.origin);
-    console.log('User-Agent:', req.headers['user-agent']);
-    next();
-});
-
-app.use(express.json());
-
-// Create uploads directory if it doesn't exist
-const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
-    console.log(`Uploads directory created: ${uploadsDir}`);
-}
-
-// Make uploads directory accessible publicly
+// Serve static files for uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Create upload directories if they don't exist
+const uploadDirs = ['uploads', 'uploads/resumes', 'uploads/logos'];
+uploadDirs.forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+});
 
 // Import database configuration
 const { pool, testConnection } = require('./db');
@@ -69,65 +70,57 @@ testConnection().then(success => {
     process.exit(1);
 });
 
-// Import routes
-const authRoutes = require('./authRoute');
-
 // Mount routes
 app.use('/api', authRoutes);
+app.use('/api/student', studentRoutes);
+app.use('/api/company', companyRoutes);
+app.use('/api', generalRoutes);
 
-// Add a test endpoint untuk CORS debugging
-app.get('/api/cors-test', (req, res) => {
-    res.json({
-        message: 'CORS is working!',
-        origin: req.headers.origin,
-        timestamp: new Date().toISOString(),
-        headers: req.headers
-    });
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    success: true, 
+    message: 'Server is running',
+    timestamp: new Date().toISOString()
+  });
 });
 
-// Add a test endpoint to verify static file serving
-app.get('/api/test-uploads', (req, res) => {
-    fs.readdir(uploadsDir, (err, files) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        
-        const fileInfo = files.map(file => {
-            const filePath = path.join(uploadsDir, file);
-            try {
-                const stats = fs.statSync(filePath);
-                return {
-                    name: file,
-                    size: stats.size,
-                    url: `/uploads/${file}`,
-                    fullPath: filePath,
-                    exists: fs.existsSync(filePath)
-                };
-            } catch (err) {
-                return {
-                    name: file,
-                    error: err.message
-                };
-            }
-        });
-        
-        res.json({
-            uploadsDir,
-            fileCount: files.length,
-            files: fileInfo
-        });
-    });
+// CORS test endpoint
+app.get('/api/cors-test', (req, res) => {
+  res.json({ 
+    success: true, 
+    message: 'CORS is working properly',
+    origin: req.headers.origin 
+  });
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error('Server Error:', err);
+    
+    if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            return res.status(400).json({
+                success: false,
+                message: 'File size too large'
+            });
+        }
+    }
+    
     res.status(500).json({ 
         success: false, 
         message: 'Internal server error',
         error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
 });
+
+// 404 handler
+// app.use('*', (req, res) => {
+//   res.status(404).json({
+//     success: false,
+//     message: 'Route not found'
+//   });
+// });
 
 // Start the server
 const PORT = process.env.PORT || 4000;
@@ -136,3 +129,5 @@ app.listen(PORT, () => {
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`Allowed CLIENT_URL: ${process.env.CLIENT_URL || 'not set'}`);
 });
+
+module.exports = app;

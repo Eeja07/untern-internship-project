@@ -50,12 +50,24 @@ export const authAPI = {
     try {
       // Map frontend field names to backend field names
       const backendData = {
-        ...userData,
-        user_type: userData.userType || userData.user_type || 'student' // Map userType to user_type
+        email: userData.email,
+        password: userData.password,
+        name: userData.name,
+        phone_number: userData.phone_number,
+        user_type: userData.userType || userData.user_type || 'student',
+        // Company specific fields
+        company_name: userData.company_name,
+        company_website: userData.company_website,
+        industry: userData.industry,
+        company_size: userData.company_size,
+        about: userData.about,
+        address: userData.address,
+        // Student specific fields
+        university: userData.university,
+        major: userData.major,
+        graduation_date: userData.graduation_date,
+        bio: userData.bio
       };
-      
-      // Remove the frontend field to avoid confusion
-      delete backendData.userType;
       
       const response = await api.post('/register', backendData);
       if (response.data.success && response.data.token) {
@@ -138,6 +150,230 @@ export const authAPI = {
       return response.data;
     } catch (error) {
       throw error.response?.data || { success: false, message: 'Token refresh failed' };
+    }
+  },
+
+  // Update user profile
+  updateProfile: async (profileData) => {
+    try {
+      const response = await api.put('/profile', profileData);
+      if (response.data.success && response.data.user) {
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+      }
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Profile update failed' };
+    }
+  }
+};
+
+// Student Profile API calls
+export const studentAPI = {
+  // Get student profile
+  getProfile: async () => {
+    try {
+      const response = await api.get('/student/profile');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to fetch student profile' };
+    }
+  },
+
+  // Update student profile
+  updateProfile: async (profileData) => {
+    try {
+      const response = await api.put('/student/profile', profileData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to update student profile' };
+    }
+  },
+
+  // Get student skills
+  getSkills: async () => {
+    try {
+      const response = await api.get('/student/skills');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to fetch skills' };
+    }
+  },
+
+  // Add skill to student
+  addSkill: async (skillName) => {
+    try {
+      const response = await api.post('/student/skills', { skill_name: skillName });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to add skill' };
+    }
+  },
+
+  // Remove skill from student
+  removeSkill: async (skillId) => {
+    try {
+      const response = await api.delete(`/student/skills/${skillId}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to remove skill' };
+    }
+  },
+
+  // Upload resume
+  uploadResume: async (formData) => {
+    try {
+      const response = await api.post('/student/resume', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to upload resume' };
+    }
+  }
+};
+
+// Company API calls
+export const companyAPI = {
+  // Get company profile
+  getProfile: async () => {
+    try {
+      const response = await api.get('/company/profile');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to fetch company profile' };
+    }
+  },
+
+  // Update company profile
+  updateProfile: async (profileData) => {
+    try {
+      const response = await api.put('/company/profile', profileData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to update company profile' };
+    }
+  },
+
+  // Create internship
+  createInternship: async (internshipData) => {
+    try {
+      const response = await api.post('/company/internships', internshipData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to create internship' };
+    }
+  },
+
+  // Get company's internships
+  getInternships: async () => {
+    try {
+      const response = await api.get('/company/internships');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to fetch company internships' };
+    }
+  },
+
+  // Update internship
+  updateInternship: async (internshipId, internshipData) => {
+    try {
+      const response = await api.put(`/company/internships/${internshipId}`, internshipData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to update internship' };
+    }
+  },
+
+  // Delete internship
+  deleteInternship: async (internshipId) => {
+    try {
+      const response = await api.delete(`/company/internships/${internshipId}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to delete internship' };
+    }
+  },
+
+  // Get applications for company's internships
+  getApplications: async (internshipId = null) => {
+    try {
+      const url = internshipId ? `/company/applications?internship_id=${internshipId}` : '/company/applications';
+      const response = await api.get(url);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to fetch applications' };
+    }
+  },
+
+  // Update application status
+  updateApplicationStatus: async (applicationId, status) => {
+    try {
+      const response = await api.put(`/company/applications/${applicationId}`, { status });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to update application status' };
+    }
+  },
+
+  // Upload company logo
+  uploadLogo: async (formData) => {
+    try {
+      const response = await api.post('/company/logo', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to upload logo' };
+    }
+  }
+};
+
+// Skills API calls
+export const skillsAPI = {
+  // Get all available skills
+  getAllSkills: async () => {
+    try {
+      const response = await api.get('/skills');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to fetch skills' };
+    }
+  },
+
+  // Search skills
+  searchSkills: async (query) => {
+    try {
+      const response = await api.get(`/skills/search?q=${encodeURIComponent(query)}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to search skills' };
+    }
+  }
+};
+
+// Reviews API calls
+export const reviewsAPI = {
+  // Get company reviews
+  getCompanyReviews: async (companyId) => {
+    try {
+      const response = await api.get(`/companies/${companyId}/reviews`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to fetch reviews' };
+    }
+  },
+
+  // Create review
+  createReview: async (companyId, reviewData) => {
+    try {
+      const response = await api.post(`/companies/${companyId}/reviews`, reviewData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to create review' };
     }
   }
 };
