@@ -1,0 +1,97 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE TABLE login (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMPTZ,
+    failed_attempts INT4 NOT NULL DEFAULT 0,
+    is_locked BOOLEAN NOT NULL DEFAULT false,
+    user_type VARCHAR(20) NOT NULL DEFAULT 'student'
+);
+
+-- Tabel untuk menyimpan data umum pengguna (mahasiswa dan perusahaan)
+CREATE TABLE users (
+    user_id UUID PRIMARY KEY REFERENCES login(user_id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    profile_picture_url VARCHAR(255),
+    phone_number VARCHAR(20),
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabel untuk detail perusahaan
+CREATE TABLE companies (
+    company_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID UNIQUE NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    company_name VARCHAR(255) NOT NULL,
+    company_website VARCHAR(255),
+    industry VARCHAR(100),
+    company_size VARCHAR(50),
+    about TEXT,
+    address TEXT,
+    logo_url VARCHAR(255)
+);
+
+-- Tabel untuk lowongan magang
+CREATE TABLE internships (
+    internship_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    company_id UUID NOT NULL REFERENCES companies(company_id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    requirements TEXT NOT NULL,
+    location VARCHAR(100),
+    type VARCHAR(50),
+    duration_months INT,
+    salary_min INT,
+    salary_max INT,
+    application_deadline DATE,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE
+);
+
+-- Tabel untuk profil mahasiswa
+CREATE TABLE student_profiles (
+    student_profile_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID UNIQUE NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    university VARCHAR(255),
+    major VARCHAR(100),
+    graduation_date DATE,
+    bio TEXT,
+    resume_url VARCHAR(255),
+    portfolio_url VARCHAR(255)
+);
+
+-- Tabel untuk daftar semua keahlian
+CREATE TABLE skills (
+    skill_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    skill_name VARCHAR(100) UNIQUE NOT NULL
+);
+
+-- Tabel penghubung antara mahasiswa dan keahlian (many-to-many)
+CREATE TABLE student_skills (
+    student_profile_id UUID NOT NULL REFERENCES student_profiles(student_profile_id) ON DELETE CASCADE,
+    skill_id UUID NOT NULL REFERENCES skills(skill_id) ON DELETE CASCADE,
+    PRIMARY KEY (student_profile_id, skill_id)
+);
+
+-- Tabel untuk melacak lamaran magang
+CREATE TABLE applications (
+    application_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    internship_id UUID NOT NULL REFERENCES internships(internship_id) ON DELETE CASCADE,
+    student_profile_id UUID NOT NULL REFERENCES student_profiles(student_profile_id) ON DELETE CASCADE,
+    status VARCHAR(50) DEFAULT 'pending', -- Contoh: pending, shortlisted, accepted, rejected
+    applied_date TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabel untuk ulasan perusahaan oleh mahasiswa
+CREATE TABLE company_reviews (
+    review_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    company_id UUID NOT NULL REFERENCES companies(company_id) ON DELETE CASCADE,
+    student_profile_id UUID NOT NULL REFERENCES student_profiles(student_profile_id) ON DELETE CASCADE,
+    rating INT CHECK (rating >= 1 AND rating <= 5),
+    review_text TEXT,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
