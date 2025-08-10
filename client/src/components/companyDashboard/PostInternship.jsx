@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { AuthContext } from '../auth/AuthContext.jsx';
+import { companyAPI } from '../auth/api.jsx';
 
 const PostInternship = () => {
+    const { user } = useContext(AuthContext);
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -12,6 +15,7 @@ const PostInternship = () => {
         salary_max: '',
         application_deadline: ''
     });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleInputChange = (e) => {
         setFormData({
@@ -22,58 +26,47 @@ const PostInternship = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Form submitted:', formData);
+        setIsSubmitting(true);
         
-        // Here you would typically send the data to your backend API
-        // For now, we'll just simulate the process
         try {
-            // Uncomment and modify when you have a backend API
-            // const response = await fetch('/api/internships', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //         'Authorization': `Bearer ${localStorage.getItem('token')}`
-            //     },
-            //     body: JSON.stringify(formData)
-            // });
-            // 
-            // if (response.ok) {
-            //     alert('Internship posting submitted successfully!');
-            //     // Reset form
-            //     setFormData({
-            //         title: '',
-            //         description: '',
-            //         requirements: '',
-            //         location: '',
-            //         type: 'remote',
-            //         duration_months: '3',
-            //         salary_min: '',
-            //         salary_max: '',
-            //         application_deadline: ''
-            //     });
-            // } else {
-            //     alert('Error submitting internship posting');
-            // }
+            // Prepare the data for submission
+            const submissionData = {
+                ...formData,
+                company_id: user?.company_id,
+                duration_months: parseInt(formData.duration_months),
+                salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
+                salary_max: formData.salary_max ? parseInt(formData.salary_max) : null
+            };
             
-            // Temporary success simulation
-            alert('Internship posting submitted successfully!');
+            console.log('Submitting internship data:', submissionData);
             
-            // Reset form
-            setFormData({
-                title: '',
-                description: '',
-                requirements: '',
-                location: '',
-                type: 'remote',
-                duration_months: '3',
-                salary_min: '',
-                salary_max: '',
-                application_deadline: ''
-            });
+            // Use the centralized API service
+            const result = await companyAPI.createInternship(submissionData);
+            
+            if (result.success) {
+                alert('Internship posting submitted successfully!');
+                // Reset form
+                setFormData({
+                    title: '',
+                    description: '',
+                    requirements: '',
+                    location: '',
+                    type: 'remote',
+                    duration_months: '3',
+                    salary_min: '',
+                    salary_max: '',
+                    application_deadline: ''
+                });
+            } else {
+                console.error('Server error:', result);
+                alert(result.message || 'Error submitting internship posting');
+            }
             
         } catch (error) {
-            console.error('Error:', error);
-            alert('Error submitting internship posting');
+            console.error('API error:', error);
+            alert(error.message || 'Error submitting internship posting. Please try again.');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -291,21 +284,26 @@ const PostInternship = () => {
 
                         <button
                             type="submit"
+                            disabled={isSubmitting}
                             style={{
                                 padding: '15px 30px',
-                                backgroundColor: '#007bff',
+                                backgroundColor: isSubmitting ? '#6c757d' : '#007bff',
                                 color: 'white',
                                 border: 'none',
                                 borderRadius: '8px',
-                                cursor: 'pointer',
+                                cursor: isSubmitting ? 'not-allowed' : 'pointer',
                                 fontSize: '1.1rem',
                                 fontWeight: '600',
                                 transition: 'background-color 0.3s ease'
                             }}
-                            onMouseEnter={(e) => e.target.style.backgroundColor = '#0056b3'}
-                            onMouseLeave={(e) => e.target.style.backgroundColor = '#007bff'}
+                            onMouseEnter={(e) => {
+                                if (!isSubmitting) e.target.style.backgroundColor = '#0056b3';
+                            }}
+                            onMouseLeave={(e) => {
+                                if (!isSubmitting) e.target.style.backgroundColor = '#007bff';
+                            }}
                         >
-                            Post Internship
+                            {isSubmitting ? 'Posting...' : 'Post Internship'}
                         </button>
                     </div>
                 </form>
