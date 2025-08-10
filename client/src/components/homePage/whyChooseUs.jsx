@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
 import afi from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/afi.svg';
 import cwp from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/cwp.svg';
 import pio from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/pio.svg';
@@ -7,6 +9,28 @@ import typ from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/
 import bytp from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/bytp.svg';
 
 const WhyChooseUs = ({ onGetStartedClick }) => {
+  const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
+  const [lastAction, setLastAction] = useState(null);
+
+  useEffect(() => {
+    if (isAuthenticated && user && lastAction === 'getStarted') {
+      if (user.userType === 'student') {
+        navigate('/student-dashboard');
+      } else if (user.userType === 'company') {
+        navigate('/company-dashboard');
+      }
+      setLastAction(null);
+    }
+  }, [isAuthenticated, user, lastAction, navigate]);
+
+  const handleGetStartedClick = (e) => {
+    e.preventDefault();
+    setLastAction('getStarted');
+    if (onGetStartedClick) {
+      onGetStartedClick();
+    }
+  };
   const studentFeatures = [
     {
       title: 'Apply for internship',
@@ -246,7 +270,7 @@ const WhyChooseUs = ({ onGetStartedClick }) => {
           }}
           onMouseEnter={(e) => e.target.style.background = '#2563EB'}
           onMouseLeave={(e) => e.target.style.background = '#112D4E'}
-          onClick={onGetStartedClick}>
+          onClick={handleGetStartedClick}>
             Get Started
           </button>
         </div>

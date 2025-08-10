@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
 import picRealExp1 from "../../assets/realExp1.webp";
 import picRealExp2 from "../../assets/realExp2.webp";
 import picRealExp3 from "../../assets/realExp3.webp";
@@ -8,7 +10,29 @@ import arwleft from "../../assets/arwleft.svg";
 import arwright from "../../assets/arwright.svg";
 
 const RealExperience = ({ onGetStartedClick }) => {
+  const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
+  const [lastAction, setLastAction] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    if (isAuthenticated && user && lastAction === 'getStarted') {
+      if (user.userType === 'student') {
+        navigate('/student-dashboard');
+      } else if (user.userType === 'company') {
+        navigate('/company-dashboard');
+      }
+      setLastAction(null);
+    }
+  }, [isAuthenticated, user, lastAction, navigate]);
+
+  const handleGetStartedClick = (e) => {
+    e.preventDefault();
+    setLastAction('getStarted');
+    if (onGetStartedClick) {
+      onGetStartedClick();
+    }
+  };
   const experiences = [
     picRealExp1,
     picRealExp2,
@@ -151,7 +175,7 @@ const RealExperience = ({ onGetStartedClick }) => {
             }}
             onMouseEnter={(e) => e.target.style.background = '#2563EB'}
             onMouseLeave={(e) => e.target.style.background = '#112D4E'}
-            onClick={onGetStartedClick}
+            onClick={handleGetStartedClick}
           >
             Get Started
           </button>

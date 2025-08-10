@@ -1,28 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
 import AI from '../../assets/companyAI.svg';
 
 const FeaturedInternships = ({ onForStudentsClick, onClose }) => {
-  const { isAuthenticated, userType } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
-  const handleForStudentsClick = () => {
-    // If user is already authenticated as a student, navigate directly to internships
-    if (isAuthenticated && userType === 'student') {
+  const [lastAction, setLastAction] = useState(null);
+
+  useEffect(() => {
+    if (isAuthenticated && user && lastAction === 'student' && user.userType === 'student') {
+      navigate('/student-dashboard');
+      setLastAction(null);
+    }
+  }, [isAuthenticated, user, lastAction, navigate]);
+
+  const handleForStudentsClick = (e) => {
+    e.preventDefault();
+    if (isAuthenticated && user?.userType === 'student') {
       navigate('/student-dashboard');
       return;
     }
-    
-    // If user is authenticated as company, show message
-    if (isAuthenticated && userType === 'company') {
+    if (isAuthenticated && user?.userType === 'company') {
       alert('You are already logged in as a company. Please log out to access student features.');
       return;
     }
-    
-    // If not authenticated, proceed with student registration/login modal
-    onClose(); // Close the get started modal first
+    setLastAction('student');
     if (onForStudentsClick) {
-      onForStudentsClick(); // This should open the student auth modal
+      onForStudentsClick(); 
     }
   };
   const internships_1 = [

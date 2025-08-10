@@ -1,6 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 const DiscoverInternships = () => {
+  const [searchParams] = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    // Get the search query from URL parameters
+    const queryParam = searchParams.get('q');
+    if (queryParam) {
+      setSearchTerm(queryParam);
+    }
+  }, [searchParams]);
+
   return (
     <div>
       <h2 style={{ color: '#007bff', marginBottom: '20px' }}>Discover Internships</h2>
@@ -20,6 +32,8 @@ const DiscoverInternships = () => {
             <input 
               type="text" 
               placeholder="Search internships..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               style={{
                 width: '100%',
                 padding: '10px',

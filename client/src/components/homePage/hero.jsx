@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
 import homepageImage from '../../assets/homepage.webp';
 
-const Hero = () => {
+const Hero = ({ onOpenLoginModal }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [tags, setTags] = useState(['Remote', 'Part-time', 'Full-time', 'Internship']);
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
 
   const allTags = ['Remote', 'Part-time', 'Full-time', 'Internship', 'Contract', 'Freelance', 'On-site', 'Hybrid'];
 
@@ -22,13 +24,51 @@ const Hero = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchTerm.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
+      // If user is authenticated as student, navigate directly
+      if (isAuthenticated && user?.userType === 'student') {
+        navigate(`/student-dashboard?tab=discover&q=${encodeURIComponent(searchTerm)}`);
+        return;
+      }
+      
+      // If user is authenticated as company, show message
+      if (isAuthenticated && user?.userType === 'company') {
+        alert('You are already logged in as a company. Please log out to access student features.');
+        return;
+      }
+      
+      // If not authenticated, store search intent and open login modal
+      sessionStorage.setItem('searchIntent', JSON.stringify({ 
+        type: 'search', 
+        query: searchTerm.trim() 
+      }));
+      if (onOpenLoginModal) {
+        onOpenLoginModal();
+      }
     }
   };
 
   // Handle tag click
   const handleTagClick = (tag) => {
-    navigate(`/search?q=${encodeURIComponent(tag)}`);
+    // If user is authenticated as student, navigate directly
+    if (isAuthenticated && user?.userType === 'student') {
+      navigate(`/student-dashboard?tab=discover&q=${encodeURIComponent(tag)}`);
+      return;
+    }
+    
+    // If user is authenticated as company, show message
+    if (isAuthenticated && user?.userType === 'company') {
+      alert('You are already logged in as a company. Please log out to access student features.');
+      return;
+    }
+    
+    // If not authenticated, store search intent and open login modal
+    sessionStorage.setItem('searchIntent', JSON.stringify({ 
+      type: 'tag', 
+      query: tag 
+    }));
+    if (onOpenLoginModal) {
+      onOpenLoginModal();
+    }
   };
 
   return (

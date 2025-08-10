@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext.jsx';
 import Navbar from '../homePage/navbar.jsx';
 import FooterHome from '../homePage/footerHome.jsx';
 import BlogHeader from './BlogHeader.jsx';
@@ -7,22 +9,86 @@ import FeaturedPosts from './FeaturedPosts.jsx';
 import LatestPosts from './LatestPosts.jsx';
 import Newsletter from './Newsletter.jsx';
 import { blogData } from './BlogData.jsx';
+import AuthModal from '../auth/authModal.jsx';
+import CompanyAuthModal from '../auth/companyAuthModal.jsx';
+import GetStartedModal from '../auth/getStarted.jsx';
 
 const BlogPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [shouldNavigateToInternships, setShouldNavigateToInternships] = useState(false);
 
   // Modal states for footer navigation
   const [isStudentModalOpen, setIsStudentModalOpen] = useState(false);
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
+  const [isGetStartedModalOpen, setIsGetStartedModalOpen] = useState(false);
+
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   // Handlers for footer modals
   const handleForStudentsClick = () => {
-    setIsStudentModalOpen(true);
+    if (isAuthenticated) {
+      navigate('/internships');
+    } else {
+      setShouldNavigateToInternships(true);
+      setIsStudentModalOpen(true);
+    }
   };
 
   const handleForCompaniesClick = () => {
     setIsCompanyModalOpen(true);
   };
+
+  const handleGetStartedClick = () => {
+    setIsGetStartedModalOpen(true);
+  };
+
+  const handleGetStartedStudentSelect = () => {
+    setIsGetStartedModalOpen(false);
+    setIsStudentModalOpen(true);
+  };
+
+  const handleGetStartedCompanySelect = () => {
+    setIsGetStartedModalOpen(false);
+    setIsCompanyModalOpen(true);
+  };
+
+  const handleCloseGetStartedModal = () => {
+    setIsGetStartedModalOpen(false);
+  };
+
+  const handleCloseStudentModal = () => {
+    setIsStudentModalOpen(false);
+    setShouldNavigateToInternships(false);
+  };
+
+  const handleCloseCompanyModal = () => {
+    setIsCompanyModalOpen(false);
+  };
+
+  // Effect to handle navigation after successful login
+  useEffect(() => {
+    if (isAuthenticated && shouldNavigateToInternships && !isStudentModalOpen) {
+      navigate('/internships');
+      setShouldNavigateToInternships(false);
+    }
+  }, [isAuthenticated, shouldNavigateToInternships, isStudentModalOpen, navigate]);
+
+  // Add blur effect to body when modal is open
+  useEffect(() => {
+    if (isStudentModalOpen || isCompanyModalOpen || isGetStartedModalOpen) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = '0px';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    };
+  }, [isStudentModalOpen, isCompanyModalOpen, isGetStartedModalOpen]);
 
   const filteredPosts = selectedCategory === 'all' 
     ? blogData.blogPosts 
@@ -33,7 +99,11 @@ const BlogPage = () => {
 
   return (
     <>
-      <Navbar />
+      <Navbar 
+        onForStudentsClick={handleForStudentsClick} 
+        onGetStartedClick={handleGetStartedClick}
+        onForCompaniesClick={handleForCompaniesClick}
+      />
       
       <div className="blog-page" style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
         {/* Header Section */}
@@ -68,7 +138,34 @@ const BlogPage = () => {
         </div>
       </div>
 
-      <FooterHome onForStudentsClick={handleForStudentsClick} onForCompaniesClick={handleForCompaniesClick} />
+            <FooterHome onForStudentsClick={handleForStudentsClick} onForCompaniesClick={handleForCompaniesClick} />
+
+      {(isStudentModalOpen || isCompanyModalOpen || isGetStartedModalOpen) && (
+        <div 
+          className="blur-overlay"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backdropFilter: 'blur(4px)',
+            WebkitBackdropFilter: 'blur(4px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            zIndex: 998,
+            pointerEvents: 'none'
+          }}
+        />
+      )}
+
+      <GetStartedModal 
+        isOpen={isGetStartedModalOpen} 
+        onClose={handleCloseGetStartedModal}
+        onStudentSelect={handleGetStartedStudentSelect}
+        onCompanySelect={handleGetStartedCompanySelect}
+      />
+      <AuthModal isOpen={isStudentModalOpen} onClose={handleCloseStudentModal} />
+      <CompanyAuthModal isOpen={isCompanyModalOpen} onClose={handleCloseCompanyModal} />
 
       <style jsx>{`
         .container {

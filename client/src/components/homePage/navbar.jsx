@@ -1,10 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 
 const Navbar = ({ onForStudentsClick, onClose,onGetStartedClick, onForCompaniesClick }) => {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
+  const [lastAction, setLastAction] = useState(null);
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (lastAction === 'student' && user.userType === 'student') {
+        navigate('/student-dashboard');
+        setLastAction(null);
+      } else if (lastAction === 'company' && user.userType === 'company') {
+        navigate('/company-dashboard');
+        setLastAction(null);
+      } else if (lastAction === 'getStarted') {
+        if (user.userType === 'student') {
+          navigate('/student-dashboard');
+        } else if (user.userType === 'company') {
+          navigate('/company-dashboard');
+        }
+        setLastAction(null);
+      }
+    }
+  }, [isAuthenticated, user, lastAction, navigate]);
 
   const handleForStudentsClick = (e) => {
     e.preventDefault();
@@ -12,11 +32,12 @@ const Navbar = ({ onForStudentsClick, onClose,onGetStartedClick, onForCompaniesC
       navigate('/student-dashboard');
       return;
     }
-    // If user is authenticated as company, show message
+    // If user is authenticated as company, show messagex`
     if (isAuthenticated && user?.userType === 'company') {
       alert('You are already logged in as a company. Please log out to access student features.');
       return;
     }
+    setLastAction('student');
     if (onForStudentsClick) {
       onForStudentsClick();
     }
@@ -36,7 +57,7 @@ const Navbar = ({ onForStudentsClick, onClose,onGetStartedClick, onForCompaniesC
       alert('You are already logged in as a student. Please log out to access company features.');
       return;
     }
-    
+    setLastAction('company');
     // If not authenticated, proceed with company registration/login modal
     if (onForCompaniesClick) {
       onForCompaniesClick();
@@ -45,6 +66,7 @@ const Navbar = ({ onForStudentsClick, onClose,onGetStartedClick, onForCompaniesC
   
   const handleGetStartedClick = (e) => {
     e.preventDefault();
+    setLastAction('getStarted');
     if (onGetStartedClick) {
       onGetStartedClick();
     }

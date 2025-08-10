@@ -1,6 +1,8 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const InternshipCertifications = ({ setActiveSection }) => {
+const InternshipCertifications = () => {
+  const navigate = useNavigate();
   return (
     <div>
       <h2 style={{ color: '#007bff', marginBottom: '20px' }}>Internship Certifications</h2>
@@ -41,7 +43,7 @@ const InternshipCertifications = ({ setActiveSection }) => {
           </div>
         </div>
         <button 
-          onClick={() => setActiveSection('discover')}
+          onClick={() => navigate('/student-dashboard/discover')}
           style={{
             background: '#007bff',
             color: 'white',

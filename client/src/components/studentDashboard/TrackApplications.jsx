@@ -1,6 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const TrackApplications = ({ setActiveSection }) => {
+const TrackApplications = () => {
+  const navigate = useNavigate();
+
+  const handleNavigateToDiscover = () => {
+    navigate('/student-dashboard/discover');
+  };
   return (
     <div>
       <h2 style={{ color: '#007bff', marginBottom: '20px' }}>Track Your Applications</h2>
@@ -30,7 +36,7 @@ const TrackApplications = ({ setActiveSection }) => {
             Start applying to internships to track your progress here.
           </p>
           <button 
-            onClick={() => setActiveSection('discover')}
+            onClick={handleNavigateToDiscover}
             style={{
               background: '#007bff',
               color: 'white',

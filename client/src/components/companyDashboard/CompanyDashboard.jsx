@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useContext, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../auth/AuthContext.jsx';
 import Navbar from '../homePage/navbar.jsx';
 import FooterHome from '../homePage/footerHome.jsx';
@@ -12,12 +12,41 @@ import PostCertifications from './PostCertifications.jsx';
 
 const CompanyDashboard = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { isAuthenticated, userType, user, logout } = useContext(AuthContext);
     const [activeSection, setActiveSection] = useState('overview');
 
     // Modal states
     const [isStudentModalOpen, setIsStudentModalOpen] = useState(false);
     const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
+
+    const sidebarItems = [
+        { id: 'overview', label: 'Dashboard Overview', icon: '📊' },
+        { id: 'post-internship', label: 'Post Internship Openings', icon: '📝' },
+        { id: 'manage-applications', label: 'Manage Applications', icon: '📋' },
+        { id: 'pricing', label: 'Check Pricing Information', icon: '💰' },
+        { id: 'partnerships', label: 'Partnership Opportunities', icon: '🤝' },
+        { id: 'analytics', label: 'Analytics & Reporting', icon: '📈' },
+        { id: 'post-certifications', label: 'Post Certifications', icon: '🏆' }
+    ];
+
+    // Set active section based on URL path
+    useEffect(() => {
+        const path = location.pathname.split('/').pop();
+        const validSections = sidebarItems.map(item => item.id);
+        console.log('Current path:', location.pathname);
+        console.log('Extracted section:', path);
+        console.log('Valid sections:', validSections);
+        
+        if (path && validSections.includes(path)) {
+            setActiveSection(path);
+            console.log('Setting active section to:', path);
+        } else {
+            // If no valid path, default to overview
+            setActiveSection('overview');
+            console.log('Setting default section: overview');
+        }
+    }, [location.pathname]);
 
     // Footer modal handlers
     const handleForStudentsClick = () => {
@@ -26,6 +55,11 @@ const CompanyDashboard = () => {
 
     const handleForCompaniesClick = () => {
         setIsCompanyModalOpen(true);
+    };
+
+    const handleSectionChange = (sectionId) => {
+        setActiveSection(sectionId);
+        navigate(`/company-dashboard/${sectionId}`);
     };
 
     const handleLogout = () => {
@@ -78,17 +112,8 @@ const CompanyDashboard = () => {
         );
     }
 
-    const sidebarItems = [
-        { id: 'overview', label: 'Dashboard Overview', icon: '📊' },
-        { id: 'post-internship', label: 'Post Internship Openings', icon: '📝' },
-        { id: 'manage-applications', label: 'Manage Applications', icon: '📋' },
-        { id: 'pricing', label: 'Check Pricing Information', icon: '💰' },
-        { id: 'partnerships', label: 'Partnership Opportunities', icon: '🤝' },
-        { id: 'analytics', label: 'Analytics & Reporting', icon: '📈' },
-        { id: 'certifications', label: 'Post Certifications', icon: '🏆' }
-    ];
-
     const renderContent = () => {
+        console.log('Rendering content for section:', activeSection);
         switch (activeSection) {
             case 'overview':
                 return <DashboardOverview />;
@@ -102,9 +127,10 @@ const CompanyDashboard = () => {
                 return <PartnershipOpportunities />;
             case 'analytics':
                 return <AnalyticsReporting />;
-            case 'certifications':
+            case 'post-certifications':
                 return <PostCertifications />;
             default:
+                console.log('No matching section, showing overview');
                 return <DashboardOverview />;
         }
     };
@@ -148,7 +174,7 @@ const CompanyDashboard = () => {
                         {sidebarItems.map(item => (
                             <button
                                 key={item.id}
-                                onClick={() => setActiveSection(item.id)}
+                                onClick={() => handleSectionChange(item.id)}
                                 style={{
                                     width: '100%',
                                     display: 'flex',

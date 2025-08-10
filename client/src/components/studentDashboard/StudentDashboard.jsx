@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useContext, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import AuthContext from '../auth/AuthContext.jsx';
 import DiscoverInternships from './DiscoverInternships.jsx';
 import BuildProfile from './BuildProfile.jsx';
@@ -13,13 +13,7 @@ const StudentDashboard = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
-
-  // Handle window resize for mobile responsiveness
-  React.useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  const location = useLocation();
 
   const sidebarItems = [
     { id: 'discover', label: 'Discover Internships', icon: '🔍' },
@@ -30,33 +24,65 @@ const StudentDashboard = () => {
     { id: 'certifications', label: 'Receive Certifications', icon: '🏆' }
   ];
 
+  // Set active section based on URL path
+  useEffect(() => {
+    const path = location.pathname.split('/').pop();
+    const validSections = sidebarItems.map(item => item.id);
+    console.log('Current path:', location.pathname);
+    console.log('Extracted section:', path);
+    console.log('Valid sections:', validSections);
+    
+    if (path && validSections.includes(path)) {
+      setActiveSection(path);
+      console.log('Setting active section to:', path);
+    } else {
+      // If no valid path, default to discover
+      setActiveSection('discover');
+      console.log('Setting default section: discover');
+    }
+  }, [location.pathname]);
+
+  // Handle window resize for mobile responsiveness
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const handleSectionChange = (sectionId) => {
+    setActiveSection(sectionId);
+    navigate(`/student-dashboard/${sectionId}`);
+  };
+
   const handleLogout = () => {
     logout();
     navigate('/');
   };
 
   const renderContent = () => {
+    console.log('Rendering content for section:', activeSection);
     switch (activeSection) {
-      case 'discover':
+      case 'discover-internships':
         return <DiscoverInternships />;
       
       case 'profile':
         return <BuildProfile />;
       
       case 'applications':
-        return <TrackApplications setActiveSection={setActiveSection} />;
+        return <TrackApplications />;
       
-      case 'stories':
+      case 'success-stories':
         return <SuccessStories />;
       
-      case 'reviews':
+      case 'company-reviews':
         return <CompanyReviews />;
       
       case 'certifications':
-        return <InternshipCertifications setActiveSection={setActiveSection} />;
+        return <InternshipCertifications />;
       
       default:
-        return <div>Select a section from the sidebar</div>;
+        console.log('No matching section, showing discover');
+        return <DiscoverInternships />;
     }
   };
 
@@ -99,7 +125,7 @@ const StudentDashboard = () => {
           {sidebarItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveSection(item.id)}
+              onClick={() => handleSectionChange(item.id)}
               style={{
                 width: '100%',
                 display: 'flex',

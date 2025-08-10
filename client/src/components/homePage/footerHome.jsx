@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import yt from "../../assets/ytFooter.svg";
@@ -12,23 +12,39 @@ import wa from "../../assets/waFooter.svg";
 
 const FooterHome = ({ onForStudentsClick, onForCompaniesClick }) => {
     const navigate = useNavigate();
-    const { isAuthenticated, userType } = useAuth();
+    const { isAuthenticated, user } = useAuth();
+    const [lastAction, setLastAction] = useState(null);
+
+    useEffect(() => {
+        if (isAuthenticated && user) {
+            if (lastAction && lastAction.startsWith('student') && user.userType === 'student') {
+                const path = lastAction === 'student' ? '/student-dashboard' : lastAction.replace('student:', '');
+                navigate(path);
+                setLastAction(null);
+            } else if (lastAction && lastAction.startsWith('company') && user.userType === 'company') {
+                const path = lastAction === 'company' ? '/company-dashboard' : lastAction.replace('company:', '');
+                navigate(path);
+                setLastAction(null);
+            }
+        }
+    }, [isAuthenticated, user, lastAction, navigate]);
 
     const handleStudentNavigation = (path) => (e) => {
         e.preventDefault();
         
-        console.log('Student navigation clicked:', { path, isAuthenticated, userType });
+        console.log('Student navigation clicked:', { path, isAuthenticated, userType: user?.userType });
         
         // Check if user is authenticated and is a student
-        if (isAuthenticated && userType === 'student') {
+        if (isAuthenticated && user?.userType === 'student') {
             console.log('Navigating to:', path);
             navigate(path);
-        } else if (isAuthenticated && userType === 'company') {
+        } else if (isAuthenticated && user?.userType === 'company') {
             // If authenticated as company, show message or redirect
             alert('Please log in as a student to access this feature');
         } else {
             // If not authenticated, show student login modal
             console.log('Opening student modal');
+            setLastAction(path ? `student:${path}` : 'student');
             if (onForStudentsClick) {
                 onForStudentsClick();
             }
@@ -39,18 +55,19 @@ const FooterHome = ({ onForStudentsClick, onForCompaniesClick }) => {
     const handleCompaniesNavigation = (path) => (e) => {
         e.preventDefault();
         
-        console.log('Company navigation clicked:', { path, isAuthenticated, userType });
+        console.log('Company navigation clicked:', { path, isAuthenticated, userType: user?.userType });
         
         // Check if user is authenticated and is a company
-        if (isAuthenticated && userType === 'company') {
+        if (isAuthenticated && user?.userType === 'company') {
             console.log('Navigating to:', path);
             navigate(path);
-        } else if (isAuthenticated && userType === 'student') {
+        } else if (isAuthenticated && user?.userType === 'student') {
             // If authenticated as student, show message or redirect
             alert('Please log in as a company to access this feature');
         } else {
             // If not authenticated, show company login modal
             console.log('Opening company modal');
+            setLastAction(path ? `company:${path}` : 'company');
             if (onForCompaniesClick) {
                 onForCompaniesClick();
             }
@@ -81,21 +98,21 @@ const FooterHome = ({ onForStudentsClick, onForCompaniesClick }) => {
                         </div>
                         <div className="footer-link2" style={{ display: 'flex', flexDirection: 'column', margin: '0', flex: '1', minWidth: '200px' }}>
                                 <h2 onClick={handleStudentNavigation()} style={{ color: 'white', fontSize: '1.25rem', margin: '0', padding: '1rem 0', cursor:'pointer'}}>For Students</h2>
-                                <a onClick={handleStudentNavigation('/discover-internships')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer'}}>Discover Internships</a>
-                                <a onClick={handleStudentNavigation('/profile')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer'}}>Build Your Profile</a>
-                                <a onClick={handleStudentNavigation('/applications')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer' }}>Track Your Applications</a>
-                                <a onClick={handleStudentNavigation('/success-stories')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer' }}>Read Success Stories</a>
-                                <a onClick={handleStudentNavigation('/company-reviews')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer' }}>View Company Reviews</a>
-                                <a onClick={handleStudentNavigation('/certifications')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer' }}>Receive Internship Certifications</a>
+                                <a onClick={handleStudentNavigation('/student-dashboard/discover-internships')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer'}}>Discover Internships</a>
+                                <a onClick={handleStudentNavigation('/student-dashboard/profile')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer'}}>Build Your Profile</a>
+                                <a onClick={handleStudentNavigation('/student-dashboard/applications')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer' }}>Track Your Applications</a>
+                                <a onClick={handleStudentNavigation('/student-dashboard/success-stories')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer' }}>Read Success Stories</a>
+                                <a onClick={handleStudentNavigation('/student-dashboard/company-reviews')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer' }}>View Company Reviews</a>
+                                <a onClick={handleStudentNavigation('/student-dashboard/certifications')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer' }}>Receive Internship Certifications</a>
                         </div>
                         <div className="footer-link3" style={{ display: 'flex', flexDirection: 'column', margin: '0', flex: '1', minWidth: '200px'}}>
                                 <h2 onClick={handleCompaniesNavigation()} style={{ color: 'white', fontSize: '1.25rem', margin: '0', padding: '1rem 0', cursor:'pointer'}}>For Companies</h2>
-                                <a onClick={handleCompaniesNavigation('/post-internship')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer'}}>Post Internship Openings</a>
-                                <a onClick={handleCompaniesNavigation('/manage-applications')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer' }}>Manage Internship Applications</a>
-                                <a onClick={handleCompaniesNavigation('/pricing')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer' }}>Check Pricing Information</a>
-                                <a onClick={handleCompaniesNavigation('/partnerships')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer'}}>Partnership Opportunities</a>
-                                <a onClick={handleCompaniesNavigation('/analytics')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer'}}>Access Analytics and Reporting</a>
-                                <a onClick={handleCompaniesNavigation('/post-certifications')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer'}}>Post Internship Certifications</a>
+                                <a onClick={handleCompaniesNavigation('/company-dashboard/post-internship')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer'}}>Post Internship Openings</a>
+                                <a onClick={handleCompaniesNavigation('/company-dashboard/manage-applications')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer' }}>Manage Internship Applications</a>
+                                <a onClick={handleCompaniesNavigation('/company-dashboard/pricing')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer' }}>Check Pricing Information</a>
+                                <a onClick={handleCompaniesNavigation('/company-dashboard/partnerships')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer'}}>Partnership Opportunities</a>
+                                <a onClick={handleCompaniesNavigation('/company-dashboard/analytics')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer'}}>Access Analytics and Reporting</a>
+                                <a onClick={handleCompaniesNavigation('/company-dashboard/post-certifications')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer'}}>Post Internship Certifications</a>
                         </div>
                         <div className="footer-link4" style={{ display: 'flex', flexDirection: 'column', margin: '0', flex: '1', minWidth: '250px' }}>
                                 <h2 style={{ color: 'white', fontSize: '1.25rem', margin: '0', padding: '1rem 0' }}>Contact Us</h2>

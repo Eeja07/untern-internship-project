@@ -48,8 +48,8 @@ function App() {
       }}>
         <Routes>
           <Route path="/" element={<HomePage/>} />
-          <Route path="/student-dashboard" element={<StudentDashboard/>} />
-          <Route path="/company-dashboard" element={<CompanyDashboard/>} />
+          <Route path="/student-dashboard/*" element={<StudentDashboard/>} />
+          <Route path="/company-dashboard/*" element={<CompanyDashboard/>} />
           {/* Student routes */}
           <Route path="/profile" element={<div>Profile Page - Coming Soon</div>} />
           <Route path="/applications" element={<div>Applications Page - Coming Soon</div>} />

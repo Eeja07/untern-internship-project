@@ -68,6 +68,21 @@ const HomePage = () => {
       navigate('/internships');
       setShouldNavigateToInternships(false);
     }
+    
+    // Handle search intent after login
+    if (isAuthenticated && !isStudentModalOpen) {
+      const searchIntent = sessionStorage.getItem('searchIntent');
+      if (searchIntent) {
+        try {
+          const { query } = JSON.parse(searchIntent);
+          sessionStorage.removeItem('searchIntent');
+          navigate(`/student-dashboard/discover?q=${encodeURIComponent(query)}`);
+        } catch (error) {
+          console.error('Error parsing search intent:', error);
+          sessionStorage.removeItem('searchIntent');
+        }
+      }
+    }
   }, [isAuthenticated, shouldNavigateToInternships, isStudentModalOpen, navigate]);
 
   const handleCloseCompanyModal = () => {
@@ -101,7 +116,7 @@ const HomePage = () => {
           onGetStartedClick={handleGetStartedClick}
           onForCompaniesClick={handleForCompaniesClick}
         />
-        <Hero />
+        <Hero onOpenLoginModal={() => setIsStudentModalOpen(true)} />
         <CompanyLogos />
         <WhyChooseUs onGetStartedClick={handleGetStartedClick} />
         <WhatIntern />
