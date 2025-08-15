@@ -1,18 +1,19 @@
 // server.js - Main entry point
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-const fs = require('fs');
-require('dotenv').config(); // Load environment variables from .env file
+import express from 'express';
+import cors from 'cors';
+import path from 'path';
+import fs from 'fs';
+import dotenv from 'dotenv';
+import authRoutes from './authRoutes.js';
+import studentRoutes from './studentRoutes.js';
+import companyRoutes from './companyRoutes.js';
+import generalRoutes from './generalRoutes.js';
+import { pool, testConnection } from './db.js';
+
+dotenv.config(); // Load environment variables from .env file
 
 // Initialize the Express app
 const app = express();
-
-// Import route files
-const authRoutes = require('./authRoutes');
-const studentRoutes = require('./studentRoutes');
-const companyRoutes = require('./companyRoutes');
-const generalRoutes = require('./generalRoutes');
 
 // Middleware
 app.use(express.json({ limit: '50mb' }));
@@ -46,7 +47,7 @@ app.use(cors({
 }));
 
 // Serve static files for uploads
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(path.resolve(), 'uploads')));
 
 // Create upload directories if they don't exist
 const uploadDirs = ['uploads', 'uploads/resumes', 'uploads/logos'];
@@ -55,9 +56,6 @@ uploadDirs.forEach(dir => {
     fs.mkdirSync(dir, { recursive: true });
   }
 });
-
-// Import database configuration
-const { pool, testConnection } = require('./db');
 
 // Test database connection on startup
 testConnection().then(success => {
@@ -130,4 +128,4 @@ app.listen(PORT, () => {
     console.log(`Allowed CLIENT_URL: ${process.env.CLIENT_URL || 'not set'}`);
 });
 
-module.exports = app;
+export default app;

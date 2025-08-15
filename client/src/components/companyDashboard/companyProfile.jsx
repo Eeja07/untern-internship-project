@@ -1,8 +1,35 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../auth/AuthContext.jsx';
+import { companyAPI } from '../auth/api.jsx';
 
 const CompanyProfile = () => {
     const { user } = useContext(AuthContext);
+    const [companyData, setCompanyData] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    // Debug: Log the user object to see what fields are available
+    useEffect(() => {
+        console.log('User object from AuthContext:', user);
+        console.log('Available user fields:', user ? Object.keys(user) : 'No user');
+        
+        // Fetch company profile data
+        const fetchCompanyProfile = async () => {
+            try {
+                const response = await companyAPI.getProfile();
+                console.log('Company profile response:', response);
+                console.log('Company profile fields:', response?.data ? Object.keys(response.data) : 'No data');
+                setCompanyData(response.data || response);
+            } catch (error) {
+                console.error('Error fetching company profile:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (user) {
+            fetchCompanyProfile();
+        }
+    }, [user]);
 
     return (
         <div style={{
@@ -45,7 +72,12 @@ const CompanyProfile = () => {
                     </label>
                     <input 
                         type="text" 
-                        value={user?.company_id || "Loading..."}
+                        value={
+                            companyData?.company_id || 
+                            user?.company_id || 
+                            user?.id || 
+                            "Not available"
+                        }
                         readOnly
                         style={{
                             width: '100%',

@@ -45,6 +45,26 @@ api.interceptors.response.use(
 
 // Authentication API calls
 export const authAPI = {
+  // Send verification code
+  sendVerificationCode: async (email) => {
+    try {
+      const response = await api.post('/send-verification-code', { email });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to send verification code' };
+    }
+  },
+
+  // Verify email code
+  verifyEmailCode: async (email, code) => {
+    try {
+      const response = await api.post('/verify-email-code', { email, code });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Email verification failed' };
+    }
+  },
+
   // Register a new user
   register: async (userData) => {
     try {

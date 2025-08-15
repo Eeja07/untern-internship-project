@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
+import { authAPI } from './api';
+import EmailVerification from './EmailVerification';
 
 const AuthModal = ({ isOpen, onClose }) => {
   const [isLogin, setIsLogin] = useState(true);
+  const [showEmailVerification, setShowEmailVerification] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -77,14 +80,39 @@ const AuthModal = ({ isOpen, onClose }) => {
           userType: 'student', // Add user type for student login
           expectedUserType: 'student' // Add expected user type validation
         });
-      } else {
-        await register({
-          email: formData.email,
-          password: formData.password,
-          name: formData.name,
-          userType: 'student' // Add user type for student registration
+        
+        // Success - close modal and reset form
+        onClose();
+        setFormData({
+          email: '',
+          password: '',
+          confirmPassword: '',
+          name: ''
         });
+      } else {
+        // For registration, first send verification code
+        const response = await authAPI.sendVerificationCode(formData.email);
+        if (response.success) {
+          setShowEmailVerification(true);
+        }
       }
+      
+    } catch (error) {
+      setError(error.message || 'An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEmailVerified = async () => {
+    try {
+      setLoading(true);
+      await register({
+        email: formData.email,
+        password: formData.password,
+        name: formData.name,
+        userType: 'student' // Add user type for student registration
+      });
 
       // Success - close modal and reset form
       onClose();
@@ -94,12 +122,19 @@ const AuthModal = ({ isOpen, onClose }) => {
         confirmPassword: '',
         name: ''
       });
+      setShowEmailVerification(false);
       
     } catch (error) {
-      setError(error.message || 'An error occurred. Please try again.');
+      setError(error.message || 'Registration failed. Please try again.');
+      setShowEmailVerification(false);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleBackFromVerification = () => {
+    setShowEmailVerification(false);
+    setError('');
   };
 
   const toggleMode = () => {
@@ -111,6 +146,7 @@ const AuthModal = ({ isOpen, onClose }) => {
       name: ''
     });
     setError('');
+    setShowEmailVerification(false);
   };
 
   return (
@@ -179,6 +215,15 @@ const AuthModal = ({ isOpen, onClose }) => {
         }}
         onClick={onClose}>×</button>
         
+        {showEmailVerification ? (
+          <EmailVerification
+            email={formData.email}
+            onVerified={handleEmailVerified}
+            onBack={handleBackFromVerification}
+            isMobile={isMobile}
+          />
+        ) : (
+          <>
         <div style={{
           textAlign: 'center',
           marginBottom: '2rem'
@@ -499,6 +544,8 @@ const AuthModal = ({ isOpen, onClose }) => {
             }}>LinkedIn</button>
           </div>
         </div>
+        </>
+        )}
       </div>
     </div>
   );

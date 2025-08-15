@@ -1,6 +1,8 @@
 // config/db.js - Database configuration
-const { Pool } = require('pg');
-require('dotenv').config();
+import { Pool } from 'pg';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 // Configure PostgreSQL connection with proper error handling
 const pool = new Pool({
@@ -50,7 +52,10 @@ const testConnection = async () => {
 };
 
 // Export the pool and test function
-module.exports = {
+export {
   pool,
   testConnection
 };
+
+// Default export for compatibility
+export default testConnection;

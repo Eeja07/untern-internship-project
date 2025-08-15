@@ -1,5 +1,5 @@
-const express = require('express');
-const { Pool } = require('pg');
+import express from 'express';
+import { Pool } from 'pg';
 const router = express.Router();
 
 // Database connection
@@ -12,7 +12,7 @@ const pool = new Pool({
 });
 
 // JWT middleware
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 const authenticateToken = (req, res, next) => {
@@ -436,4 +436,4 @@ router.post('/companies/:companyId/reviews', authenticateToken, async (req, res)
   }
 });
 
-module.exports = router;
+export default router;

@@ -1,7 +1,7 @@
-const express = require('express');
-const { Pool } = require('pg');
-const multer = require('multer');
-const path = require('path');
+import express from 'express';
+import { Pool } from 'pg';
+import multer from 'multer';
+import path from 'path';
 const router = express.Router();
 
 // Database connection
@@ -14,7 +14,7 @@ const pool = new Pool({
 });
 
 // JWT middleware
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 const authenticateToken = (req, res, next) => {
@@ -473,4 +473,4 @@ router.post('/logo', authenticateToken, requireCompany, upload.single('logo'), a
   }
 });
 
-module.exports = router;
+export default router;

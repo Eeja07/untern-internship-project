@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
+import { authAPI } from './api';
+import EmailVerification from './EmailVerification';
 
 const CompanyAuthModal = ({ isOpen, onClose }) => {
   const [isLogin, setIsLogin] = useState(true);
+  const [showEmailVerification, setShowEmailVerification] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -80,17 +83,45 @@ const CompanyAuthModal = ({ isOpen, onClose }) => {
           userType: 'company', // Add user type for company login
           expectedUserType: 'company' // Add expected user type validation
         });
-      } else {
-        await register({
-          email: formData.email,
-          password: formData.password,
-          companyName: formData.companyName,
-          companyWebsite: formData.companyWebsite,
-          companySize: formData.companySize,
-          industry: formData.industry,
-          userType: 'company' // Add user type for company registration
+        
+        // Success - close modal and reset form
+        onClose();
+        setFormData({
+          email: '',
+          password: '',
+          confirmPassword: '',
+          companyName: '',
+          companyWebsite: '',
+          companySize: '',
+          industry: ''
         });
+      } else {
+        // For registration, first send verification code
+        const response = await authAPI.sendVerificationCode(formData.email);
+        if (response.success) {
+          setShowEmailVerification(true);
+        }
       }
+      
+    } catch (error) {
+      setError(error.message || 'An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEmailVerified = async () => {
+    try {
+      setLoading(true);
+      await register({
+        email: formData.email,
+        password: formData.password,
+        company_name: formData.companyName,
+        company_website: formData.companyWebsite,
+        company_size: formData.companySize,
+        industry: formData.industry,
+        userType: 'company' // Add user type for company registration
+      });
 
       // Success - close modal and reset form
       onClose();
@@ -103,12 +134,19 @@ const CompanyAuthModal = ({ isOpen, onClose }) => {
         companySize: '',
         industry: ''
       });
+      setShowEmailVerification(false);
       
     } catch (error) {
-      setError(error.message || 'An error occurred. Please try again.');
+      setError(error.message || 'Registration failed. Please try again.');
+      setShowEmailVerification(false);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleBackFromVerification = () => {
+    setShowEmailVerification(false);
+    setError('');
   };
 
   const toggleMode = () => {
@@ -123,6 +161,7 @@ const CompanyAuthModal = ({ isOpen, onClose }) => {
       industry: ''
     });
     setError('');
+    setShowEmailVerification(false);
   };
 
 return (
@@ -191,6 +230,15 @@ return (
         }}
         onClick={onClose}>×</button>
         
+        {showEmailVerification ? (
+          <EmailVerification
+            email={formData.email}
+            onVerified={handleEmailVerified}
+            onBack={handleBackFromVerification}
+            isMobile={isMobile}
+          />
+        ) : (
+          <>
         <div className="modal-header" style={{
           textAlign: 'center',
           marginBottom: '2rem'
@@ -642,6 +690,8 @@ return (
             }}>LinkedIn</button>
           </div>
         </div>
+        </>
+        )}
       </div>
     </div>
   );

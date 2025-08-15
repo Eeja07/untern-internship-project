@@ -12,4 +12,4 @@ const response = (statusCode, data, message, res) => {
         }
     });
 };
-module.exports = response;
+export default response;
