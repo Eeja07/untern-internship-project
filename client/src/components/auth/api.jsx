@@ -41,8 +41,6 @@ api.interceptors.response.use(
   }
 );
 
-// ...existing code...
-
 // Authentication API calls
 export const authAPI = {
   // Send verification code
@@ -230,9 +228,9 @@ export const studentAPI = {
   },
 
   // Remove skill from student
-  removeSkill: async (skillId) => {
+  removeSkill: async (skillName) => {
     try {
-      const response = await api.delete(`/student/skills/${skillId}`);
+      const response = await api.delete(`/student/skills/${encodeURIComponent(skillName)}`);
       return response.data;
     } catch (error) {
       throw error.response?.data || { success: false, message: 'Failed to remove skill' };

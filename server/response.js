@@ -1,15 +1,2 @@
-const response = (statusCode, data, message, res) => {
-    res.status(statusCode).json({
-        payload: {
-            status: statusCode,
-            datas: data || null, 
-        },
-        message: message || "",
-        pagination: {
-            prev: "",
-            next: "",
-            current: "",
-        }
-    });
-};
-export default response;
+// This file is no longer needed as the routes use direct JSON responses
+// Remove this file or keep it for future use if needed

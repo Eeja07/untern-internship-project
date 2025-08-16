@@ -1,36 +1,8 @@
 import express from 'express';
-import { Pool } from 'pg';
+import { pool } from './config/database.js';
+import { authenticateToken } from './middleware/auth.js';
+
 const router = express.Router();
-
-// Database connection
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
-});
-
-// JWT middleware
-import jwt from 'jsonwebtoken';
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ success: false, message: 'Access token required' });
-  }
-
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) {
-      return res.status(403).json({ success: false, message: 'Invalid token' });
-    }
-    req.user = user;
-    next();
-  });
-};
 
 // Get all internships with filters
 router.get('/internships', async (req, res) => {
@@ -182,7 +154,7 @@ router.get('/internships/:id', async (req, res) => {
 // Apply for internship (student only)
 router.post('/internships/:id/apply', authenticateToken, async (req, res) => {
   try {
-    const { user_id, user_type } = req.user;
+    const { id: user_id, user_type, student_id } = req.user;
     const { id: internshipId } = req.params;
 
     if (user_type !== 'student') {
@@ -192,20 +164,12 @@ router.post('/internships/:id/apply', authenticateToken, async (req, res) => {
       });
     }
 
-    // Get student_profile_id
-    const profileResult = await pool.query(
-      'SELECT student_profile_id FROM student_profiles WHERE user_id = $1',
-      [user_id]
-    );
-
-    if (profileResult.rows.length === 0) {
-      return res.status(404).json({
+    if (!student_id) {
+      return res.status(400).json({
         success: false,
-        message: 'Student profile not found'
+        message: 'Student ID not found in token'
       });
     }
-
-    const student_profile_id = profileResult.rows[0].student_profile_id;
 
     // Check if internship exists and is active
     const internshipResult = await pool.query(
@@ -222,8 +186,9 @@ router.post('/internships/:id/apply', authenticateToken, async (req, res) => {
 
     // Check if student has already applied
     const existingApplication = await pool.query(
-      'SELECT application_id FROM applications WHERE internship_id = $1 AND student_profile_id = $2',
-      [internshipId, student_profile_id]
+      `SELECT application_id FROM applications 
+       WHERE internship_id = $1 AND student_profile_id = $2`,
+      [internshipId, student_id]
     );
 
     if (existingApplication.rows.length > 0) {
@@ -236,7 +201,7 @@ router.post('/internships/:id/apply', authenticateToken, async (req, res) => {
     // Create application
     const result = await pool.query(
       'INSERT INTO applications (internship_id, student_profile_id) VALUES ($1, $2) RETURNING application_id',
-      [internshipId, student_profile_id]
+      [internshipId, student_id]
     );
 
     res.status(201).json({
@@ -283,16 +248,21 @@ router.get('/internships-filters', async (req, res) => {
   }
 });
 
-// Get all skills
+// Get all skills - Extract from students table JSONB skills field
 router.get('/skills', async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT skill_id, skill_name FROM skills ORDER BY skill_name'
+      `SELECT DISTINCT jsonb_array_elements_text(skills) as skill_name 
+       FROM students 
+       WHERE skills IS NOT NULL 
+       ORDER BY skill_name`
     );
+
+    const skills = result.rows.map(row => row.skill_name);
 
     res.json({
       success: true,
-      skills: result.rows
+      skills
     });
 
   } catch (error) {
@@ -317,13 +287,20 @@ router.get('/skills/search', async (req, res) => {
     }
 
     const result = await pool.query(
-      'SELECT skill_id, skill_name FROM skills WHERE LOWER(skill_name) LIKE LOWER($1) ORDER BY skill_name LIMIT 10',
+      `SELECT DISTINCT jsonb_array_elements_text(skills) as skill_name 
+       FROM students 
+       WHERE skills IS NOT NULL 
+       AND jsonb_array_elements_text(skills) ILIKE $1
+       ORDER BY skill_name
+       LIMIT 20`,
       [`%${q}%`]
     );
 
+    const skills = result.rows.map(row => row.skill_name);
+
     res.json({
       success: true,
-      skills: result.rows
+      skills
     });
 
   } catch (error) {
@@ -342,10 +319,9 @@ router.get('/companies/:companyId/reviews', async (req, res) => {
 
     const result = await pool.query(
       `SELECT cr.review_id, cr.rating, cr.review_text, cr.created_at,
-              u.name as reviewer_name
+              s.name as reviewer_name
        FROM company_reviews cr
-       JOIN student_profiles sp ON cr.student_profile_id = sp.student_profile_id
-       JOIN users u ON sp.user_id = u.user_id
+       JOIN students s ON cr.student_profile_id = s.student_id
        WHERE cr.company_id = $1
        ORDER BY cr.created_at DESC`,
       [companyId]
@@ -376,7 +352,7 @@ router.get('/companies/:companyId/reviews', async (req, res) => {
 // Create company review (student only)
 router.post('/companies/:companyId/reviews', authenticateToken, async (req, res) => {
   try {
-    const { user_id, user_type } = req.user;
+    const { id, user_type, student_id } = req.user;
     const { companyId } = req.params;
     const { rating, review_text } = req.body;
 
@@ -387,25 +363,17 @@ router.post('/companies/:companyId/reviews', authenticateToken, async (req, res)
       });
     }
 
-    // Get student_profile_id
-    const profileResult = await pool.query(
-      'SELECT student_profile_id FROM student_profiles WHERE user_id = $1',
-      [user_id]
-    );
-
-    if (profileResult.rows.length === 0) {
-      return res.status(404).json({
+    if (!student_id) {
+      return res.status(400).json({
         success: false,
-        message: 'Student profile not found'
+        message: 'Student ID not found in token'
       });
     }
-
-    const student_profile_id = profileResult.rows[0].student_profile_id;
 
     // Check if student has already reviewed this company
     const existingReview = await pool.query(
       'SELECT review_id FROM company_reviews WHERE company_id = $1 AND student_profile_id = $2',
-      [companyId, student_profile_id]
+      [companyId, student_id]
     );
 
     if (existingReview.rows.length > 0) {
@@ -418,7 +386,7 @@ router.post('/companies/:companyId/reviews', authenticateToken, async (req, res)
     // Create review
     const result = await pool.query(
       'INSERT INTO company_reviews (company_id, student_profile_id, rating, review_text) VALUES ($1, $2, $3, $4) RETURNING review_id',
-      [companyId, student_profile_id, rating, review_text]
+      [companyId, student_id, rating, review_text]
     );
 
     res.status(201).json({

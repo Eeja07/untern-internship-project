@@ -1,8 +1,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE login (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL,
-        email VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
     password VARCHAR(255) NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -12,19 +11,9 @@ CREATE TABLE login (
     user_type VARCHAR(20) NOT NULL DEFAULT 'student'
 );
 
--- Tabel untuk menyimpan data umum pengguna (mahasiswa dan perusahaan)
-CREATE TABLE users (
-    user_id UUID PRIMARY KEY REFERENCES login(user_id) ON DELETE CASCADE,
-    name VARCHAR(255) NOT NULL,
-    profile_picture_url VARCHAR(255),
-    phone_number VARCHAR(20),
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-);
-
 -- Tabel untuk detail perusahaan
 CREATE TABLE companies (
-    company_id UUID UNIQUE NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    company_id UUID UNIQUE NOT NULL REFERENCES login(id) ON DELETE CASCADE,
     company_name VARCHAR(255) NOT NULL,
     company_website VARCHAR(255),
     industry VARCHAR(100),
@@ -52,9 +41,8 @@ CREATE TABLE internships (
 );
 
 -- Tabel untuk profil mahasiswa
-CREATE TABLE student_profiles (
-    student_profile_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID UNIQUE NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+CREATE TABLE students (
+    student_id UUID UNIQUE NOT NULL REFERENCES login(user_id) ON DELETE CASCADE,
     university VARCHAR(255),
     major VARCHAR(100),
     graduation_date DATE,
@@ -63,15 +51,9 @@ CREATE TABLE student_profiles (
     portfolio_url VARCHAR(255)
 );
 
--- Tabel untuk daftar semua keahlian
-CREATE TABLE skills (
-    skill_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    skill_name VARCHAR(100) UNIQUE NOT NULL
-);
-
 -- Tabel penghubung antara mahasiswa dan keahlian (many-to-many)
 CREATE TABLE student_skills (
-    student_profile_id UUID NOT NULL REFERENCES student_profiles(student_profile_id) ON DELETE CASCADE,
+    student_profile_id UUID NOT NULL REFERENCES students(student_profile_id) ON DELETE CASCADE,
     skill_id UUID NOT NULL REFERENCES skills(skill_id) ON DELETE CASCADE,
     PRIMARY KEY (student_profile_id, skill_id)
 );
@@ -80,7 +62,7 @@ CREATE TABLE student_skills (
 CREATE TABLE applications (
     application_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     internship_id UUID NOT NULL REFERENCES internships(internship_id) ON DELETE CASCADE,
-    student_profile_id UUID NOT NULL REFERENCES student_profiles(student_profile_id) ON DELETE CASCADE,
+    student_profile_id UUID NOT NULL REFERENCES students(student_profile_id) ON DELETE CASCADE,
     status VARCHAR(50) DEFAULT 'pending', -- Contoh: pending, shortlisted, accepted, rejected
     applied_date TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
@@ -89,8 +71,42 @@ CREATE TABLE applications (
 CREATE TABLE company_reviews (
     review_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     company_id UUID NOT NULL REFERENCES companies(company_id) ON DELETE CASCADE,
-    student_profile_id UUID NOT NULL REFERENCES student_profiles(student_profile_id) ON DELETE CASCADE,
+    student_profile_id UUID NOT NULL REFERENCES students(student_profile_id) ON DELETE CASCADE,
     rating INT CHECK (rating >= 1 AND rating <= 5),
     review_text TEXT,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
+
+SELECT 
+    'COLUMN_INFO' as metadata_type,
+    t.table_schema,
+    t.table_name,
+    t.column_name,
+    t.ordinal_position as position,
+    t.data_type,
+    CASE 
+        WHEN t.data_type = 'character varying' THEN 'VARCHAR(' || t.character_maximum_length || ')'
+        WHEN t.data_type = 'character' THEN 'CHAR(' || t.character_maximum_length || ')'
+        WHEN t.data_type = 'numeric' THEN 'NUMERIC(' || t.numeric_precision || ',' || t.numeric_scale || ')'
+        WHEN t.data_type = 'integer' THEN 'INTEGER'
+        WHEN t.data_type = 'bigint' THEN 'BIGINT'
+        WHEN t.data_type = 'timestamp without time zone' THEN 'TIMESTAMP'
+        WHEN t.data_type = 'timestamp with time zone' THEN 'TIMESTAMPTZ'
+        ELSE UPPER(t.data_type)
+    END as formatted_data_type,
+    COALESCE(t.character_maximum_length, t.numeric_precision) as max_length,
+    t.numeric_scale,
+    t.is_nullable,
+    COALESCE(t.column_default, 'NO DEFAULT') as default_value,
+    CASE 
+        WHEN t.column_default LIKE 'nextval%' THEN 'AUTO_INCREMENT'
+        WHEN t.is_nullable = 'NO' THEN 'NOT_NULL'
+        WHEN t.column_default IS NOT NULL THEN 'HAS_DEFAULT'
+        ELSE 'NULLABLE'
+    END as column_properties,
+    COALESCE(col_description(pgc.oid, t.ordinal_position), 'No description') as column_comment
+FROM information_schema.columns t
+LEFT JOIN pg_class pgc ON pgc.relname = t.table_name
+    AND pgc.relnamespace = (SELECT oid FROM pg_namespace WHERE nspname = t.table_schema)
+WHERE t.table_schema = 'public'  -- Ganti dengan schema yang diinginkan
+ORDER BY t.table_name, t.ordinal_position;

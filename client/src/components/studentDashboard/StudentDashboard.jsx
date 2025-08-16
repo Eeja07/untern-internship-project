@@ -71,10 +71,10 @@ const StudentDashboard = () => {
       case 'applications':
         return <TrackApplications />;
       
-      case 'success-stories':
+      case 'stories':
         return <SuccessStories />;
       
-      case 'company-reviews':
+      case 'reviews':
         return <CompanyReviews />;
       
       case 'certifications':

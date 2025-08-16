@@ -6,6 +6,8 @@ const CompanyProfile = () => {
     const { user } = useContext(AuthContext);
     const [companyData, setCompanyData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [formData, setFormData] = useState({});
 
     // Debug: Log the user object to see what fields are available
     useEffect(() => {
@@ -18,7 +20,9 @@ const CompanyProfile = () => {
                 const response = await companyAPI.getProfile();
                 console.log('Company profile response:', response);
                 console.log('Company profile fields:', response?.data ? Object.keys(response.data) : 'No data');
-                setCompanyData(response.data || response);
+                const profileData = response.data || response;
+                setCompanyData(profileData);
+                setFormData(profileData);
             } catch (error) {
                 console.error('Error fetching company profile:', error);
             } finally {
@@ -31,8 +35,33 @@ const CompanyProfile = () => {
         }
     }, [user]);
 
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSaveProfile = async (e) => {
+        e.preventDefault();
+        setSaving(true);
+        
+        try {
+            const response = await companyAPI.updateProfile(formData);
+            setCompanyData(response.data || response);
+            console.log('Profile updated successfully:', response);
+            // You can add a success notification here
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            // You can add an error notification here
+        } finally {
+            setSaving(false);
+        }
+    };
+
     return (
-        <div style={{
+        <form onSubmit={handleSaveProfile} style={{
             backgroundColor: 'white',
             borderRadius: '12px',
             padding: '30px',
@@ -48,24 +77,6 @@ const CompanyProfile = () => {
                 <h2 style={{ color: '#2c3e50', margin: 0 }}>Company Profile</h2>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: '600', color: '#2c3e50' }}>
-                        User ID
-                    </label>
-                    <input 
-                        type="text" 
-                        value={user?.user_id || "Loading..."}
-                        readOnly
-                        style={{
-                            width: '100%',
-                            padding: '10px',
-                            border: '2px solid #e9ecef',
-                            borderRadius: '8px',
-                            fontSize: '1rem',
-                            backgroundColor: '#f8f9fa'
-                        }}
-                    />
-                </div>
                 <div>
                     <label style={{ display: 'block', marginBottom: '5px', fontWeight: '600', color: '#2c3e50' }}>
                         Company ID
@@ -97,7 +108,8 @@ const CompanyProfile = () => {
                         type="text" 
                         name="company_name"
                         placeholder="Your Company Name"
-                        defaultValue={user?.company_name || ""}
+                        value={formData.company_name || user?.company_name || ""}
+                        onChange={handleInputChange}
                         style={{
                             width: '100%',
                             padding: '10px',
@@ -115,7 +127,8 @@ const CompanyProfile = () => {
                         type="url" 
                         name="company_website"
                         placeholder="https://www.yourcompany.com"
-                        defaultValue={user?.company_website || ""}
+                        value={formData.company_website || user?.company_website || ""}
+                        onChange={handleInputChange}
                         style={{
                             width: '100%',
                             padding: '10px',
@@ -131,7 +144,8 @@ const CompanyProfile = () => {
                     </label>
                     <select 
                         name="industry"
-                        defaultValue={user?.industry || "Technology"}
+                        value={formData.industry || user?.industry || "Technology"}
+                        onChange={handleInputChange}
                         style={{
                             width: '100%',
                             padding: '10px',
@@ -156,7 +170,8 @@ const CompanyProfile = () => {
                     </label>
                     <select 
                         name="company_size"
-                        defaultValue={user?.company_size || "500-1000 employees"}
+                        value={formData.company_size || user?.company_size || "500-1000 employees"}
+                        onChange={handleInputChange}
                         style={{
                             width: '100%',
                             padding: '10px',
@@ -175,31 +190,14 @@ const CompanyProfile = () => {
                 </div>
                 <div style={{ gridColumn: 'span 2' }}>
                     <label style={{ display: 'block', marginBottom: '5px', fontWeight: '600', color: '#2c3e50' }}>
-                        Logo URL
-                    </label>
-                    <input 
-                        type="url" 
-                        name="logo_url"
-                        placeholder="https://www.yourcompany.com/logo.png"
-                        defaultValue={user?.logo_url || ""}
-                        style={{
-                            width: '100%',
-                            padding: '10px',
-                            border: '2px solid #e9ecef',
-                            borderRadius: '8px',
-                            fontSize: '1rem'
-                        }}
-                    />
-                </div>
-                <div style={{ gridColumn: 'span 2' }}>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: '600', color: '#2c3e50' }}>
                         Address
                     </label>
                     <input 
                         type="text" 
                         name="address"
                         placeholder="Your company address"
-                        defaultValue={user?.address || ""}
+                        value={formData.address || user?.address || ""}
+                        onChange={handleInputChange}
                         style={{
                             width: '100%',
                             padding: '10px',
@@ -217,7 +215,8 @@ const CompanyProfile = () => {
                         rows="4"
                         name="about"
                         placeholder="Describe your company..."
-                        defaultValue={user?.about || ""}
+                        value={formData.about || user?.about || ""}
+                        onChange={handleInputChange}
                         style={{
                             width: '100%',
                             padding: '10px',
@@ -229,20 +228,24 @@ const CompanyProfile = () => {
                     />
                 </div>
             </div>
-            <button style={{
-                padding: '12px 24px',
-                backgroundColor: '#007bff',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '1rem',
-                fontWeight: '600',
-                marginTop: '20px'
-            }}>
-                Save Company Profile
+            <button 
+                type="submit"
+                disabled={saving}
+                style={{
+                    padding: '12px 24px',
+                    backgroundColor: saving ? '#6c757d' : '#007bff',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: saving ? 'not-allowed' : 'pointer',
+                    fontSize: '1rem',
+                    fontWeight: '600',
+                    marginTop: '20px'
+                }}
+            >
+                {saving ? 'Saving...' : 'Save Company Profile'}
             </button>
-        </div>
+        </form>
     );
 };
 

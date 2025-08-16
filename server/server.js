@@ -4,11 +4,12 @@ import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
 import dotenv from 'dotenv';
+import multer from 'multer';
 import authRoutes from './authRoutes.js';
 import studentRoutes from './studentRoutes.js';
 import companyRoutes from './companyRoutes.js';
 import generalRoutes from './generalRoutes.js';
-import { pool, testConnection } from './db.js';
+import { pool, testDatabaseConnection } from './config/database.js';
 
 dotenv.config(); // Load environment variables from .env file
 
@@ -57,21 +58,13 @@ uploadDirs.forEach(dir => {
   }
 });
 
-// Test database connection on startup
-testConnection().then(success => {
-    if (!success) {
-        console.error('Failed to connect to database. Please check your configuration.');
-        process.exit(1);
-    }
-}).catch(err => {
-    console.error('Database connection test failed:', err);
-    process.exit(1);
-});
+// Test database connection
+testDatabaseConnection()
 
 // Mount routes
 app.use('/api', authRoutes);
-app.use('/api/student', studentRoutes);
-app.use('/api/company', companyRoutes);
+app.use('/api', studentRoutes);
+app.use('/api', companyRoutes);
 app.use('/api', generalRoutes);
 
 // Health check endpoint
@@ -112,13 +105,13 @@ app.use((err, req, res, next) => {
     });
 });
 
-// 404 handler
-// app.use('*', (req, res) => {
-//   res.status(404).json({
-//     success: false,
-//     message: 'Route not found'
-//   });
-// });
+// 404 handler for all unmatched routes
+app.use('*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found'
+  });
+});
 
 // Start the server
 const PORT = process.env.PORT || 4000;

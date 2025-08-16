@@ -1,6 +1,6 @@
 // context/AuthContext.js - Authentication context for managing user state
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authAPI, utils } from './api';
+import { authAPI, studentAPI, companyAPI, utils } from './api';
 
 // Create the auth context
 // Update context untuk include userType
@@ -46,15 +46,50 @@ export const AuthProvider = ({ children }) => {
   const initializeAuth = async () => {
     try {
       const token = localStorage.getItem('token');
-      const savedUser = utils.getCurrentUser();
       
-      if (token && savedUser) {
-        // Verify token is still valid
+      if (token) {
+        // Verify token is still valid and get fresh user data
         try {
           const response = await authAPI.verifyToken();
           if (response.success) {
-            setUser(savedUser);
-            setIsAuthenticated(true);
+            // Get fresh profile data from server
+            const profileResponse = await authAPI.getProfile();
+            if (profileResponse.success) {
+              let fullProfile = profileResponse.user;
+              
+              // Get additional profile data based on user type
+              if (profileResponse.user.user_type === 'student') {
+                try {
+                  const studentResponse = await studentAPI.getProfile();
+                  if (studentResponse.success) {
+                    fullProfile = {
+                      ...fullProfile,
+                      student_profile: studentResponse.profile
+                    };
+                  }
+                } catch (studentError) {
+                  console.error('Failed to fetch student profile:', studentError);
+                }
+              } else if (profileResponse.user.user_type === 'company') {
+                try {
+                  const companyResponse = await companyAPI.getProfile();
+                  if (companyResponse.success) {
+                    fullProfile = {
+                      ...fullProfile,
+                      company: companyResponse.profile
+                    };
+                  }
+                } catch (companyError) {
+                  console.error('Failed to fetch company profile:', companyError);
+                }
+              }
+              
+              setUser(fullProfile);
+              setIsAuthenticated(true);
+              localStorage.setItem('user', JSON.stringify(fullProfile));
+            } else {
+              throw new Error('Failed to fetch profile');
+            }
           } else {
             // Token is invalid, clear storage
             localStorage.removeItem('token');
@@ -131,19 +166,52 @@ export const AuthProvider = ({ children }) => {
   // Get fresh user profile
   const refreshUserProfile = async () => {
     try {
-      const response = await authAPI.getProfile();
+      setLoading(true);
+      
+      // Use specific endpoint based on user type
+      let response;
+      const currentUserType = user?.userType || user?.user_type;
+      
+      if (currentUserType === 'student') {
+        response = await authAPI.getProfile(); // This will get basic profile
+        // Also get detailed student profile
+        const studentResponse = await studentAPI.getProfile();
+        if (studentResponse.success) {
+          response.user = {
+            ...response.user,
+            student_profile: studentResponse.profile
+          };
+        }
+      } else if (currentUserType === 'company') {
+        response = await authAPI.getProfile(); // This will get basic profile
+        // Also get detailed company profile
+        const companyResponse = await companyAPI.getProfile();
+        if (companyResponse.success) {
+          response.user = {
+            ...response.user,
+            company: companyResponse.profile
+          };
+        }
+      } else {
+        response = await authAPI.getProfile();
+      }
+      
       if (response.success) {
         updateUser(response.user);
         return response.user;
+      } else {
+        throw new Error(response.message || 'Failed to fetch profile');
       }
     } catch (error) {
       console.error('Error refreshing user profile:', error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
   // Get user type from user object
-  const userType = user?.userType || user?.type || null;
+  const userType = user?.userType || user?.user_type || null;
 
   // Context value
   const value = {
