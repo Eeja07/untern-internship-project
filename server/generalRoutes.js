@@ -264,7 +264,10 @@ router.get('/featured-internships', async (req, res) => {
       JOIN companies c ON i.company_id = c.company_id
       LEFT JOIN applications a ON i.internship_id = a.internship_id
       WHERE i.is_active = true
-      GROUP BY i.internship_id, c.company_id
+      GROUP BY i.internship_id, i.title, i.description, i.requirements, i.location, i.type,
+               i.duration_months, i.salary_min, i.salary_max, i.application_deadline,
+               i.created_at, i.is_active, i.company_id,
+               c.company_name, c.company_website, c.industry, c.company_size, c.logo_url
       ORDER BY application_count DESC, i.created_at DESC
       LIMIT 6
     `);
