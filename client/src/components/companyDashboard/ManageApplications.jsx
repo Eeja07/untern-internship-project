@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { companyAPI } from '../auth/api.jsx';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const ManageApplications = () => {
     const location = useLocation();
@@ -10,6 +11,9 @@ const ManageApplications = () => {
     const [internships, setInternships] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showCaptchaModal, setShowCaptchaModal] = useState(false);
+    const [pendingAction, setPendingAction] = useState({ applicationId: null, newStatus: null });
+    const [captchaToken, setCaptchaToken] = useState('');
 
     useEffect(() => {
         fetchInternshipsAndApplications();
@@ -55,12 +59,21 @@ const ManageApplications = () => {
         }
     };
 
-    const handleUpdateApplicationStatus = async (applicationId, newStatus) => {
+    const handleUpdateApplicationStatus = (applicationId, newStatus) => {
+        setPendingAction({ applicationId, newStatus });
+        setShowCaptchaModal(true);
+    };
+
+    const handleCaptchaChange = async (token) => {
+        setCaptchaToken(token);
+        if (!token) return;
+        setShowCaptchaModal(false);
         try {
+            const { applicationId, newStatus } = pendingAction;
+            setPendingAction({ applicationId: null, newStatus: null });
+            // Optionally, send captcha token to backend for verification
             const result = await companyAPI.updateApplicationStatus(applicationId, newStatus);
-            
             if (result.success) {
-                // Refresh applications
                 fetchInternshipsAndApplications();
                 alert(`Application ${newStatus} successfully!`);
             } else {
@@ -516,6 +529,44 @@ const ManageApplications = () => {
                     ))
                 )}
             </div>
+
+            {/* CAPTCHA Modal */}
+            {showCaptchaModal && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    background: 'rgba(0,0,0,0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 9999
+                }}>
+                    <div style={{
+                        background: 'white',
+                        padding: '30px',
+                        borderRadius: '12px',
+                        boxShadow: '0 2px 16px rgba(0,0,0,0.2)',
+                        minWidth: '320px',
+                        textAlign: 'center'
+                    }}>
+                        <h3 style={{ marginBottom: '20px' }}>Confirm Action</h3>
+                        <p style={{ marginBottom: '20px' }}>Please complete the CAPTCHA to confirm this action.</p>
+                        <ReCAPTCHA
+                            sitekey="6Lf2E6krAAAAAAzXkluXdOa1A7XVSOMV0cdUyDZM"
+                            onChange={handleCaptchaChange}
+                        />
+                        <button
+                            onClick={() => setShowCaptchaModal(false)}
+                            style={{ marginTop: '20px', padding: '8px 16px', background: '#dc3545', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

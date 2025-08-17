@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { AuthContext } from '../auth/AuthContext.jsx';
 import { companyAPI } from '../auth/api.jsx';
 import { useNavigate } from 'react-router-dom';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const PostInternship = () => {
     const { user } = useContext(AuthContext);
@@ -22,6 +23,9 @@ const PostInternship = () => {
     const [loadingInternships, setLoadingInternships] = useState(true);
     const [activeTab, setActiveTab] = useState('post'); // 'post' or 'manage'
     const [editingInternship, setEditingInternship] = useState(null); // For editing mode
+    const [showCaptchaModal, setShowCaptchaModal] = useState(false);
+    const [pendingAction, setPendingAction] = useState({ type: null, internshipId: null, currentStatus: null });
+    const [captchaToken, setCaptchaToken] = useState('');
 
     React.useEffect(() => {
         if (activeTab === 'manage') {
@@ -45,41 +49,43 @@ const PostInternship = () => {
         }
     };
 
-    const handleToggleInternshipStatus = async (internshipId, currentStatus) => {
-        try {
-            const result = await companyAPI.updateInternship(internshipId, {
-                is_active: !currentStatus
-            });
-            
-            if (result.success) {
-                // Refresh the internships list
-                fetchPostedInternships();
-                alert(`Internship ${!currentStatus ? 'activated' : 'deactivated'} successfully!`);
-            } else {
-                alert(result.message || 'Failed to update internship status');
-            }
-        } catch (error) {
-            console.error('Error updating internship:', error);
-            alert('Error updating internship status');
-        }
+    const handleToggleInternshipStatus = (internshipId, currentStatus) => {
+        setPendingAction({ type: 'toggle', internshipId, currentStatus });
+        setShowCaptchaModal(true);
     };
 
-    const handleDeleteInternship = async (internshipId) => {
-        if (window.confirm('Are you sure you want to delete this internship? This action cannot be undone.')) {
-            try {
-                const result = await companyAPI.deleteInternship(internshipId);
-                
+    const handleDeleteInternship = (internshipId) => {
+        setPendingAction({ type: 'delete', internshipId });
+        setShowCaptchaModal(true);
+    };
+
+    const handleCaptchaChange = async (token) => {
+        setCaptchaToken(token);
+        if (!token) return;
+        setShowCaptchaModal(false);
+        try {
+            const { type, internshipId, currentStatus } = pendingAction;
+            setPendingAction({ type: null, internshipId: null, currentStatus: null });
+            if (type === 'toggle') {
+                const result = await companyAPI.updateInternship(internshipId, { is_active: !currentStatus });
                 if (result.success) {
-                    // Refresh the internships list
+                    fetchPostedInternships();
+                    alert(`Internship ${!currentStatus ? 'activated' : 'deactivated'} successfully!`);
+                } else {
+                    alert(result.message || 'Failed to update internship status');
+                }
+            } else if (type === 'delete') {
+                const result = await companyAPI.deleteInternship(internshipId);
+                if (result.success) {
                     fetchPostedInternships();
                     alert('Internship deleted successfully!');
                 } else {
                     alert(result.message || 'Failed to delete internship');
                 }
-            } catch (error) {
-                console.error('Error deleting internship:', error);
-                alert('Error deleting internship');
             }
+        } catch (error) {
+            console.error('Error performing action:', error);
+            alert('Error performing action');
         }
     };
 
@@ -739,6 +745,44 @@ const PostInternship = () => {
                             ))}
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* CAPTCHA Modal */}
+            {showCaptchaModal && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    background: 'rgba(0,0,0,0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 9999
+                }}>
+                    <div style={{
+                        background: 'white',
+                        padding: '30px',
+                        borderRadius: '12px',
+                        boxShadow: '0 2px 16px rgba(0,0,0,0.2)',
+                        minWidth: '320px',
+                        textAlign: 'center'
+                    }}>
+                        <h3 style={{ marginBottom: '20px' }}>Confirm Action</h3>
+                        <p style={{ marginBottom: '20px' }}>Please complete the CAPTCHA to confirm this action.</p>
+                        <ReCAPTCHA
+                            sitekey="6Lf2E6krAAAAAAzXkluXdOa1A7XVSOMV0cdUyDZM"
+                            onChange={handleCaptchaChange}
+                        />
+                        <button
+                            onClick={() => setShowCaptchaModal(false)}
+                            style={{ marginTop: '20px', padding: '8px 16px', background: '#dc3545', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                        >
+                            Cancel
+                        </button>
+                    </div>
                 </div>
             )}
         </div>

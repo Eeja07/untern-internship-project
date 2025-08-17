@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const DiscoverInternships = () => {
   const [searchParams] = useSearchParams();
@@ -26,6 +27,9 @@ const DiscoverInternships = () => {
     total_count: 0,
     limit: 9
   });
+  const [showCaptchaModal, setShowCaptchaModal] = useState(false);
+  const [captchaInternshipId, setCaptchaInternshipId] = useState(null);
+  const [captchaToken, setCaptchaToken] = useState('');
 
   useEffect(() => {
     // Get the search query from URL parameters
@@ -132,27 +136,35 @@ const DiscoverInternships = () => {
     }));
   };
 
-  const handleApplyInternship = async (internshipId) => {
+  const handleApplyInternship = (internshipId) => {
+    setCaptchaInternshipId(internshipId);
+    setShowCaptchaModal(true);
+  };
+
+  const handleCaptchaChange = async (token) => {
+    setCaptchaToken(token);
+    if (!token) return;
+    setShowCaptchaModal(false);
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
+      const applyId = captchaInternshipId;
+      setCaptchaInternshipId(null);
+      const apiToken = localStorage.getItem('token');
+      if (!apiToken) {
         alert('Please log in to apply for internships');
         return;
       }
-
-      const response = await fetch(`http://localhost:4000/api/internships/${internshipId}/apply`, {
+      // Optionally, send captcha token to backend for verification
+      const response = await fetch(`http://localhost:4000/api/internships/${applyId}/apply`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${apiToken}`,
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({ captcha: token }) // send captcha token if backend supports
       });
-
       const data = await response.json();
-
       if (data.success) {
         alert('Application submitted successfully!');
-        // Refresh featured internships to update application counts
         fetchFeaturedInternships();
       } else {
         alert(data.message || 'Failed to apply for internship');
@@ -842,6 +854,44 @@ const DiscoverInternships = () => {
           </>
         )}
       </div>
+
+      {/* CAPTCHA Modal */}
+      {showCaptchaModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(0,0,0,0.4)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999
+        }}>
+          <div style={{
+            background: 'white',
+            padding: '30px',
+            borderRadius: '12px',
+            boxShadow: '0 2px 16px rgba(0,0,0,0.2)',
+            minWidth: '320px',
+            textAlign: 'center'
+          }}>
+            <h3 style={{ marginBottom: '20px' }}>Confirm Application</h3>
+            <p style={{ marginBottom: '20px' }}>Please complete the CAPTCHA to confirm your application.</p>
+            <ReCAPTCHA
+              sitekey="6Lf2E6krAAAAAAzXkluXdOa1A7XVSOMV0cdUyDZM"
+              onChange={handleCaptchaChange}
+            />
+            <button
+              onClick={() => setShowCaptchaModal(false)}
+              style={{ marginTop: '20px', padding: '8px 16px', background: '#dc3545', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Add CSS for spinning animation */}
       <style jsx>{`
