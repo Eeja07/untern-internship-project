@@ -389,31 +389,52 @@ export const companyAPI = {
   // Delete internship
   deleteInternship: async (internshipId) => {
     try {
-      const response = await api.delete(`/company/internships/${internshipId}`);
-      return response.data;
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/company/internships/${internshipId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      return await response.json();
     } catch (error) {
-      throw error.response?.data || { success: false, message: 'Failed to delete internship' };
+      throw new Error('Failed to delete internship: ' + error.message);
     }
   },
 
   // Get applications for company's internships
-  getApplications: async (internshipId = null) => {
+  getApplications: async () => {
     try {
-      const url = internshipId ? `/company/applications?internship_id=${internshipId}` : '/company/applications';
-      const response = await api.get(url);
-      return response.data;
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/company/applications`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      return await response.json();
     } catch (error) {
-      throw error.response?.data || { success: false, message: 'Failed to fetch applications' };
+      throw new Error('Failed to fetch applications: ' + error.message);
     }
   },
 
   // Update application status
   updateApplicationStatus: async (applicationId, status) => {
     try {
-      const response = await api.put(`/company/applications/${applicationId}`, { status });
-      return response.data;
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/company/applications/${applicationId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status })
+      });
+      return await response.json();
     } catch (error) {
-      throw error.response?.data || { success: false, message: 'Failed to update application status' };
+      throw new Error('Failed to update application status: ' + error.message);
     }
   },
 

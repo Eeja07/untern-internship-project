@@ -27,7 +27,7 @@ router.get('/internships', async (req, res) => {
              COUNT(*) OVER() as total_count
       FROM internships i
       JOIN companies c ON i.company_id = c.company_id
-      WHERE i.is_active = true AND i.application_deadline > CURRENT_DATE
+      WHERE i.is_active = true
     `;
 
     const params = [];
@@ -172,16 +172,16 @@ router.post('/internships/:id/apply', authenticateToken, async (req, res) => {
       });
     }
 
-    // Check if internship exists and is active
+    // Check if internship exists and is active (removed deadline check)
     const internshipResult = await pool.query(
-      'SELECT internship_id FROM internships WHERE internship_id = $1 AND is_active = true AND application_deadline > CURRENT_DATE',
+      'SELECT internship_id FROM internships WHERE internship_id = $1 AND is_active = true',
       [internshipId]
     );
 
     if (internshipResult.rows.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Internship not found or no longer accepting applications'
+        message: 'Internship not found or is no longer active'
       });
     }
 
@@ -199,16 +199,18 @@ router.post('/internships/:id/apply', authenticateToken, async (req, res) => {
       });
     }
 
-    // Create application
+    // Create application with pending status and current timestamp
     const result = await pool.query(
-      'INSERT INTO applications (internship_id, student_profile_id) VALUES ($1, $2) RETURNING application_id',
+      `INSERT INTO applications (internship_id, student_profile_id, status, applied_date) 
+       VALUES ($1, $2, 'pending', CURRENT_TIMESTAMP) 
+       RETURNING application_id, applied_date`,
       [internshipId, profileId]
     );
 
     res.status(201).json({
       success: true,
       message: 'Application submitted successfully',
-      application_id: result.rows[0].application_id
+      application: result.rows[0]
     });
 
   } catch (error) {
@@ -245,6 +247,38 @@ router.get('/internships-filters', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch filter options'
+    });
+  }
+});
+
+// Get featured internships (most popular based on application count)
+router.get('/featured-internships', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT i.internship_id, i.title, i.description, i.requirements, i.location, i.type,
+             i.duration_months, i.salary_min, i.salary_max, i.application_deadline,
+             i.created_at, i.is_active,
+             c.company_name, c.company_website, c.industry, c.company_size, c.logo_url,
+             COALESCE(COUNT(a.application_id), 0) as application_count
+      FROM internships i
+      JOIN companies c ON i.company_id = c.company_id
+      LEFT JOIN applications a ON i.internship_id = a.internship_id
+      WHERE i.is_active = true
+      GROUP BY i.internship_id, c.company_id
+      ORDER BY application_count DESC, i.created_at DESC
+      LIMIT 6
+    `);
+
+    res.json({
+      success: true,
+      internships: result.rows
+    });
+
+  } catch (error) {
+    console.error('Featured internships fetch error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch featured internships'
     });
   }
 });

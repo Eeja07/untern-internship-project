@@ -53,7 +53,7 @@ try {
     for (const { name, config } of configs) {
       try {
         console.log(`🔍 Testing ${name}...`);
-        transporter = nodemailer.createTransporter(config);
+        transporter = nodemailer.createTransport(config);
         
         // Test the connection
         await new Promise((resolve, reject) => {
