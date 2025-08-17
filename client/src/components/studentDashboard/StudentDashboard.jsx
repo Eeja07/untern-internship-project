@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import AuthContext from '../auth/AuthContext.jsx';
+import { studentAPI } from '../auth/api';
 import DiscoverInternships from './DiscoverInternships.jsx';
 import BuildProfile from './BuildProfile.jsx';
 import TrackApplications from './TrackApplications.jsx';
@@ -11,7 +12,8 @@ import InternshipCertifications from './InternshipCertifications.jsx';
 const StudentDashboard = () => {
   const [activeSection, setActiveSection] = useState('discover');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const { user, logout } = useContext(AuthContext);
+  const { user, profile, logout } = useContext(AuthContext);
+  const [localProfile, setLocalProfile] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -20,9 +22,28 @@ const StudentDashboard = () => {
     { id: 'profile', label: 'Build Your Profile', icon: '👤' },
     { id: 'applications', label: 'Track Your Applications', icon: '📋' },
     { id: 'stories', label: 'Read Success Stories', icon: '🌟' },
-    { id: 'reviews', label: 'View Company Reviews', icon: '⭐' },
+    { id: 'reviews', label: 'View Company Reviews', icon: '⭐' }, 
     { id: 'certifications', label: 'Receive Certifications', icon: '🏆' }
   ];
+
+  // Fetch profile data
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        
+        const profileResponse = await studentAPI.getProfile();
+        if (profileResponse.success) {
+          setLocalProfile(profileResponse.profile);
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+    
+    fetchProfile();
+  }, []);
 
   // Set active section based on URL path
   useEffect(() => {
@@ -114,10 +135,13 @@ const StudentDashboard = () => {
             fontSize: '20px',
             marginBottom: '10px'
           }}>
-            {user?.email?.charAt(0).toUpperCase() || 'U'}
+            {((localProfile || user)?.name?.charAt(0) || 
+             (localProfile || user)?.firstName?.charAt(0) || 'S').toUpperCase()}
           </div>
           <h4 style={{ margin: 0, marginBottom: '5px' }}>Student Dashboard</h4>
-          <p style={{ margin: 0, color: '#6c757d', fontSize: '14px' }}>{user?.email}</p>
+          <p style={{ margin: 0, color: '#6c757d', fontSize: '14px' }}>
+            {(localProfile || user)?.name || ((localProfile || user)?.firstName && (localProfile || user)?.lastName ? `${(localProfile || user).firstName} ${(localProfile || user).lastName}` : 'Student')}
+          </p>
         </div>
 
         {/* Navigation Items */}

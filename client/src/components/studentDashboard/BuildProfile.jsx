@@ -1,6 +1,13 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import AuthContext from '../auth/AuthContext.jsx';
 import { studentAPI } from '../auth/api.jsx';
+import ProfileHeader from './ProfileHeader.jsx';
+import PersonalInformation from './PersonalInformation.jsx';
+import EducationSection from './EducationSection.jsx';
+import LanguagesSection from './LanguagesSection.jsx';
+import CertificationsSection from './CertificationsSection.jsx';
+import ExperienceSection from './ExperienceSection.jsx';
+import SkillsSection from './SkillsSection.jsx';
 
 const BuildProfile = () => {
   const { user, refreshUserProfile } = useContext(AuthContext);
@@ -9,6 +16,22 @@ const BuildProfile = () => {
   const [skills, setSkills] = useState([]);
   const [newSkill, setNewSkill] = useState('');
   const [saving, setSaving] = useState(false);
+  const [educationList, setEducationList] = useState([]);
+  const [profilePicture, setProfilePicture] = useState(null);
+  const [profilePicturePreview, setProfilePicturePreview] = useState(null);
+  const [cvFile, setCvFile] = useState(null);
+  const [phoneVerification, setPhoneVerification] = useState({
+    code: '',
+    isVerified: false,
+    isVerifying: false,
+    codeSent: false
+  });
+  const [languageList, setLanguageList] = useState([]);
+  const [certificationList, setCertificationList] = useState([]);
+  const [workExperienceList, setWorkExperienceList] = useState([]);
+  const [eventExperienceList, setEventExperienceList] = useState([]);
+  const [organizationExperienceList, setOrganizationExperienceList] = useState([]);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -16,45 +39,125 @@ const BuildProfile = () => {
 
   const fetchProfile = async () => {
     try {
-      const response = await studentAPI.getProfile();
-      if (response.success) {
-        setProfile(response.profile);
-        setSkills(response.profile.skills || []);
+      setLoading(true);
+      
+      // Check if user is authenticated
+      const token = localStorage.getItem('token');
+      const user = localStorage.getItem('user');
+      console.log('Token exists:', !!token);
+      console.log('Token value:', token ? token.substring(0, 20) + '...' : 'null');
+      
+      // Fetch student profile
+      const profileResponse = await studentAPI.getProfile();
+      console.log('Profile response:', profileResponse);
+      
+      if (profileResponse.success) {
+        setProfile(profileResponse.profile);
+        
+        // Parse and set education
+        if (profileResponse.profile.education) {
+          try {
+            const parsedEducation = typeof profileResponse.profile.education === 'string' 
+              ? JSON.parse(profileResponse.profile.education) 
+              : profileResponse.profile.education;
+            setEducationList(Array.isArray(parsedEducation) ? parsedEducation : []);
+          } catch (error) {
+            console.error('Error parsing education:', error);
+            setEducationList([]);
+          }
+        }
+        
+        // Set profile picture preview if exists
+        if (profileResponse.profile.profile_picture_url) {
+          const imageUrl = profileResponse.profile.profile_picture_url.startsWith('http') 
+            ? profileResponse.profile.profile_picture_url
+            : `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${profileResponse.profile.profile_picture_url}`;
+          setProfilePicturePreview(imageUrl);
+        }
       }
+      
+      // Fetch skills
+      const skillsResponse = await studentAPI.getSkills();
+      console.log('Skills response:', skillsResponse);
+      
+      if (skillsResponse.success) {
+        setSkills(skillsResponse.skills || []);
+      }
+      
     } catch (error) {
-      console.error('Failed to fetch profile:', error);
+      console.error('Error fetching profile:', error);
+      if (error.message?.includes('401') || error.message?.includes('403') || error.code === 'TOKEN_EXPIRED') {
+        alert('Session expired. Please login again.');
+        // Clear auth data and redirect to login
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      } else {
+        alert(`Failed to load profile: ${error.message || 'Unknown error'}`);
+      }
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleSaveProfile = async (e) => {
+  };  const handleSaveProfile = async (e) => {
     e.preventDefault();
-    setSaving(true);
-    
     try {
+      setSaving(true);
+      
+      // Debug token before saving
+      const token = localStorage.getItem('token');
+      console.log('Save Profile - Token exists:', !!token);
+      console.log('Save Profile - Token value:', token ? token.substring(0, 20) + '...' : 'null');
+      
+      if (!token) {
+        alert('Please login first to save your profile');
+        return;
+      }
+      
+      // Get form data from the form
       const formData = new FormData(e.target);
       const profileData = {
-        name: formData.get('name'),
-        phone_number: formData.get('phone_number'),
-        university: formData.get('university'),
-        major: formData.get('major'),
-        portfolio_url: formData.get('portfolio_url'),
-        bio: formData.get('bio')
+        name: formData.get('name') || profile?.name || '',
+        phone_number: formData.get('phone_number') || profile?.phone_number || '',
+        email: formData.get('email') || profile?.email || '',
+        address: formData.get('address') || profile?.address || '',
+        bio: formData.get('bio') || profile?.bio || '',
+        portfolio_url: formData.get('portfolio_url') || profile?.portfolio_url || '',
+        education: educationList
       };
-
+      
+      console.log('Saving profile data:', profileData);
+      
       const response = await studentAPI.updateProfile(profileData);
+      
       if (response.success) {
-        await refreshUserProfile();
-        await fetchProfile();
+        // Update local user context if needed
+        if (refreshUserProfile) {
+          try {
+            await refreshUserProfile();
+          } catch (refreshError) {
+            console.error('Error refreshing user profile:', refreshError);
+            // Continue even if refresh fails
+          }
+        }
+        // Show success message
+        console.log('Profile updated successfully');
         alert('Profile updated successfully!');
-      } else {
-        console.error('Update failed:', response);
-        alert(response.message || 'Failed to update profile. Please try again.');
+        setIsEditMode(false);
+        
+        // Refresh profile data
+        fetchProfile();
       }
+      
     } catch (error) {
-      console.error('Failed to update profile:', error);
-      alert(error.response?.data?.message || error.message || 'Failed to update profile. Please try again.');
+      console.error('Error saving profile:', error);
+      if (error.message?.includes('401') || error.message?.includes('403') || error.code === 'TOKEN_EXPIRED') {
+        alert('Session expired. Please login again.');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      } else {
+        alert(`Failed to save profile: ${error.message || 'Unknown error'}`);
+      }
     } finally {
       setSaving(false);
     }
@@ -66,12 +169,12 @@ const BuildProfile = () => {
     try {
       const response = await studentAPI.addSkill(newSkill.trim());
       if (response.success) {
-        setSkills(response.skills);
+        setSkills(prev => [...prev, { skill_name: newSkill.trim() }]);
         setNewSkill('');
       }
     } catch (error) {
-      console.error('Failed to add skill:', error);
-      alert(error.message || 'Failed to add skill');
+      console.error('Error adding skill:', error);
+      // Handle error
     }
   };
 
@@ -79,11 +182,250 @@ const BuildProfile = () => {
     try {
       const response = await studentAPI.removeSkill(skillName);
       if (response.success) {
-        setSkills(response.skills);
+        setSkills(prev => prev.filter(skill => skill.skill_name !== skillName));
       }
     } catch (error) {
-      console.error('Failed to remove skill:', error);
-      alert('Failed to remove skill');
+      console.error('Error removing skill:', error);
+      // Handle error
+    }
+  };
+
+    const handleProfilePictureChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    try {
+      // Show preview immediately
+      const reader = new FileReader();
+      reader.onload = (e) => setProfilePicturePreview(e.target.result);
+      reader.readAsDataURL(file);
+      
+      // Upload the file
+      const formData = new FormData();
+      formData.append('profilePicture', file);
+      
+      const response = await studentAPI.uploadProfilePicture(formData);
+      if (response.success) {
+        alert('Profile picture uploaded successfully!');
+        await fetchProfile(); // Refresh profile
+        
+        // Update preview with the new URL
+        const newImageUrl = response.profile_picture_url.startsWith('http') 
+          ? response.profile_picture_url
+          : `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${response.profile_picture_url}`;
+        setProfilePicturePreview(newImageUrl);
+      }
+    } catch (error) {
+      console.error('Error uploading profile picture:', error);
+      if (error.message?.includes('401') || error.message?.includes('403') || error.code === 'TOKEN_EXPIRED') {
+        alert('Session expired. Please login again.');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      } else {
+        alert(`Failed to upload profile picture: ${error.message || 'Unknown error'}`);
+      }
+      setProfilePicturePreview(null); // Reset preview on error
+    }
+  };
+
+    const handleCVUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    try {
+      const formData = new FormData();
+      formData.append('cv', file);
+      
+      const response = await studentAPI.uploadResume(formData);
+      if (response.success) {
+        alert('CV uploaded successfully!');
+        await fetchProfile(); // Refresh to show the uploaded CV
+      }
+    } catch (error) {
+      console.error('Error uploading CV:', error);
+      if (error.message?.includes('401') || error.message?.includes('403') || error.code === 'TOKEN_EXPIRED') {
+        alert('Session expired. Please login again.');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      } else {
+        alert(`Failed to upload CV: ${error.message || 'Unknown error'}`);
+      }
+    }
+  };
+
+  const addEducation = () => {
+    setEducationList([...educationList, {
+      id: Date.now(),
+      degree: '',
+      institution: '',
+      field_of_study: '',
+      start_date: '',
+      end_date: '',
+      grade: '',
+      description: ''
+    }]);
+  };
+
+  const updateEducation = (id, field, value) => {
+    setEducationList(educationList.map(edu => 
+      edu.id === id ? { ...edu, [field]: value } : edu
+    ));
+  };
+
+  const removeEducation = (id) => {
+    setEducationList(educationList.filter(edu => edu.id !== id));
+  };
+
+  const addLanguage = () => {
+    setLanguageList([...languageList, {
+      id: Date.now(),
+      language: '',
+      proficiency: '',
+      certification: ''
+    }]);
+  };
+
+  const updateLanguage = (id, field, value) => {
+    setLanguageList(languageList.map(lang => 
+      lang.id === id ? { ...lang, [field]: value } : lang
+    ));
+  };
+
+  const removeLanguage = (id) => {
+    setLanguageList(languageList.filter(lang => lang.id !== id));
+  };
+
+  const addCertification = () => {
+    setCertificationList([...certificationList, {
+      id: Date.now(),
+      name: '',
+      issuing_organization: '',
+      issue_date: '',
+      expiry_date: '',
+      credential_id: '',
+      credential_url: '',
+      description: ''
+    }]);
+  };
+
+  const updateCertification = (id, field, value) => {
+    setCertificationList(certificationList.map(cert => 
+      cert.id === id ? { ...cert, [field]: value } : cert
+    ));
+  };
+
+  const removeCertification = (id) => {
+    setCertificationList(certificationList.filter(cert => cert.id !== id));
+  };
+
+  const addWorkExperience = () => {
+    setWorkExperienceList([...workExperienceList, {
+      id: Date.now(),
+      title: '',
+      company: '',
+      location: '',
+      start_date: '',
+      end_date: '',
+      current: false,
+      description: ''
+    }]);
+  };
+
+  const updateWorkExperience = (id, field, value) => {
+    setWorkExperienceList(workExperienceList.map(work => 
+      work.id === id ? { ...work, [field]: value } : work
+    ));
+  };
+
+  const removeWorkExperience = (id) => {
+    setWorkExperienceList(workExperienceList.filter(work => work.id !== id));
+  };
+
+  const addEventExperience = () => {
+    setEventExperienceList([...eventExperienceList, {
+      id: Date.now(),
+      event_name: '',
+      role: '',
+      organization: '',
+      location: '',
+      start_date: '',
+      end_date: '',
+      description: ''
+    }]);
+  };
+
+  const updateEventExperience = (id, field, value) => {
+    setEventExperienceList(eventExperienceList.map(event => 
+      event.id === id ? { ...event, [field]: value } : event
+    ));
+  };
+
+  const removeEventExperience = (id) => {
+    setEventExperienceList(eventExperienceList.filter(event => event.id !== id));
+  };
+
+  const addOrganizationExperience = () => {
+    setOrganizationExperienceList([...organizationExperienceList, {
+      id: Date.now(),
+      organization_name: '',
+      role: '',
+      location: '',
+      start_date: '',
+      end_date: '',
+      current: false,
+      description: ''
+    }]);
+  };
+
+  const updateOrganizationExperience = (id, field, value) => {
+    setOrganizationExperienceList(organizationExperienceList.map(org => 
+      org.id === id ? { ...org, [field]: value } : org
+    ));
+  };
+
+  const removeOrganizationExperience = (id) => {
+    setOrganizationExperienceList(organizationExperienceList.filter(org => org.id !== id));
+  };
+
+  const sendPhoneVerification = async () => {
+    try {
+      const phoneNumber = document.querySelector('input[name="phone_number"]').value;
+      if (!phoneNumber) {
+        alert('Please enter a phone number first');
+        return;
+      }
+      
+      const response = await studentAPI.sendPhoneVerification(phoneNumber);
+      if (response.success) {
+        setPhoneVerification({ ...phoneVerification, codeSent: true });
+        alert('Verification code sent to your phone');
+      }
+    } catch (error) {
+      console.error('Error sending verification:', error);
+      alert(`Failed to send verification: ${error.message || 'Unknown error'}`);
+    }
+  };
+
+  const verifyPhone = async () => {
+    try {
+      setPhoneVerification({ ...phoneVerification, isVerifying: true });
+      
+      const response = await studentAPI.verifyPhoneCode(phoneVerification.code);
+      if (response.success) {
+        setPhoneVerification({ 
+          ...phoneVerification, 
+          isVerified: true, 
+          isVerifying: false 
+        });
+        alert('Phone number verified successfully!');
+      }
+    } catch (error) {
+      console.error('Error verifying phone:', error);
+      alert(`Failed to verify phone: ${error.message || 'Unknown error'}`);
+    } finally {
+      setPhoneVerification(prev => ({ ...prev, isVerifying: false }));
     }
   };
 
@@ -93,164 +435,93 @@ const BuildProfile = () => {
 
   return (
     <div>
-      <h2 style={{ color: '#007bff', marginBottom: '20px' }}>Build Your Profile</h2>
+      <h2 style={{ color: '#007bff', marginBottom: '15px' }}>Build Your Profile</h2>
       <div style={{
         background: '#f8f9fa',
-        padding: '30px',
-        borderRadius: '8px',
+        padding: '15px',
+        borderRadius: '6px',
         border: '1px solid #e9ecef'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '30px' }}>
-          <div style={{
-            width: '80px',
-            height: '80px',
-            background: '#007bff',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white',
-            fontSize: '24px',
-            marginRight: '20px'
-          }}>
-            {user?.email?.charAt(0).toUpperCase() || 'U'}
-          </div>
-          <div>
-            <h3>{user?.email}</h3>
-            <p style={{ color: '#6c757d' }}>Complete your profile to attract employers</p>
-          </div>
-        </div>
+        <ProfileHeader 
+          user={profile || user}
+          profilePicturePreview={profilePicturePreview}
+          handleProfilePictureChange={handleProfilePictureChange}
+          isEditMode={isEditMode}
+          setIsEditMode={setIsEditMode}
+          saving={saving}
+          handleSaveProfile={handleSaveProfile}
+          fetchProfile={fetchProfile}
+          setProfilePicturePreview={setProfilePicturePreview}
+        />
 
         {/* Student Profile Section */}
-        <form onSubmit={handleSaveProfile}>
-          <div style={{ marginBottom: '30px' }}>
-            <h3 style={{ color: '#007bff', marginBottom: '20px' }}>Student Profile Information</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                  Student Profile ID
-                </label>
-                <input 
-                  type="text" 
-                  value={profile?.student_id || "Loading..."}
-                  readOnly
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    backgroundColor: '#f8f9fa'
-                  }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                  Name
-                </label>
-                <input 
-                  type="text" 
-                  name="name"
-                  placeholder="Your Full Name"
-                  defaultValue={profile?.name || ""}
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px'
-                  }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                  Phone Number
-                </label>
-                <input 
-                  type="tel" 
-                  name="phone_number"
-                  placeholder="Your Phone Number"
-                  defaultValue={profile?.phone_number || ""}
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px'
-                  }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                  University
-                </label>
-                <input 
-                  type="text" 
-                  name="university"
-                  placeholder="Your University Name"
-                  defaultValue={profile?.university || ""}
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px'
-                  }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                  Major
-                </label>
-                <input 
-                  type="text" 
-                  name="major"
-                  placeholder="e.g., Computer Science"
-                  defaultValue={profile?.major || ""}
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px'
-                  }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                  Portfolio URL
-                </label>
-                <input 
-                  type="url" 
-                  name="portfolio_url"
-                  placeholder="https://your-portfolio.com"
-                  defaultValue={profile?.portfolio_url || ""}
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px'
-                  }}
-                />
-              </div>
-              <div style={{ gridColumn: 'span 2' }}>
-                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                  Resume URL
-                </label>
-                <input 
-                  type="url" 
-                  name="resume_url"
-                  placeholder="https://your-resume-link.com"
-                  defaultValue={profile?.resume_url || ""}
-                  readOnly
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    backgroundColor: '#f8f9fa'
-                  }}
-                />
-              </div>
-            </div>
-          </div>
+        <form id="profileForm" onSubmit={handleSaveProfile}>
+          <PersonalInformation 
+            profile={profile}
+            user={user}
+            isEditMode={isEditMode}
+            phoneVerification={phoneVerification}
+            setPhoneVerification={setPhoneVerification}
+            sendPhoneVerification={sendPhoneVerification}
+            verifyPhone={verifyPhone}
+            handleCVUpload={handleCVUpload}
+            fetchProfile={fetchProfile}
+          />
+          <EducationSection 
+            educationList={educationList}
+            updateEducation={updateEducation}
+            removeEducation={removeEducation}
+            addEducation={addEducation}
+            isEditMode={isEditMode}
+          />
+
+          <LanguagesSection 
+            languageList={languageList}
+            updateLanguage={updateLanguage}
+            removeLanguage={removeLanguage}
+            addLanguage={addLanguage}
+            isEditMode={isEditMode}
+          />
+
+          <CertificationsSection 
+            certificationList={certificationList}
+            updateCertification={updateCertification}
+            removeCertification={removeCertification}
+            addCertification={addCertification}
+            isEditMode={isEditMode}
+          />
+
+          <ExperienceSection 
+            title="Work Experience"
+            experienceList={workExperienceList}
+            addExperience={addWorkExperience}
+            updateExperience={updateWorkExperience}
+            removeExperience={removeWorkExperience}
+            isEditMode={isEditMode}
+            experienceType="work"
+          />
+
+          <ExperienceSection 
+            title="Event Experience"
+            experienceList={eventExperienceList}
+            addExperience={addEventExperience}
+            updateExperience={updateEventExperience}
+            removeExperience={removeEventExperience}
+            isEditMode={isEditMode}
+            experienceType="event"
+          />
+
+          <ExperienceSection 
+            title="Organization Experience"
+            experienceList={organizationExperienceList}
+            addExperience={addOrganizationExperience}
+            updateExperience={updateOrganizationExperience}
+            removeExperience={removeOrganizationExperience}
+            isEditMode={isEditMode}
+            experienceType="organization"
+          />
           
-          <div style={{ marginTop: '20px' }}>
+          <div style={{ marginTop: '15px' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
               Bio
             </label>
@@ -258,109 +529,28 @@ const BuildProfile = () => {
               rows="4"
               name="bio"
               defaultValue={profile?.bio || ""}
+              disabled={!isEditMode}
               style={{
                 width: '100%',
                 padding: '10px',
                 border: '1px solid #ddd',
                 borderRadius: '4px',
-                resize: 'vertical'
+                resize: 'vertical',
+                backgroundColor: !isEditMode ? '#f8f9fa' : 'white'
               }}
               placeholder="Tell employers about yourself..."
             />
           </div>
-
-          <button 
-            type="submit"
-            disabled={saving}
-            style={{
-              background: saving ? '#6c757d' : '#007bff',
-              color: 'white',
-              border: 'none',
-              padding: '12px 24px',
-              borderRadius: '4px',
-              cursor: saving ? 'not-allowed' : 'pointer',
-              marginTop: '20px'
-            }}
-          >
-            {saving ? 'Saving...' : 'Save Profile'}
-          </button>
         </form>
 
-        {/* Skills Section */}
-        <div style={{ marginTop: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>
-            Skills
-          </label>
-          <div style={{ 
-            display: 'flex', 
-            flexWrap: 'wrap', 
-            gap: '10px', 
-            marginBottom: '15px',
-            minHeight: '40px',
-            padding: '10px',
-            border: '1px solid #ddd',
-            borderRadius: '4px',
-            backgroundColor: '#f8f9fa'
-          }}>
-            {skills.map(skill => (
-              <span key={skill} style={{
-                padding: '5px 10px',
-                backgroundColor: '#007bff',
-                color: 'white',
-                borderRadius: '15px',
-                fontSize: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}>
-                {skill}
-                <button 
-                  type="button"
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'white',
-                    cursor: 'pointer',
-                    padding: '0',
-                    marginLeft: '5px'
-                  }}
-                  onClick={() => handleRemoveSkill(skill)}
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <input 
-              type="text" 
-              placeholder="Add a skill (e.g., React, Python, Design)"
-              value={newSkill}
-              onChange={(e) => setNewSkill(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleAddSkill()}
-              style={{
-                flex: 1,
-                padding: '10px',
-                border: '1px solid #ddd',
-                borderRadius: '4px'
-              }}
-            />
-            <button 
-              type="button"
-              onClick={handleAddSkill}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#28a745',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              Add Skill
-            </button>
-          </div>
-        </div>
+        <SkillsSection 
+          skills={skills}
+          newSkill={newSkill}
+          setNewSkill={setNewSkill}
+          handleAddSkill={handleAddSkill}
+          handleRemoveSkill={handleRemoveSkill}
+          isEditMode={isEditMode}
+        />
         
       </div>
     </div>

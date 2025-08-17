@@ -1,9 +1,10 @@
 import express from 'express';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
 import { pool } from '../config/database.js';
-import { authenticateToken, JWT_SECRET } from '../middleware/auth.js';
+import { authenticateToken } from '../middleware/auth.js';
 
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 const router = express.Router();
 
 // Register endpoint
@@ -105,19 +106,17 @@ router.post('/register', async (req, res) => {
       );
     } else if (user_type === 'student') {
       // Insert into students table with same UUID as login.id
-      await client.query(
-        `INSERT INTO students (student_id, university, major, bio, name, phone_number)
-         VALUES ($1, $2, $3, $4, $5, $6)`,
+      const studentResult = await client.query(
+        `INSERT INTO students (student_id, name, phone_number, bio)
+         VALUES ($1, $2, $3, $4) RETURNING student_id`,
         [
-          loginId, // Use loginId as student_id
-          university || '',
-          major || '',
-          bio || '',
-          userName,
-          phone_number || ''
+          loginId,
+          userName || '',
+          phone_number || '',
+          bio || ''
         ]
       );
-      studentCreatedId = loginId;
+      studentCreatedId = studentResult.rows[0].student_id;
     }
 
     // Clean up verification record
@@ -227,10 +226,21 @@ router.post('/login', async (req, res) => {
     );
 
     // For students, include student_id in token
-    let tokenPayload = { id: user.id, email: user.email, user_type: user.user_type };
+    let tokenPayload = { 
+      id: user.id, 
+      email: user.email, 
+      user_type: user.user_type
+    };
     
     if (user.user_type === 'student') {
-      tokenPayload.student_id = user.id; // student_id is same as login.id
+      const studentResult = await pool.query(
+        'SELECT student_id FROM students WHERE student_id = $1',
+        [user.id]
+      );
+      
+      if (studentResult.rows.length > 0) {
+        tokenPayload.student_id = studentResult.rows[0].student_id;
+      }
     }
 
     // Generate JWT token

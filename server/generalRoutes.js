@@ -156,6 +156,7 @@ router.post('/internships/:id/apply', authenticateToken, async (req, res) => {
   try {
     const { id: user_id, user_type, student_id } = req.user;
     const { id: internshipId } = req.params;
+    const profileId = student_id || user_id;
 
     if (user_type !== 'student') {
       return res.status(403).json({
@@ -164,7 +165,7 @@ router.post('/internships/:id/apply', authenticateToken, async (req, res) => {
       });
     }
 
-    if (!student_id) {
+    if (!profileId) {
       return res.status(400).json({
         success: false,
         message: 'Student ID not found in token'
@@ -188,7 +189,7 @@ router.post('/internships/:id/apply', authenticateToken, async (req, res) => {
     const existingApplication = await pool.query(
       `SELECT application_id FROM applications 
        WHERE internship_id = $1 AND student_profile_id = $2`,
-      [internshipId, student_id]
+      [internshipId, profileId]
     );
 
     if (existingApplication.rows.length > 0) {
@@ -201,7 +202,7 @@ router.post('/internships/:id/apply', authenticateToken, async (req, res) => {
     // Create application
     const result = await pool.query(
       'INSERT INTO applications (internship_id, student_profile_id) VALUES ($1, $2) RETURNING application_id',
-      [internshipId, student_id]
+      [internshipId, profileId]
     );
 
     res.status(201).json({
@@ -355,6 +356,7 @@ router.post('/companies/:companyId/reviews', authenticateToken, async (req, res)
     const { id, user_type, student_id } = req.user;
     const { companyId } = req.params;
     const { rating, review_text } = req.body;
+    const profileId = student_id || id;
 
     if (user_type !== 'student') {
       return res.status(403).json({
@@ -363,7 +365,7 @@ router.post('/companies/:companyId/reviews', authenticateToken, async (req, res)
       });
     }
 
-    if (!student_id) {
+    if (!profileId) {
       return res.status(400).json({
         success: false,
         message: 'Student ID not found in token'
@@ -373,7 +375,7 @@ router.post('/companies/:companyId/reviews', authenticateToken, async (req, res)
     // Check if student has already reviewed this company
     const existingReview = await pool.query(
       'SELECT review_id FROM company_reviews WHERE company_id = $1 AND student_profile_id = $2',
-      [companyId, student_id]
+      [companyId, profileId]
     );
 
     if (existingReview.rows.length > 0) {
@@ -386,7 +388,7 @@ router.post('/companies/:companyId/reviews', authenticateToken, async (req, res)
     // Create review
     const result = await pool.query(
       'INSERT INTO company_reviews (company_id, student_profile_id, rating, review_text) VALUES ($1, $2, $3, $4) RETURNING review_id',
-      [companyId, student_id, rating, review_text]
+      [companyId, profileId, rating, review_text]
     );
 
     res.status(201).json({

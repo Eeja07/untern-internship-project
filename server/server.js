@@ -47,14 +47,32 @@ app.use(cors({
     optionsSuccessStatus: 200 // For legacy browser support
 }));
 
-// Serve static files for uploads
-app.use('/uploads', express.static(path.join(path.resolve(), 'uploads')));
+// Serve static files for uploads with proper headers
+app.use('/uploads', (req, res, next) => {
+  // Add CORS headers for file access
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+  // Set proper content type for different file types
+  const ext = path.extname(req.path).toLowerCase();
+  if (ext === '.pdf') {
+    res.type('application/pdf');
+  } else if (['.jpg', '.jpeg', '.png', '.gif'].includes(ext)) {
+    res.type(`image/${ext.slice(1)}`);
+  } else if (['.doc', '.docx'].includes(ext)) {
+    res.type('application/msword');
+  }
+  
+  next();
+}, express.static(path.join(path.resolve(), 'uploads')));
 
 // Create upload directories if they don't exist
-const uploadDirs = ['uploads', 'uploads/resumes', 'uploads/logos'];
+const uploadDirs = ['uploads', 'uploads/resumes', 'uploads/logos', 'uploads/profile-pictures'];
 uploadDirs.forEach(dir => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
+    console.log(`📁 Created directory: ${dir}`);
   }
 });
 

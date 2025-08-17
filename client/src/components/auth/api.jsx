@@ -14,10 +14,30 @@ const api = axios.create({
 
 // Request interceptor to add auth token to requests
 api.interceptors.request.use(
-  (config) => {
+  async (config) => {
     const token = localStorage.getItem('token');
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      // Check if token is expired before making request
+      if (utils.isTokenExpired()) {
+        try {
+          const refreshResponse = await authAPI.refreshToken();
+          if (refreshResponse.success && refreshResponse.token) {
+            config.headers.Authorization = `Bearer ${refreshResponse.token}`;
+          } else {
+            // If refresh fails, clear auth data
+            utils.clearAuthData();
+            window.location.href = '/login';
+            return Promise.reject(new Error('Session expired'));
+          }
+        } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError);
+          utils.clearAuthData();
+          window.location.href = '/login';
+          return Promise.reject(new Error('Session expired'));
+        }
+      } else {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
@@ -29,13 +49,31 @@ api.interceptors.request.use(
 // Response interceptor to handle auth errors
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Remove invalid token and redirect to login
+  async (error) => {
+    const originalRequest = error.config;
+    
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      try {
+        // Try to refresh the token first
+        const refreshResponse = await api.post('/refresh');
+        if (refreshResponse.data.success && refreshResponse.data.token) {
+          localStorage.setItem('token', refreshResponse.data.token);
+          // Update the authorization header for the original request
+          originalRequest.headers.Authorization = `Bearer ${refreshResponse.data.token}`;
+          // Retry the original request
+          return api(originalRequest);
+        }
+      } catch (refreshError) {
+        console.error('Token refresh failed:', refreshError);
+      }
+      
+      // If refresh fails, remove invalid token and redirect to login
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      // You might want to redirect to login or show login modal
       window.dispatchEvent(new Event('auth-expired'));
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
@@ -138,16 +176,6 @@ export const authAPI = {
     localStorage.removeItem('user');
   },
 
-  // Get user profile
-  getProfile: async () => {
-    try {
-      const response = await api.get('/profile');
-      return response.data;
-    } catch (error) {
-      throw error.response?.data || { success: false, message: 'Failed to fetch profile' };
-    }
-  },
-
   // Verify token
   verifyToken: async () => {
     try {
@@ -248,6 +276,60 @@ export const studentAPI = {
       return response.data;
     } catch (error) {
       throw error.response?.data || { success: false, message: 'Failed to upload resume' };
+    }
+  },
+
+  // Upload profile picture
+  uploadProfilePicture: async (formData) => {
+    try {
+      const response = await api.post('/student/profile-picture', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to upload profile picture' };
+    }
+  },
+
+  // Send phone verification code
+  sendPhoneVerification: async (phoneNumber) => {
+    try {
+      const response = await api.post('/student/phone/send-verification', { phone_number: phoneNumber });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to send verification code' };
+    }
+  },
+
+  // Verify phone code
+  verifyPhoneCode: async (code) => {
+    try {
+      const response = await api.post('/student/phone/verify-code', { code });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to verify phone code' };
+    }
+  },
+
+  // Remove resume
+  removeResume: async () => {
+    try {
+      const response = await api.delete('/student/resume');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to remove resume' };
+    }
+  },
+
+  // Remove profile picture
+  removeProfilePicture: async () => {
+    try {
+      const response = await api.delete('/student/profile-picture');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to remove profile picture' };
     }
   }
 };
@@ -439,7 +521,7 @@ export const internshipAPI = {
   // Get user's applications
   getMyApplications: async () => {
     try {
-      const response = await api.get('/my-applications');
+      const response = await api.get('/student/applications');
       return response.data;
     } catch (error) {
       throw error.response?.data || { success: false, message: 'Failed to fetch applications' };
@@ -473,7 +555,22 @@ export const utils = {
   isAuthenticated: () => {
     const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');
-    return !!(token && user);
+    return !!(token && user && !utils.isTokenExpired());
+  },
+
+  // Check if token is expired
+  isTokenExpired: () => {
+    const token = localStorage.getItem('token');
+    if (!token) return true;
+    
+    try {
+      const decoded = JSON.parse(atob(token.split('.')[1]));
+      const currentTime = Math.floor(Date.now() / 1000);
+      return decoded.exp < currentTime;
+    } catch (error) {
+      console.error('Error checking token expiration:', error);
+      return true;
+    }
   },
 
   // Get current user from localStorage
@@ -485,6 +582,12 @@ export const utils = {
       console.error('Error parsing user from localStorage:', error);
       return null;
     }
+  },
+
+  // Clear auth data
+  clearAuthData: () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   },
 
   // Format currency (Indonesian Rupiah)
@@ -515,6 +618,13 @@ export const utils = {
     }
     if (min) return `From ${utils.formatCurrency(min)}`;
     if (max) return `Up to ${utils.formatCurrency(max)}`;
+  },
+
+  // Get file URL with proper base URL
+  getFileUrl: (filePath) => {
+    if (!filePath) return null;
+    if (filePath.startsWith('http')) return filePath;
+    return `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${filePath}`;
   }
 };
 

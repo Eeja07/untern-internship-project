@@ -8,8 +8,9 @@ const router = express.Router();
 router.get('/', authenticateToken, requireStudent, async (req, res) => {
   try {
     const { id, student_id } = req.user;
+    const profileId = student_id || id;
 
-    if (!student_id) {
+    if (!profileId) {
       return res.status(400).json({
         success: false,
         message: 'Student ID not found in token'
@@ -26,7 +27,7 @@ router.get('/', authenticateToken, requireStudent, async (req, res) => {
        JOIN companies c ON i.company_id = c.company_id
        WHERE a.student_profile_id = $1
        ORDER BY a.applied_date DESC`,
-      [student_id]
+      [profileId]
     );
 
     res.json({
