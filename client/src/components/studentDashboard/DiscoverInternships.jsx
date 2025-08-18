@@ -30,6 +30,8 @@ const DiscoverInternships = () => {
   const [showCaptchaModal, setShowCaptchaModal] = useState(false);
   const [captchaInternshipId, setCaptchaInternshipId] = useState(null);
   const [captchaToken, setCaptchaToken] = useState('');
+  const [showInternshipModal, setShowInternshipModal] = useState(false);
+  const [selectedInternship, setSelectedInternship] = useState(null);
 
   useEffect(() => {
     // Get the search query from URL parameters
@@ -66,7 +68,6 @@ const DiscoverInternships = () => {
   const fetchInternships = async () => {
     setLoading(true);
     setError(null);
-    
     try {
       const params = new URLSearchParams({
         page: pagination.current_page,
@@ -76,6 +77,8 @@ const DiscoverInternships = () => {
       // Add search term if exists
       if (searchTerm.trim()) {
         params.append('search', searchTerm.trim());
+        // Also search by requirements
+        params.append('requirements', searchTerm.trim());
       }
 
       // Add filters
@@ -175,6 +178,11 @@ const DiscoverInternships = () => {
     }
   };
 
+  const handleCardClick = (internship) => {
+    setSelectedInternship(internship);
+    setShowInternshipModal(true);
+  };
+
   const formatSalary = (min, max) => {
     if (!min && !max) return 'Salary not specified';
     if (min && max) return `Rp ${min?.toLocaleString()} - Rp ${max?.toLocaleString()}`;
@@ -219,7 +227,7 @@ const DiscoverInternships = () => {
         {featuredInternships.length > 0 ? (
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gridTemplateColumns: 'repeat(3, 1fr)',
             gap: '20px',
             marginBottom: '20px'
           }}>
@@ -232,8 +240,10 @@ const DiscoverInternships = () => {
                   borderRadius: '12px',
                   backdropFilter: 'blur(10px)',
                   border: '1px solid rgba(255,255,255,0.2)',
-                  transition: 'transform 0.2s ease'
+                  transition: 'transform 0.2s ease',
+                  cursor: 'pointer'
                 }}
+                onClick={() => handleCardClick(internship)}
                 onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
                 onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
               >
@@ -297,7 +307,7 @@ const DiscoverInternships = () => {
 
                 {/* Apply Button */}
                 <button
-                  onClick={() => handleApplyInternship(internship.internship_id)}
+                  onClick={(e) => { e.stopPropagation(); handleApplyInternship(internship.internship_id); }}
                   style={{
                     width: '100%',
                     padding: '8px 16px',
@@ -360,39 +370,32 @@ const DiscoverInternships = () => {
         </div>
       </div>
 
-      {/* Search and Filters with Summary Section */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '2fr 1fr', 
-        gap: '20px',
-        marginBottom: '30px'
+      {/* Search, Filters, and Summary in One Container (Summary below search/filters) */}
+      <div style={{
+        background: 'white',
+        padding: '30px',
+        borderRadius: '12px',
+        border: '1px solid #e9ecef',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        marginBottom: '30px',
+        maxWidth: '100%',
+        marginLeft: 'auto',
+        marginRight: 'auto'
       }}>
-        {/* Search & Filters */}
-        <div style={{
-          background: '#f8f9fa',
-          padding: '25px',
-          borderRadius: '12px',
-          border: '1px solid #e9ecef'
-        }}>
-          <h3 style={{ marginBottom: '20px', color: '#2c3e50' }}>Search & Filters</h3>
-          
-          {/* Search Input */}
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px', 
-              fontWeight: '600', 
-              color: '#2c3e50' 
-            }}>
+        <h3 style={{ marginBottom: '20px', color: '#2c3e50' }}>Search & Filters</h3>
+        {/* Search Input */}
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px', width: '100%', margin: '0 auto' }}>
+          <div style={{ flex: 1 }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#2c3e50' }}>
               Search Internships
             </label>
             <input 
               type="text" 
-              placeholder="Search by title, company, or description..." 
+              placeholder="Search by title, company, description, or requirements..." 
               value={searchTerm}
               onChange={handleSearchChange}
               style={{
-                width: '100%',
+                width: '95%',
                 padding: '12px 16px',
                 border: '2px solid #e9ecef',
                 borderRadius: '8px',
@@ -403,119 +406,6 @@ const DiscoverInternships = () => {
               onBlur={(e) => e.target.style.borderColor = '#e9ecef'}
             />
           </div>
-          
-          {/* Filter Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-            <div>
-              <label style={{ 
-                display: 'block', 
-                marginBottom: '8px', 
-                fontWeight: '600', 
-                color: '#2c3e50' 
-              }}>
-                Industry
-              </label>
-              <select 
-                value={filters.industry}
-                onChange={(e) => handleFilterChange('industry', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '2px solid #e9ecef',
-                  borderRadius: '8px',
-                  fontSize: '1rem'
-                }}
-              >
-                <option value="">All Industries</option>
-                {filterOptions.industries.map(industry => (
-                  <option key={industry} value={industry}>{industry}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label style={{ 
-                display: 'block', 
-                marginBottom: '8px', 
-                fontWeight: '600', 
-                color: '#2c3e50' 
-              }}>
-                Type
-              </label>
-              <select 
-                value={filters.type}
-                onChange={(e) => handleFilterChange('type', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '2px solid #e9ecef',
-                  borderRadius: '8px',
-                  fontSize: '1rem'
-                }}
-              >
-                <option value="">All Types</option>
-                {filterOptions.types.map(type => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label style={{ 
-                display: 'block', 
-                marginBottom: '8px', 
-                fontWeight: '600', 
-                color: '#2c3e50' 
-              }}>
-                Location
-              </label>
-              <select 
-                value={filters.location}
-                onChange={(e) => handleFilterChange('location', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '2px solid #e9ecef',
-                  borderRadius: '8px',
-                  fontSize: '1rem'
-                }}
-              >
-                <option value="">All Locations</option>
-                {filterOptions.locations.map(location => (
-                  <option key={location} value={location}>{location}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label style={{ 
-                display: 'block', 
-                marginBottom: '8px', 
-                fontWeight: '600', 
-                color: '#2c3e50' 
-              }}>
-                Company Size
-              </label>
-              <select 
-                value={filters.company_size}
-                onChange={(e) => handleFilterChange('company_size', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '2px solid #e9ecef',
-                  borderRadius: '8px',
-                  fontSize: '1rem'
-                }}
-              >
-                <option value="">All Company Sizes</option>
-                {filterOptions.company_sizes.map(size => (
-                  <option key={size} value={size}>{size}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Clear Filters Button */}
           <button
             onClick={() => {
               setFilters({
@@ -527,31 +417,135 @@ const DiscoverInternships = () => {
               setSearchTerm('');
             }}
             style={{
-              marginTop: '20px',
+              marginLeft: '16px',
+              marginTop: '35px',
               padding: '10px 20px',
               backgroundColor: '#6c757d',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
               cursor: 'pointer',
-              fontSize: '0.9rem'
+              fontSize: '0.9rem',
+              height: '44px'
             }}
           >
-            Clear All Filters
+            Clear Filters
           </button>
         </div>
+        {/* Filter Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
+          <div>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '8px', 
+              fontWeight: '600', 
+              color: '#2c3e50' 
+            }}>
+              Industry
+            </label>
+            <select 
+              value={filters.industry}
+              onChange={(e) => handleFilterChange('industry', e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: '2px solid #e9ecef',
+                borderRadius: '8px',
+                fontSize: '1rem'
+              }}
+            >
+              <option value="">All Industries</option>
+              {filterOptions.industries.map(industry => (
+                <option key={industry} value={industry}>{industry}</option>
+              ))}
+            </select>
+          </div>
 
-        {/* Search Summary */}
-        <div style={{
-          background: 'white',
-          padding: '25px',
-          borderRadius: '12px',
-          border: '1px solid #e9ecef',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          height: 'fit-content'
-        }}>
+          <div>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '8px', 
+              fontWeight: '600', 
+              color: '#2c3e50' 
+            }}>
+              Type
+            </label>
+            <select 
+              value={filters.type}
+              onChange={(e) => handleFilterChange('type', e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: '2px solid #e9ecef',
+                borderRadius: '8px',
+                fontSize: '1rem'
+              }}
+            >
+              <option value="">All Types</option>
+              {filterOptions.types.map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '8px', 
+              fontWeight: '600', 
+              color: '#2c3e50' 
+            }}>
+              Location
+            </label>
+            <select 
+              value={filters.location}
+              onChange={(e) => handleFilterChange('location', e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: '2px solid #e9ecef',
+                borderRadius: '8px',
+                fontSize: '1rem'
+              }}
+            >
+              <option value="">All Locations</option>
+              {filterOptions.locations.map(location => (
+                <option key={location} value={location}>{location}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '8px', 
+              fontWeight: '600', 
+              color: '#2c3e50' 
+            }}>
+              Company Size
+            </label>
+            <select 
+              value={filters.company_size}
+              onChange={(e) => handleFilterChange('company_size', e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: '2px solid #e9ecef',
+                borderRadius: '8px',
+                fontSize: '1rem'
+              }}
+            >
+              <option value="">All Company Sizes</option>
+              {filterOptions.company_sizes.map(size => (
+                <option key={size} value={size}>{size}</option>
+              ))}
+            </select>
+          </div>
+        </div>      
+
+        {/* Search Summary Below */}
+        <div style={{ height: 'fit-content', marginTop: '10px' }}>
           <h3 style={{ marginBottom: '20px', color: '#2c3e50' }}>Search Summary</h3>
-          
           <div style={{ marginBottom: '15px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
               <span style={{ fontWeight: '600', color: '#2c3e50' }}>Results Found:</span>
@@ -566,7 +560,6 @@ const DiscoverInternships = () => {
               <span style={{ color: '#6c757d' }}>{pagination.limit}</span>
             </div>
           </div>
-
           {/* Active Filters */}
           {(searchTerm || Object.values(filters).some(filter => filter)) && (
             <div style={{ marginTop: '20px' }}>
@@ -679,7 +672,7 @@ const DiscoverInternships = () => {
             ) : (
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+                gridTemplateColumns: 'repeat(3, 1fr)',
                 gap: '20px',
                 marginBottom: '30px'
               }}>
@@ -692,8 +685,10 @@ const DiscoverInternships = () => {
                       borderRadius: '12px',
                       border: '1px solid #e9ecef',
                       boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                      transition: 'transform 0.2s, box-shadow 0.2s'
+                      transition: 'transform 0.2s, box-shadow 0.2s',
+                      cursor: 'pointer'
                     }}
+                    onClick={() => handleCardClick(internship)}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.transform = 'translateY(-2px)';
                       e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.15)';
@@ -743,19 +738,6 @@ const DiscoverInternships = () => {
                     {/* Internship Title */}
                     <h3 style={{ color: '#007bff', marginBottom: '10px' }}>{internship.title}</h3>
 
-                    {/* Description */}
-                    <p style={{ 
-                      color: '#6c757d', 
-                      marginBottom: '15px',
-                      lineHeight: '1.5',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 3,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden'
-                    }}>
-                      {internship.description}
-                    </p>
-
                     {/* Details */}
                     <div style={{ marginBottom: '15px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
@@ -784,7 +766,7 @@ const DiscoverInternships = () => {
 
                     {/* Apply Button */}
                     <button
-                      onClick={() => handleApplyInternship(internship.internship_id)}
+                      onClick={(e) => { e.stopPropagation(); handleApplyInternship(internship.internship_id); }}
                       style={{
                         width: '100%',
                         padding: '12px',
@@ -893,13 +875,63 @@ const DiscoverInternships = () => {
         </div>
       )}
 
-      {/* Add CSS for spinning animation */}
-      <style jsx>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
+      {/* Internship Detail Modal */}
+      {showInternshipModal && selectedInternship && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(0,0,0,0.4)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999
+        }}>
+          <div style={{
+            background: 'white',
+            padding: '30px',
+            borderRadius: '12px',
+            boxShadow: '0 2px 16px rgba(0,0,0,0.2)',
+            minWidth: '400px',
+            maxWidth: '600px',
+            textAlign: 'left',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setShowInternshipModal(false)}
+              style={{ position: 'absolute', top: 10, right: 10, background: '#dc3545', color: 'white', border: 'none', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}
+            >
+              Close
+            </button>
+            <h2 style={{ color: '#007bff', marginBottom: '10px' }}>{selectedInternship.title}</h2>
+            <h4 style={{ color: '#2c3e50', marginBottom: '10px' }}>{selectedInternship.company_name}</h4>
+            <div style={{ marginBottom: '10px', color: '#6c757d' }}>
+              <strong>Industry:</strong> {selectedInternship.industry || selectedInternship.company_industry}<br/>
+              <strong>Location:</strong> {selectedInternship.location}<br/>
+              <strong>Type:</strong> {selectedInternship.type}<br/>
+              <strong>Duration:</strong> {selectedInternship.duration_months} months<br/>
+              <strong>Salary:</strong> {formatSalary(selectedInternship.salary_min, selectedInternship.salary_max)}<br/>
+              <strong>Deadline:</strong> {formatDate(selectedInternship.application_deadline)}<br/>
+            </div>
+            <div style={{ marginBottom: '10px' }}>
+              <strong>Description:</strong>
+              <p style={{ color: '#2c3e50', whiteSpace: 'pre-line' }}>{selectedInternship.description}</p>
+            </div>
+            <div style={{ marginBottom: '10px' }}>
+              <strong>Requirements:</strong>
+              <p style={{ color: '#2c3e50', whiteSpace: 'pre-line' }}>{selectedInternship.requirements}</p>
+            </div>
+            <button
+              onClick={() => { setShowInternshipModal(false); handleApplyInternship(selectedInternship.internship_id); }}
+              style={{ width: '100%', padding: '12px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '1rem', fontWeight: '600', marginTop: '10px' }}
+            >
+              Apply Now
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -50,17 +50,17 @@ const StudentDashboard = () => {
   useEffect(() => {
     const path = location.pathname.split('/').pop();
     const validSections = sidebarItems.map(item => item.id);
-    console.log('Current path:', location.pathname);
-    console.log('Extracted section:', path);
-    console.log('Valid sections:', validSections);
+    // console.log('Current path:', location.pathname);
+    // console.log('Extracted section:', path);
+    // console.log('Valid sections:', validSections);
     
     if (path && validSections.includes(path)) {
       setActiveSection(path);
-      console.log('Setting active section to:', path);
+      // console.log('Setting active section to:', path);
     } else {
       // If no valid path, default to discover
       setActiveSection('discover');
-      console.log('Setting default section: discover');
+      // console.log('Setting default section: discover');
     }
   }, [location.pathname]);
 
@@ -82,7 +82,7 @@ const StudentDashboard = () => {
   };
 
   const renderContent = () => {
-    console.log('Rendering content for section:', activeSection);
+    // console.log('Rendering content for section:', activeSection);
     switch (activeSection) {
       case 'discover':
         return <DiscoverInternships />;

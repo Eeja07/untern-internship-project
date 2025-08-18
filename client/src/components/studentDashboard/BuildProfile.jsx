@@ -44,12 +44,12 @@ const BuildProfile = ({ onProfileSaved }) => {
       // Check if user is authenticated
       const token = localStorage.getItem('token');
       const user = localStorage.getItem('user');
-      console.log('Token exists:', !!token);
-      console.log('Token value:', token ? token.substring(0, 20) + '...' : 'null');
+      // console.log('Token exists:', !!token);
+      // console.log('Token value:', token ? token.substring(0, 20) + '...' : 'null');
       
       // Fetch student profile
       const profileResponse = await studentAPI.getProfile();
-      console.log('Profile response:', profileResponse);
+      // console.log('Profile response:', profileResponse);
       
       if (profileResponse.success) {
         setProfile(profileResponse.profile);
@@ -78,7 +78,7 @@ const BuildProfile = ({ onProfileSaved }) => {
       
       // Fetch skills
       const skillsResponse = await studentAPI.getSkills();
-      console.log('Skills response:', skillsResponse);
+      // console.log('Skills response:', skillsResponse);
       
       if (skillsResponse.success) {
         setSkills(skillsResponse.skills || []);

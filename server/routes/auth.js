@@ -145,7 +145,7 @@ router.post('/register', async (req, res) => {
       ...(studentCreatedId ? { student_id: studentCreatedId } : {})
     };
     
-    const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '24h' });
+    const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '30d' });
 
     res.status(201).json({
       success: true,
@@ -244,7 +244,7 @@ router.post('/login', async (req, res) => {
     }
 
     // Generate JWT token
-    const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '24h' });
+    const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '30d' });
 
     res.json({
       success: true,
@@ -344,7 +344,8 @@ router.post('/refresh', authenticateToken, (req, res) => {
       ...(student_id ? { student_id } : {})
     };
     
-    const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '24h' });
+    // Use same expiration as login/register
+    const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '30d' });
 
     res.json({
       success: true,

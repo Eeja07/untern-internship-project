@@ -38,17 +38,17 @@ const CompanyDashboard = () => {
     useEffect(() => {
         const path = location.pathname.split('/').pop();
         const validSections = sidebarItems.map(item => item.id);
-        console.log('Current path:', location.pathname);
-        console.log('Extracted section:', path);
-        console.log('Valid sections:', validSections);
+        // console.log('Current path:', location.pathname);
+        // console.log('Extracted section:', path);
+        // console.log('Valid sections:', validSections);
         
         if (path && validSections.includes(path)) {
             setActiveSection(path);
-            console.log('Setting active section to:', path);
+            // console.log('Setting active section to:', path);
         } else {
             // If no valid path, default to overview
             setActiveSection('overview');
-            console.log('Setting default section: overview');
+            // console.log('Setting default section: overview');
         }
     }, [location.pathname]);
 
@@ -85,54 +85,8 @@ const CompanyDashboard = () => {
         logout();
         navigate('/');
     };
-
-    // Check authentication and user type
-    if (!isAuthenticated || userType !== 'company') {
-        return (
-            <>
-                <Navbar />
-                <div style={{
-                    minHeight: '100vh',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: '#f8f9fa'
-                }}>
-                    <div style={{
-                        textAlign: 'center',
-                        padding: '40px',
-                        backgroundColor: 'white',
-                        borderRadius: '12px',
-                        boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                        maxWidth: '500px'
-                    }}>
-                        <h2 style={{ color: '#dc3545', marginBottom: '20px' }}>Access Denied</h2>
-                        <p style={{ marginBottom: '30px', color: '#6c757d' }}>
-                            Please log in as a company to access the company dashboard.
-                        </p>
-                        <button
-                            onClick={() => navigate('/')}
-                            style={{
-                                padding: '12px 24px',
-                                backgroundColor: '#007bff',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '6px',
-                                cursor: 'pointer',
-                                fontSize: '1rem'
-                            }}
-                        >
-                            Back to Home
-                        </button>
-                    </div>
-                </div>
-                <FooterHome onForStudentsClick={handleForStudentsClick} onForCompaniesClick={handleForCompaniesClick} />
-            </>
-        );
-    }
-
     const renderContent = () => {
-        console.log('Rendering content for section:', activeSection);
+        // console.log('Rendering content for section:', activeSection);
         switch (activeSection) {
             case 'overview':
                 return <DashboardOverview />;

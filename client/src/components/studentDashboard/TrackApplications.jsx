@@ -28,7 +28,7 @@ const TrackApplications = () => {
         // Remap any 'shortlisted' status to 'pending' just in case
         const mappedApps = (result.applications || []).map(app => ({ ...app, status: remapStatus(app.status) }));
         setApplications(mappedApps);
-        console.log('Student applications:', mappedApps);
+        // console.log('Student applications:', mappedApps);
       } else {
         setError(result.message || 'Failed to fetch applications');
       }

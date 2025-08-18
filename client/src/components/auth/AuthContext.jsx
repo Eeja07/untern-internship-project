@@ -91,11 +91,13 @@ export const AuthProvider = ({ children }) => {
               throw new Error('Failed to fetch profile');
             }
           } else {
+            // console.log('Token is invalid, clearing storage');
             // Token is invalid, clear storage
             localStorage.removeItem('token');
             localStorage.removeItem('user');
           }
         } catch (error) {
+          // console.log('Token verification failed:', error);
           // Token verification failed, clear storage
           localStorage.removeItem('token');
           localStorage.removeItem('user');

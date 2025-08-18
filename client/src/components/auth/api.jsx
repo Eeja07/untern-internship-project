@@ -18,6 +18,7 @@ api.interceptors.request.use(
     const token = localStorage.getItem('token');
     if (token) {
       // Check if token is expired before making request
+      // console.log('Current token:', token);
       if (utils.isTokenExpired()) {
         try {
           const refreshResponse = await authAPI.refreshToken();
@@ -209,6 +210,16 @@ export const authAPI = {
       return response.data;
     } catch (error) {
       throw error.response?.data || { success: false, message: 'Profile update failed' };
+    }
+  },
+
+  // Get user profile
+  getProfile: async () => {
+    try {
+      const response = await api.get('/profile');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { success: false, message: 'Failed to fetch profile' };
     }
   }
 };
