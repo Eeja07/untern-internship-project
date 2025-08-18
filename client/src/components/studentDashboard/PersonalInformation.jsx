@@ -101,7 +101,7 @@ const PersonalInformation = ({
             name="email"
             placeholder="your.email@example.com"
             defaultValue={profile?.email || user?.email || ""}
-            disabled={!isEditMode}
+            disabled
             style={{
               width: '100%',
               padding: '10px',

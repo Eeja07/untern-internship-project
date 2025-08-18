@@ -137,7 +137,9 @@ const CompanyDashboard = () => {
             case 'overview':
                 return <DashboardOverview />;
             case 'profile':
-                return <CompanyProfile onProfileSaved={() => setProfileRefreshFlag(f => f + 1)} />;
+                return <CompanyProfile onProfileSaved={() => {
+                    setProfileRefreshFlag(f => f + 1);
+                }} profileData={companyProfile} />;
             case 'post-internship':
                 return <PostInternship />;
             case 'manage-applications':
@@ -176,7 +178,8 @@ const CompanyDashboard = () => {
                         <div style={{
                             width: '60px',
                             height: '60px',
-                            background: companyProfile?.logo_url ? `url(${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${companyProfile.logo_url})` : '#007bff',
+                            backgroundColor: companyProfile?.logo_url ? 'transparent' : '#007bff',
+                            backgroundImage: companyProfile?.logo_url ? `url(${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${companyProfile.logo_url})` : 'none',
                             backgroundSize: 'cover',
                             backgroundPosition: 'center',
                             borderRadius: '50%',

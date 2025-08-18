@@ -174,7 +174,6 @@ const CompanyProfile = ({ onProfileSaved }) => {
                                 left: '0',
                                 backgroundColor: '#dc3545',
                                 color: 'white',
-                                border: 'none',
                                 borderRadius: '50%',
                                 width: '24px',
                                 height: '24px',
@@ -254,12 +253,12 @@ const CompanyProfile = ({ onProfileSaved }) => {
                 <div style={{ minWidth: 0 }}>
                     <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Company Email</label>
                     <input
+                        disabled
                         type="email"
                         name="company_email"
                         placeholder="company@email.com"
                         value={formData.company_email || ''}
                         onChange={handleInputChange}
-                        disabled={!isEditMode}
                         style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', backgroundColor: !isEditMode ? '#f8f9fa' : 'white', boxSizing: 'border-box' }}
                     />
                 </div>

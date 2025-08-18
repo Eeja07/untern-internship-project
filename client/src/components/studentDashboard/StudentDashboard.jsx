@@ -121,7 +121,14 @@ const StudentDashboard = () => {
           <div style={{
             width: '60px',
             height: '60px',
-            background: '#007bff',
+            backgroundColor: (localProfile?.profile_picture_url || user?.profile_picture_url) ? 'transparent' : '#007bff',
+            backgroundImage: (localProfile?.profile_picture_url || user?.profile_picture_url)
+              ? `url(${(localProfile?.profile_picture_url || user?.profile_picture_url).startsWith('http')
+                  ? (localProfile?.profile_picture_url || user?.profile_picture_url)
+                  : `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${localProfile?.profile_picture_url || user?.profile_picture_url}`})`
+              : 'none',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
             borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
@@ -130,8 +137,7 @@ const StudentDashboard = () => {
             fontSize: '20px',
             marginBottom: '10px'
           }}>
-            {((localProfile || user)?.name?.charAt(0) || 
-             (localProfile || user)?.firstName?.charAt(0) || 'S').toUpperCase()}
+            {!(localProfile?.profile_picture_url || user?.profile_picture_url) && ((localProfile || user)?.name?.charAt(0) || (localProfile || user)?.firstName?.charAt(0) || 'S').toUpperCase()}
           </div>
           <h4 style={{ margin: 0, marginBottom: '5px' }}>Student Dashboard</h4>
           <p style={{ margin: 0, color: '#6c757d', fontSize: '14px' }}>
