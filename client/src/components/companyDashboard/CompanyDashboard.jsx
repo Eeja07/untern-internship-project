@@ -16,6 +16,8 @@ const CompanyDashboard = () => {
     const location = useLocation();
     const { isAuthenticated, userType, user, logout } = useContext(AuthContext);
     const [activeSection, setActiveSection] = useState('overview');
+    const [companyProfile, setCompanyProfile] = useState(null);
+    const [profileRefreshFlag, setProfileRefreshFlag] = useState(0);
 
     // Modal states
     const [isStudentModalOpen, setIsStudentModalOpen] = useState(false);
@@ -49,6 +51,21 @@ const CompanyDashboard = () => {
             console.log('Setting default section: overview');
         }
     }, [location.pathname]);
+
+    // Fetch company profile
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const response = await import('../auth/api.jsx').then(m => m.companyAPI.getProfile());
+                setCompanyProfile(response.profile || response.data || response);
+            } catch (error) {
+                setCompanyProfile(null);
+            }
+        };
+        if (isAuthenticated && userType === 'company') {
+            fetchProfile();
+        }
+    }, [isAuthenticated, userType, profileRefreshFlag]);
 
     // Footer modal handlers
     const handleForStudentsClick = () => {
@@ -120,7 +137,7 @@ const CompanyDashboard = () => {
             case 'overview':
                 return <DashboardOverview />;
             case 'profile':
-                return <CompanyProfile />;
+                return <CompanyProfile onProfileSaved={() => setProfileRefreshFlag(f => f + 1)} />;
             case 'post-internship':
                 return <PostInternship />;
             case 'manage-applications':
@@ -155,10 +172,13 @@ const CompanyDashboard = () => {
                         paddingBottom: '20px',
                         marginBottom: '20px'
                     }}>
+                        {/* Profile Picture from DB */}
                         <div style={{
                             width: '60px',
                             height: '60px',
-                            background: '#007bff',
+                            background: companyProfile?.logo_url ? `url(${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${companyProfile.logo_url})` : '#007bff',
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
                             borderRadius: '50%',
                             display: 'flex',
                             alignItems: 'center',
@@ -167,10 +187,10 @@ const CompanyDashboard = () => {
                             fontSize: '20px',
                             marginBottom: '10px'
                         }}>
-                            {user?.email?.charAt(0).toUpperCase() || 'C'}
+                            {!companyProfile?.logo_url && (companyProfile?.company_name?.charAt(0).toUpperCase() || 'C')}
                         </div>
                         <h4 style={{ margin: 0, marginBottom: '5px' }}>Company Dashboard</h4>
-                        <p style={{ margin: 0, color: '#6c757d', fontSize: '14px' }}>{user?.email}</p>
+                        <p style={{ margin: 0, color: '#2c3e50', fontSize: '16px' }}>{companyProfile?.company_name || ''}</p>
                     </div>
 
                     {/* Navigation Items */}

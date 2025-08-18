@@ -14,6 +14,7 @@ const StudentDashboard = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const { user, profile, logout } = useContext(AuthContext);
   const [localProfile, setLocalProfile] = useState(null);
+  const [profileRefreshFlag, setProfileRefreshFlag] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -43,7 +44,7 @@ const StudentDashboard = () => {
     };
     
     fetchProfile();
-  }, []);
+  }, [profileRefreshFlag]);
 
   // Set active section based on URL path
   useEffect(() => {
@@ -83,24 +84,18 @@ const StudentDashboard = () => {
   const renderContent = () => {
     console.log('Rendering content for section:', activeSection);
     switch (activeSection) {
-      case 'discover-internships':
+      case 'discover':
         return <DiscoverInternships />;
-      
       case 'profile':
-        return <BuildProfile />;
-      
+        return <BuildProfile onProfileSaved={() => setProfileRefreshFlag(f => f + 1)} />;
       case 'applications':
         return <TrackApplications />;
-      
       case 'stories':
         return <SuccessStories />;
-      
       case 'reviews':
         return <CompanyReviews />;
-      
       case 'certifications':
         return <InternshipCertifications />;
-      
       default:
         console.log('No matching section, showing discover');
         return <DiscoverInternships />;

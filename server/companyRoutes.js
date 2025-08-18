@@ -41,44 +41,27 @@ const upload = multer({
   }
 });
 
-// Upload company logo
+// Upload or remove company logo
 router.post('/company/logo', authenticateToken, requireCompany, upload.single('logo'), async (req, res) => {
   try {
     const { id } = req.user;
-
     if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: 'No logo file uploaded'
-      });
+      // Remove logo if no file uploaded
+      await pool.query('UPDATE companies SET logo_url = NULL WHERE company_id = $1', [id]);
+      return res.json({ success: true, message: 'Logo removed', logo_url: null });
     }
-
     const logo_url = `/uploads/logos/${req.file.filename}`;
-
     const result = await pool.query(
       'UPDATE companies SET logo_url = $1 WHERE company_id = $2',
       [logo_url, id]
     );
-
     if (result.rowCount === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Company not found'
-      });
+      return res.status(404).json({ success: false, message: 'Company not found' });
     }
-
-    res.json({
-      success: true,
-      message: 'Logo uploaded successfully',
-      logo_url
-    });
-
+    res.json({ success: true, message: 'Logo uploaded successfully', logo_url });
   } catch (error) {
     console.error('Logo upload error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to upload logo'
-    });
+    res.status(500).json({ success: false, message: 'Failed to upload logo' });
   }
 });
 

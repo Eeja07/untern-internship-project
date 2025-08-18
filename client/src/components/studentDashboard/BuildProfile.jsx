@@ -9,7 +9,7 @@ import CertificationsSection from './CertificationsSection.jsx';
 import ExperienceSection from './ExperienceSection.jsx';
 import SkillsSection from './SkillsSection.jsx';
 
-const BuildProfile = () => {
+const BuildProfile = ({ onProfileSaved }) => {
   const { user, refreshUserProfile } = useContext(AuthContext);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -146,6 +146,7 @@ const BuildProfile = () => {
         
         // Refresh profile data
         fetchProfile();
+        if (onProfileSaved) onProfileSaved();
       }
       
     } catch (error) {
