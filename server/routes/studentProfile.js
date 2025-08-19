@@ -12,7 +12,7 @@ router.get('/', authenticateToken, requireStudent, async (req, res) => {
     // Use id as student_id if student_id is not present
     const profileId = student_id || id;
 
-    console.log('Debug - Token data:', { id, student_id, profileId });
+    // console.log('Debug - Token data:', { id, student_id, profileId });
 
     if (!profileId) {
       return res.status(400).json({
@@ -28,7 +28,7 @@ router.get('/', authenticateToken, requireStudent, async (req, res) => {
         FROM information_schema.columns 
         WHERE table_name = 'students' AND table_schema = 'public'
       `);
-      console.log('Available columns in students table:', columnsResult.rows.map(r => r.column_name));
+      // console.log('Available columns in students table:', columnsResult.rows.map(r => r.column_name));
     } catch (columnError) {
       console.error('Error checking columns:', columnError);
     }
@@ -43,15 +43,15 @@ router.get('/', authenticateToken, requireStudent, async (req, res) => {
       [profileId]
     );
 
-    console.log('Debug - Query result:', result.rows.length, 'rows found');
+    // console.log('Debug - Query result:', result.rows.length, 'rows found');
 
     if (result.rows.length === 0) {
       // Try to check if student record exists at all
       const checkStudent = await pool.query('SELECT student_id FROM students WHERE student_id = $1', [profileId]);
       const checkLogin = await pool.query('SELECT id FROM login WHERE id = $1', [id]);
       
-      console.log('Debug - Student exists:', checkStudent.rows.length > 0);
-      console.log('Debug - Login exists:', checkLogin.rows.length > 0);
+      // console.log('Debug - Student exists:', checkStudent.rows.length > 0);
+      // console.log('Debug - Login exists:', checkLogin.rows.length > 0);
       
       return res.status(404).json({
         success: false,
@@ -161,7 +161,7 @@ router.put('/', authenticateToken, requireStudent, async (req, res) => {
     // Use id as student_id if student_id is not present
     const profileId = student_id || id;
 
-    console.log('Debug - Update profile:', { id, student_id, profileId, profileData: req.body });
+    // console.log('Debug - Update profile:', { id, student_id, profileId, profileData: req.body });
 
     if (!profileId) {
       return res.status(400).json({

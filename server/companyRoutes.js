@@ -102,6 +102,7 @@ router.get('/company/applications', authenticateToken, requireCompany, async (re
         a.student_profile_id,
         a.status,
         a.applied_date,
+        a.done_intern,
         i.title as internship_title,
         s.name as student_name,
         s.university,
@@ -279,6 +280,47 @@ router.put('/company/applications/:id/status', authenticateToken, requireCompany
       success: false,
       message: 'Failed to update application status',
       error: error.message
+    });
+  }
+});
+
+// Mark application as done
+router.put('/company/applications/:id/done', authenticateToken, requireCompany, async (req, res) => {
+  try {
+    const { id: applicationId } = req.params;
+    const { id: companyId } = req.user;
+
+    // Verify that this application belongs to the company's internship
+    const verifyResult = await pool.query(`
+      SELECT a.application_id 
+      FROM applications a
+      JOIN internships i ON a.internship_id = i.internship_id
+      WHERE a.application_id = $1 AND i.company_id = $2
+    `, [applicationId, companyId]);
+
+    if (verifyResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Application not found or unauthorized'
+      });
+    }
+
+    // Update done_intern to true
+    await pool.query(
+      'UPDATE applications SET done_intern = true WHERE application_id = $1',
+      [applicationId]
+    );
+
+    res.json({
+      success: true,
+      message: 'Application marked as done'
+    });
+
+  } catch (error) {
+    console.error('Mark application as done error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to mark application as done'
     });
   }
 });
@@ -475,20 +517,20 @@ router.post('/internship-documents', authenticateToken, requireCompany, document
 router.get('/company/debug-applications', authenticateToken, requireCompany, async (req, res) => {
   try {
     const { id: companyId } = req.user;
-    console.log('Debug: Company ID from token:', companyId);
+    // console.log('Debug: Company ID from token:', companyId);
 
     // First, check if company has any internships
     const internshipsResult = await pool.query(
       'SELECT internship_id, title FROM internships WHERE company_id = $1',
       [companyId]
     );
-    console.log('Debug: Company internships:', internshipsResult.rows);
+    // console.log('Debug: Company internships:', internshipsResult.rows);
 
     // Check all applications in the database
     const allApplicationsResult = await pool.query(
       'SELECT application_id, internship_id, student_profile_id, status FROM applications'
     );
-    console.log('Debug: All applications in DB:', allApplicationsResult.rows);
+    // console.log('Debug: All applications in DB:', allApplicationsResult.rows);
 
     // Then check applications for those internships
     const applicationsResult = await pool.query(`
@@ -504,13 +546,13 @@ router.get('/company/debug-applications', authenticateToken, requireCompany, asy
       WHERE i.company_id = $1
       ORDER BY a.applied_date DESC
     `, [companyId]);
-    console.log('Debug: Applications found:', applicationsResult.rows);
+    // console.log('Debug: Applications found:', applicationsResult.rows);
 
     // Check if students table has data
     const studentsResult = await pool.query(
       'SELECT student_id, name FROM students LIMIT 5'
     );
-    console.log('Debug: Sample students:', studentsResult.rows);
+    // console.log('Debug: Sample students:', studentsResult.rows);
 
     res.json({
       success: true,

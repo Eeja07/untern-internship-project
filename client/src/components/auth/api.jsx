@@ -461,6 +461,23 @@ export const companyAPI = {
     } catch (error) {
       throw error.response?.data || { success: false, message: 'Failed to upload logo' };
     }
+  },
+
+  // Mark application as done
+  markApplicationDone: async (applicationId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/company/applications/${applicationId}/done`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      return await response.json();
+    } catch (error) {
+      throw new Error('Failed to mark application as done: ' + error.message);
+    }
   }
 };
 
@@ -492,7 +509,12 @@ export const reviewsAPI = {
   // Get company reviews
   getCompanyReviews: async (companyId) => {
     try {
-      const response = await api.get(`/companies/${companyId}/reviews`);
+      let response;
+      if (companyId) {
+        response = await api.get(`/companies/${companyId}/reviews`);
+      } else {
+        response = await api.get('/companies/reviews');
+      }
       return response.data;
     } catch (error) {
       throw error.response?.data || { success: false, message: 'Failed to fetch reviews' };
@@ -553,6 +575,7 @@ export const internshipAPI = {
   // Get user's applications
   getMyApplications: async () => {
     try {
+      // Uses /student/applications endpoint, which returns student_profile_id and done_intern
       const response = await api.get('/student/applications');
       return response.data;
     } catch (error) {

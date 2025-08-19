@@ -87,6 +87,21 @@ const ManageApplications = () => {
         }
     };
 
+    const handleMarkDone = async (applicationId) => {
+        try {
+            const result = await companyAPI.markApplicationDone(applicationId);
+            if (result.success) {
+                fetchInternshipsAndApplications();
+                alert('Applicant marked as done!');
+            } else {
+                alert(result.message || 'Failed to mark as done');
+            }
+        } catch (error) {
+            console.error('Error marking as done:', error);
+            alert('Error marking as done');
+        }
+    };
+
     const getStatusColor = (status) => {
         switch (status) {
             case 'pending': return '#ffc107';
@@ -529,6 +544,21 @@ const ManageApplications = () => {
                                                 View Portfolio
                                             </button>
                                         )}
+                                        <button 
+                                            onClick={() => handleMarkDone(application.application_id)}
+                                            disabled={application.done_intern}
+                                            style={{
+                                                padding: '8px 16px',
+                                                backgroundColor: application.done_intern ? '#6c757d' : '#17a2b8',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '5px',
+                                                cursor: application.done_intern ? 'not-allowed' : 'pointer',
+                                                fontSize: '0.9rem'
+                                            }}
+                                        >
+                                            {application.done_intern ? 'Internship Done' : 'Mark as Done'}
+                                        </button>
                                     </div>
                                 </div>
                             ))
@@ -796,6 +826,21 @@ const ManageApplications = () => {
                                                             View Portfolio
                                                         </button>
                                                     )}
+                                                    <button 
+                                                        onClick={() => handleMarkDone(application.application_id)}
+                                                        disabled={application.done_intern}
+                                                        style={{
+                                                            padding: '8px 16px',
+                                                            backgroundColor: application.done_intern ? '#6c757d' : '#17a2b8',
+                                                            color: 'white',
+                                                            border: 'none',
+                                                            borderRadius: '5px',
+                                                            cursor: application.done_intern ? 'not-allowed' : 'pointer',
+                                                            fontSize: '0.9rem'
+                                                        }}
+                                                    >
+                                                        {application.done_intern ? 'Internship Done' : 'Mark as Done'}
+                                                    </button>
                                                   </div>
                                                 </div>
                                             ))

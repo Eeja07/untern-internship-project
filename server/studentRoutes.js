@@ -28,6 +28,8 @@ router.get('/student/applications', authenticateToken, requireStudent, async (re
       SELECT 
         a.application_id,
         a.internship_id,
+        a.student_profile_id,
+        COALESCE(a.done_intern, false) AS done_intern,
         CASE 
             WHEN a.status = 'shortlisted' THEN 'pending'
             ELSE a.status
@@ -41,6 +43,7 @@ router.get('/student/applications', authenticateToken, requireStudent, async (re
         i.salary_min,
         i.salary_max,
         i.application_deadline,
+        c.company_id,
         c.company_name,
         c.industry,
         c.logo_url

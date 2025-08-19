@@ -201,8 +201,8 @@ router.post('/internships/:id/apply', authenticateToken, async (req, res) => {
 
     // Create application with pending status and current timestamp
     const result = await pool.query(
-      `INSERT INTO applications (internship_id, student_profile_id, status, applied_date) 
-       VALUES ($1, $2, 'pending', CURRENT_TIMESTAMP) 
+      `INSERT INTO applications (internship_id, student_profile_id, status, applied_date, done_intern) 
+       VALUES ($1, $2, 'pending', CURRENT_TIMESTAMP, false) 
        RETURNING application_id, applied_date`,
       [internshipId, profileId]
     );
@@ -354,12 +354,14 @@ router.get('/skills/search', async (req, res) => {
 router.get('/companies/:companyId/reviews', async (req, res) => {
   try {
     const { companyId } = req.params;
-
     const result = await pool.query(
-      `SELECT cr.review_id, cr.rating, cr.review_text, cr.created_at,
-              s.name as reviewer_name
+      `SELECT cr.review_id, cr.rating, cr.review_text, cr.created_at, cr.internship_id,
+              s.name as reviewer_name,
+              s.education,
+              c.company_name
        FROM company_reviews cr
        JOIN students s ON cr.student_profile_id = s.student_id
+       JOIN companies c ON cr.company_id = c.company_id
        WHERE cr.company_id = $1
        ORDER BY cr.created_at DESC`,
       [companyId]
@@ -392,7 +394,7 @@ router.post('/companies/:companyId/reviews', authenticateToken, async (req, res)
   try {
     const { id, user_type, student_id } = req.user;
     const { companyId } = req.params;
-    const { rating, review_text } = req.body;
+    const { rating, review_text, internship_id } = req.body;
     const profileId = student_id || id;
 
     if (user_type !== 'student') {
@@ -409,23 +411,23 @@ router.post('/companies/:companyId/reviews', authenticateToken, async (req, res)
       });
     }
 
-    // Check if student has already reviewed this company
+    // Check if student has already reviewed this internship post
     const existingReview = await pool.query(
-      'SELECT review_id FROM company_reviews WHERE company_id = $1 AND student_profile_id = $2',
-      [companyId, profileId]
+      'SELECT review_id FROM company_reviews WHERE company_id = $1 AND student_profile_id = $2 AND internship_id = $3',
+      [companyId, profileId, internship_id]
     );
 
     if (existingReview.rows.length > 0) {
       return res.status(400).json({
         success: false,
-        message: 'You have already reviewed this company'
+        message: 'You have already reviewed this internship post'
       });
     }
 
-    // Create review
+    // Create review with internship_id
     const result = await pool.query(
-      'INSERT INTO company_reviews (company_id, student_profile_id, rating, review_text) VALUES ($1, $2, $3, $4) RETURNING review_id',
-      [companyId, profileId, rating, review_text]
+      'INSERT INTO company_reviews (company_id, student_profile_id, rating, review_text, internship_id) VALUES ($1, $2, $3, $4, $5) RETURNING review_id',
+      [companyId, profileId, rating, review_text, internship_id]
     );
 
     res.status(201).json({
@@ -439,6 +441,66 @@ router.post('/companies/:companyId/reviews', authenticateToken, async (req, res)
     res.status(500).json({
       success: false,
       message: 'Failed to submit review'
+    });
+  }
+});
+
+// Get all company reviews (no companyId required)
+router.get('/companies/reviews', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT cr.review_id, cr.rating, cr.review_text, cr.created_at, cr.internship_id,
+              s.name as reviewer_name,
+              s.education,
+              c.company_name
+       FROM company_reviews cr
+       JOIN students s ON cr.student_profile_id = s.student_id
+       JOIN companies c ON cr.company_id = c.company_id
+       ORDER BY cr.created_at DESC`
+    );
+    res.json({
+      success: true,
+      reviews: result.rows
+    });
+  } catch (error) {
+    console.error('All company reviews fetch error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch company reviews'
+    });
+  }
+});
+
+// Get student applications
+router.get('/student/applications', authenticateToken, async (req, res) => {
+  try {
+    const { id: user_id, student_id } = req.user;
+    const profileId = student_id || user_id;
+
+    // Fetch applications with internship and company details
+    const result = await pool.query(
+      `SELECT a.*, COALESCE(a.done_intern, false) AS done_intern, i.title AS internship_title, c.company_name
+       FROM applications a
+       JOIN internships i ON a.internship_id = i.internship_id
+       JOIN companies c ON i.company_id = c.company_id
+       WHERE a.student_profile_id = $1
+       ORDER BY a.applied_date DESC`,
+      [profileId]
+    );
+
+    // Debug: log raw application rows
+    console.log('Student applications raw rows:', result.rows);
+
+    res.json({
+      success: true,
+      applications: result.rows
+    });
+
+  } catch (error) {
+    console.error('Student applications fetch error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch applications'
     });
   }
 });

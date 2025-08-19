@@ -115,10 +115,25 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await authAPI.login(credentials);
-      
       if (response.success) {
-        setUser(response.user);
+        let fullProfile = response.user;
+        // Fetch student profile if userType is student
+        if (response.user.userType === 'student') {
+          try {
+            const studentResponse = await studentAPI.getProfile();
+            if (studentResponse.success) {
+              fullProfile = {
+                ...fullProfile,
+                student_profile: studentResponse.profile
+              };
+            }
+          } catch (studentError) {
+            console.error('Failed to fetch student profile after login:', studentError);
+          }
+        }
+        setUser(fullProfile);
         setIsAuthenticated(true);
+        localStorage.setItem('user', JSON.stringify(fullProfile));
         return response;
       } else {
         throw new Error(response.message || 'Login failed');

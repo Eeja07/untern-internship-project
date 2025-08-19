@@ -1,38 +1,8 @@
-import React, { useState } from 'react';
-
-const studentReviews = [
-  {
-    company: {
-      name: 'CompanyA',
-      address: '123 Main St, Cityville',
-    },
-    student: {
-      fullName: 'Mahija Rahman',
-      education: 'BSc Computer Science, University of Cityville',
-    },
-    review: 'My internship at CompanyA was transformative. I worked on real projects and received mentorship from experienced engineers. The company culture was supportive and innovative.',
-  },
-  {
-    company: {
-      name: 'CompanyB',
-      address: '456 Tech Ave, Townsburg',
-    },
-    student: {
-      fullName: 'Arjun Patel',
-      education: 'BA Business Administration, Townsburg College',
-    },
-    review: 'CompanyB provided a great learning environment. I gained practical skills and the team encouraged my growth. Highly recommended for future interns.',
-  },
-];
-
-// Dummy verification data: only verified internships can be reviewed
-const acceptedInternships = [
-  { company: 'CompanyA', post: 'Software Engineer Intern', verified: true },
-  { company: 'CompanyA', post: 'Frontend Developer Intern', verified: false },
-  { company: 'CompanyB', post: 'Business Analyst Intern', verified: true }
-];
-
-const uniqueCompanies = [...new Set(studentReviews.map(r => r.company.name))];
+import React, { useState, useEffect } from 'react';
+import { reviewsAPI } from '../auth/api.jsx';
+import { internshipAPI } from '../auth/api.jsx';
+import { useAuth } from '../auth/AuthContext';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const CompanyReviews = () => {
   const [search, setSearch] = useState('');
@@ -41,40 +11,184 @@ const CompanyReviews = () => {
   const [reviewForm, setReviewForm] = useState({
     company: '',
     post: '',
-    review: ''
+    review: '',
+    rating: 5
   });
   const [formMessage, setFormMessage] = useState('');
+  const [reviews, setReviews] = useState([]);
+  const [uniqueCompanies, setUniqueCompanies] = useState([]);
+  const [verifiedInternships, setVerifiedInternships] = useState([]);
+  const [recaptchaToken, setRecaptchaToken] = useState('');
+  const RECAPTCHA_SITE_KEY = '6Lf2E6krAAAAAAzXkluXdOa1A7XVSOMV0cdUyDZM'; // Replace with your actual site key
+  const { isAuthenticated, user } = useAuth();
 
-  const filteredReviews = studentReviews.filter(item => {
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const res = await reviewsAPI.getCompanyReviews();
+        if (res.success) {
+          setReviews(res.reviews || []);
+          setUniqueCompanies([...new Set((res.reviews || []).map(r => r.company_name))]);
+        }
+      } catch (err) {
+        setReviews([]);
+        setUniqueCompanies([]);
+      }
+    };
+    fetchReviews();
+  }, [activeTab, localStorage.getItem('user')]);
+
+  // Fetch verified internships for review form
+  useEffect(() => {
+    const fetchVerifiedInternships = async () => {
+      try {
+        const res = await internshipAPI.getMyApplications();
+        if (res.success) {
+          if (res.applications && res.applications.length > 0) {
+            res.applications.forEach(app => {
+            });
+          }
+          const verified = (res.applications || []).filter(a => a.done_intern);
+          setVerifiedInternships(verified);
+        }
+      } catch (err) {
+        console.error('Error fetching verified internships:', err);
+        setVerifiedInternships([]);
+      }
+    };
+    fetchVerifiedInternships();
+  }, []); // Add empty dependency array so it only runs once
+
+  // Fetch reviews when tab changes to 'write'
+  useEffect(() => {
+    if (activeTab === 'write') {
+      const fetchReviews = async () => {
+        try {
+          const res = await reviewsAPI.getCompanyReviews();
+          if (res.success) {
+            setReviews(res.reviews || []);
+            setUniqueCompanies([...new Set((res.reviews || []).map(r => r.company_name))]);
+          }
+        } catch (err) {
+          setReviews([]);
+          setUniqueCompanies([]);
+        }
+      };
+      fetchReviews();
+    }
+  }, [activeTab]);
+
+  // Fetch reviews after login
+  useEffect(() => {
+    if (isAuthenticated) {
+      const fetchReviews = async () => {
+        try {
+          const res = await reviewsAPI.getCompanyReviews();
+          if (res.success) {
+            setReviews(res.reviews || []);
+            setUniqueCompanies([...new Set((res.reviews || []).map(r => r.company_name))]);
+          }
+        } catch (err) {
+          setReviews([]);
+          setUniqueCompanies([]);
+        }
+      };
+      fetchReviews();
+    }
+  }, [isAuthenticated, user, activeTab]);
+
+  const filteredReviews = reviews.filter(item => {
     const matchesSearch =
-      item.company.name.toLowerCase().includes(search.toLowerCase()) ||
-      item.student.fullName.toLowerCase().includes(search.toLowerCase());
-    const matchesFilter = filter ? item.company.name === filter : true;
+      (item.company_name || '').toLowerCase().includes(search.toLowerCase()) ||
+      (item.reviewer_name || '').toLowerCase().includes(search.toLowerCase());
+    const matchesFilter = filter ? item.company_name === filter : true;
     return matchesSearch && matchesFilter;
   });
 
-  // Filter accepted and verified posts for selected company
+  // For review form: only allow companies/posts where done_intern === true
+  const verifiedCompanies = [...new Set(verifiedInternships.map(i => i.company_name))];
   const acceptedPosts = reviewForm.company
-    ? acceptedInternships.filter(i => i.company === reviewForm.company && i.verified)
+    ? verifiedInternships.filter(i => i.company_name === reviewForm.company)
     : [];
-  const isCompanyVerified = acceptedInternships.some(i => i.company === reviewForm.company && i.verified);
+  const isCompanyVerified = verifiedCompanies.includes(reviewForm.company);
+
+  // Track reviewed posts for the selected company
+  // Use user from AuthContext, prefer student name
+  const userName =
+    user?.student_profile?.name ||
+    user?.student?.name ||
+    user?.name ||
+    user?.username ||
+    user?.email ||
+    '';
+
+  const reviewedPosts = reviews
+    .filter(r => r.company_name === reviewForm.company && r.reviewer_name === userName)
+    .map(r => {
+      // Debug: log each review object
+      return r.job_title || r.internship_title || r.title;
+    });
+
+  // Track reviewed internship_ids for the selected company and user
+  const reviewedInternshipIds = reviews
+    .filter(r => r.company_name === reviewForm.company && r.reviewer_name === userName && r.internship_id)
+    .map(r => r.internship_id);
+
+  // Debug: log reviewed internship_ids for the selected company
 
   const handleFormChange = (e) => {
+    if (e.target.name === 'post') {
+      const alreadyReviewed = reviewedPosts.includes(e.target.value);
+      if (alreadyReviewed) {
+        setReviewForm(f => ({ ...f, post: '' }));
+        return;
+      }
+    }
     setReviewForm({ ...reviewForm, [e.target.name]: e.target.value });
-    // Reset post if company changes
     if (e.target.name === 'company') {
       setReviewForm(f => ({ ...f, post: '' }));
     }
   };
 
-  const handleReviewSubmit = (e) => {
+  const handleReviewSubmit = async (e) => {
     e.preventDefault();
+    if (!recaptchaToken) {
+      setFormMessage('Please complete the reCAPTCHA to submit your review.');
+      return;
+    }
     if (!reviewForm.company || !reviewForm.post) {
       setFormMessage('You must select a verified company and internship post.');
       return;
     }
-    setFormMessage('Review submitted! (In real app, this would be verified and saved to DB)');
-    setReviewForm({ company: '', post: '', review: '' });
+    try {
+      // Find the company_id and internship_id for the selected post from verifiedInternships
+      const selectedIntern = acceptedPosts.find(i => (i.internship_title || i.title) === reviewForm.post);
+      if (!selectedIntern) {
+        setFormMessage('Invalid internship post selection.');
+        return;
+      }
+      // Call API to create review, now sending internship_id
+      const res = await reviewsAPI.createReview(selectedIntern.company_id || selectedIntern.companyId, {
+        rating: reviewForm.rating,
+        review_text: reviewForm.review,
+        internship_id: selectedIntern.internship_id // <-- send internship_id
+      });
+      if (res.success) {
+        setFormMessage('Review submitted!');
+        setReviewForm({ company: '', post: '', review: '', rating: 5 });
+        // Fetch updated reviews
+        const reviewsRes = await reviewsAPI.getCompanyReviews();
+        if (reviewsRes.success) {
+          setReviews(reviewsRes.reviews || []);
+          setUniqueCompanies([...new Set((reviewsRes.reviews || []).map(r => r.company_name))]);
+        }
+      } else {
+        setFormMessage(res.message || 'Failed to submit review.');
+      }
+    } catch (err) {
+      setFormMessage(err?.message || err?.response?.data?.message || 'Failed to submit review.');
+    }
+    setRecaptchaToken('');
   };
 
   return (
@@ -137,12 +251,15 @@ const CompanyReviews = () => {
             ) : (
               filteredReviews.map((item, idx) => (
                 <div key={idx} style={{ background: '#f8f9fa', padding: '24px', borderRadius: '12px', border: '1px solid #e9ecef', boxShadow: '0 2px 8px #e9ecef' }}>
-                  <h4 style={{ color: '#007bff', marginBottom: '8px' }}>{item.company.name}</h4>
-                  <p style={{ margin: '4px 0', color: '#6c757d' }}><strong>Address:</strong> {item.company.address}</p>
-                  <p style={{ margin: '4px 0' }}><strong>Student:</strong> {item.student.fullName}</p>
-                  <p style={{ margin: '4px 0', color: '#6c757d' }}><strong>Education:</strong> {item.student.education}</p>
+                  <h4 style={{ color: '#007bff', marginBottom: '8px' }}>{item.company_name}</h4>
+                  <p style={{ margin: '4px 0', color: '#6c757d' }}><strong>Job Title:</strong> {item.job_title}</p>
+                  <p style={{ margin: '4px 0' }}><strong>Student:</strong> {item.reviewer_name}</p>
+                  <p style={{ margin: '4px 0', color: '#6c757d' }}><strong>Education:</strong> {item.education}</p>
+                  <div style={{ margin: '4px 0' }}>
+                    <strong>Rating:</strong> {'★'.repeat(item.rating || 0)}{'☆'.repeat(5 - (item.rating || 0))}
+                  </div>
                   <div style={{ marginTop: '14px', fontStyle: 'italic', color: '#343a40', background: '#e7f3ff', padding: '12px', borderRadius: '8px' }}>
-                    "{item.review}"
+                    "{item.review_text}"
                   </div>
                 </div>
               ))
@@ -159,11 +276,10 @@ const CompanyReviews = () => {
               value={reviewForm.company}
               onChange={handleFormChange}
               required
-              disabled={reviewForm.company && !isCompanyVerified}
-              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ddd', marginTop: '6px', background: reviewForm.company && !isCompanyVerified ? '#e9ecef' : 'white' }}
+              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ddd', marginTop: '6px' }}
             >
               <option value="">Select Company</option>
-              {uniqueCompanies.map(company => (
+              {verifiedCompanies.map(company => (
                 <option key={company} value={company}>{company}</option>
               ))}
             </select>
@@ -179,8 +295,29 @@ const CompanyReviews = () => {
               style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ddd', marginTop: '6px', background: !isCompanyVerified || acceptedPosts.length === 0 ? '#e9ecef' : 'white' }}
             >
               <option value="">{!isCompanyVerified ? 'Not verified by company' : acceptedPosts.length === 0 ? 'No verified internship posts available' : 'Select Internship Post'}</option>
-              {acceptedPosts.map((i, idx) => (
-                <option key={idx} value={i.post}>{i.post}</option>
+              {acceptedPosts.map((i, idx) => {
+                const postTitle = i.internship_title || i.title;
+                const alreadyReviewed = reviewedInternshipIds.includes(i.internship_id);
+                // Debug: log each post and its reviewed status
+                return (
+                  <option key={idx} value={postTitle} disabled={alreadyReviewed}>
+                    {postTitle}{alreadyReviewed ? ' (already reviewed)' : ''}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+          <div style={{ marginBottom: '12px' }}>
+            <label style={{ fontWeight: 'bold', color: '#343a40' }}>Rating</label>
+            <select
+              name="rating"
+              value={reviewForm.rating}
+              onChange={e => setReviewForm({ ...reviewForm, rating: parseInt(e.target.value) })}
+              required
+              style={{ width: '100px', padding: '10px', borderRadius: '6px', border: '1px solid #ddd', marginTop: '6px' }}
+            >
+              {[1,2,3,4,5].map(star => (
+                <option key={star} value={star}>{star} Star{star > 1 ? 's' : ''}</option>
               ))}
             </select>
           </div>
@@ -199,6 +336,13 @@ const CompanyReviews = () => {
               disabled={!isCompanyVerified || acceptedPosts.length === 0}
               style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ddd', marginTop: '6px', minHeight: '80px', background: !isCompanyVerified || acceptedPosts.length === 0 ? '#e9ecef' : 'white' }}
               placeholder="Write your review here..."
+            />
+          </div>
+          {/* Google reCAPTCHA for review submission */}
+          <div style={{ marginBottom: '12px' }}>
+            <ReCAPTCHA
+              sitekey={RECAPTCHA_SITE_KEY}
+              onChange={token => setRecaptchaToken(token)}
             />
           </div>
           <button

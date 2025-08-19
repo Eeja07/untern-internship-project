@@ -18,10 +18,10 @@ router.get('/', authenticateToken, requireStudent, async (req, res) => {
     }
 
     const result = await pool.query(
-      `SELECT a.application_id, a.status, a.applied_date,
+      `SELECT a.application_id, a.student_profile_id, COALESCE(a.done_intern, false) AS done_intern, a.status, a.applied_date,
               i.internship_id, i.title, i.description, i.location, i.type,
               i.salary_min, i.salary_max, i.application_deadline,
-              c.company_name, c.logo_url
+              c.company_id, c.company_name, c.logo_url
        FROM applications a
        JOIN internships i ON a.internship_id = i.internship_id
        JOIN companies c ON i.company_id = c.company_id
