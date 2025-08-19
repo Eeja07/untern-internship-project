@@ -18,6 +18,7 @@
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "mailer": "^0.6.6",
+    "midtrans-client": "^1.4.3",
     "mongoose": "^8.17.1",
     "multer": "^2.0.2",
     "nodemailer": "^6.9.1",
