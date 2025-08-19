@@ -5,9 +5,9 @@ import { studentAPI } from '../auth/api';
 import DiscoverInternships from './DiscoverInternships.jsx';
 import BuildProfile from './BuildProfile.jsx';
 import TrackApplications from './TrackApplications.jsx';
-import SuccessStories from './SuccessStories.jsx';
 import CompanyReviews from './CompanyReviews.jsx';
 import InternshipCertifications from './InternshipCertifications.jsx';
+import DashboardOverview from './DashboardOverview.jsx';
 
 const StudentDashboard = () => {
   const [activeSection, setActiveSection] = useState('discover');
@@ -19,11 +19,11 @@ const StudentDashboard = () => {
   const location = useLocation();
 
   const sidebarItems = [
+    { id: 'overview', label: 'Dashboard Overview', icon: '📊' },
     { id: 'discover', label: 'Discover Internships', icon: '🔍' },
     { id: 'profile', label: 'Build Your Profile', icon: '👤' },
     { id: 'applications', label: 'Track Your Applications', icon: '📋' },
-    { id: 'stories', label: 'Read Success Stories', icon: '🌟' },
-    { id: 'reviews', label: 'View Company Reviews', icon: '⭐' }, 
+    { id: 'reviews', label: 'View Company Reviews', icon: '⭐' },
     { id: 'certifications', label: 'Receive Certifications', icon: '🏆' }
   ];
 
@@ -50,17 +50,11 @@ const StudentDashboard = () => {
   useEffect(() => {
     const path = location.pathname.split('/').pop();
     const validSections = sidebarItems.map(item => item.id);
-    // console.log('Current path:', location.pathname);
-    // console.log('Extracted section:', path);
-    // console.log('Valid sections:', validSections);
     
     if (path && validSections.includes(path)) {
       setActiveSection(path);
-      // console.log('Setting active section to:', path);
     } else {
-      // If no valid path, default to discover
-      setActiveSection('discover');
-      // console.log('Setting default section: discover');
+      setActiveSection('overview');
     }
   }, [location.pathname]);
 
@@ -82,23 +76,21 @@ const StudentDashboard = () => {
   };
 
   const renderContent = () => {
-    // console.log('Rendering content for section:', activeSection);
     switch (activeSection) {
+      case 'overview':
+        return <DashboardOverview />;
       case 'discover':
         return <DiscoverInternships />;
       case 'profile':
         return <BuildProfile onProfileSaved={() => setProfileRefreshFlag(f => f + 1)} />;
       case 'applications':
         return <TrackApplications />;
-      case 'stories':
-        return <SuccessStories />;
       case 'reviews':
         return <CompanyReviews />;
       case 'certifications':
         return <InternshipCertifications />;
       default:
-        console.log('No matching section, showing discover');
-        return <DiscoverInternships />;
+        return <DashboardOverview />;
     }
   };
 

@@ -152,6 +152,10 @@ const InternshipCertifications = () => {
                   return matchesJob && matchesPostSearch;
                 }).map((post, pIdx) => {
                   const postKey = `${company}-${post.key}`;
+                  const firstCert = post.certs[0];
+                  // Find certificate and letter
+                  const certItem = post.certs.find(item => item.letter.toLowerCase().includes('certificate'));
+                  const letterItem = post.certs.find(item => item.letter.toLowerCase().includes('letter'));
                   return (
                     <div key={postKey} style={{ marginBottom: '8px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -168,27 +172,52 @@ const InternshipCertifications = () => {
                       </div>
                       {openPost[postKey] && (
                         <div style={{ background: '#fff', padding: '16px', borderRadius: '10px', border: '1px solid #e9ecef', boxShadow: '0 1px 4px #e9ecef', marginTop: '12px' }}>
-                          {post.certs.map((item, cIdx) => (
-                            <div key={cIdx} style={{ background: '#f8f9fa', padding: '16px', borderRadius: '10px', border: '1px solid #e9ecef', marginBottom: '10px' }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontWeight: 'bold', color: '#343a40' }}>{item.letter}</span>
-                                <a
-                                  href={item.fileUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={{ background: '#28a745', color: 'white', textDecoration: 'none', padding: '6px 16px', borderRadius: '4px', fontSize: '14px' }}
-                                >
-                                  View File
-                                </a>
-                              </div>
-                              <div style={{ marginTop: '12px' }}>
-                                <p style={{ margin: '4px 0', color: '#6c757d' }}><strong>Mentor:</strong> {item.mentor}</p>
-                                <div style={{ marginTop: '10px', color: '#343a40', background: '#e7f3ff', padding: '12px', borderRadius: '8px' }}>
-                                  <strong>Feedback/Evaluation:</strong> {item.feedback}
+                          <p style={{ margin: '4px 0', color: '#6c757d' }}><strong>Mentor:</strong> {firstCert.mentor}</p>
+                          <div style={{ marginTop: '10px', color: '#343a40', background: '#e7f3ff', padding: '12px', borderRadius: '8px', marginBottom: '16px' }}>
+                            <strong>Feedback/Evaluation:</strong> {firstCert.feedback}
+                          </div>
+                          {/* Certificate Section */}
+                          <div style={{ marginBottom: '10px' }}>
+                            <span style={{ fontWeight: 'bold', color: '#007bff' }}>Certificate:</span>
+                            {certItem ? (
+                              <div style={{ background: '#f8f9fa', padding: '16px', borderRadius: '10px', border: '1px solid #e9ecef', marginTop: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                  <span style={{ fontWeight: 'bold', color: '#343a40' }}>{certItem.letter}</span>
+                                  <a
+                                    href={certItem.fileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{ background: '#28a745', color: 'white', textDecoration: 'none', padding: '6px 16px', borderRadius: '4px', fontSize: '14px' }}
+                                  >
+                                    View File
+                                  </a>
                                 </div>
                               </div>
-                            </div>
-                          ))}
+                            ) : (
+                              <div style={{ color: '#dc3545', marginTop: '8px' }}>No certificate available.</div>
+                            )}
+                          </div>
+                          {/* Letter Section */}
+                          <div style={{ marginBottom: '10px' }}>
+                            <span style={{ fontWeight: 'bold', color: '#007bff' }}>Letter:</span>
+                            {letterItem ? (
+                              <div style={{ background: '#f8f9fa', padding: '16px', borderRadius: '10px', border: '1px solid #e9ecef', marginTop: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                  <span style={{ fontWeight: 'bold', color: '#343a40' }}>{letterItem.letter}</span>
+                                  <a
+                                    href={letterItem.fileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{ background: '#28a745', color: 'white', textDecoration: 'none', padding: '6px 16px', borderRadius: '4px', fontSize: '14px' }}
+                                  >
+                                    View File
+                                  </a>
+                                </div>
+                              </div>
+                            ) : (
+                              <div style={{ color: '#dc3545', marginTop: '8px' }}>No letter available.</div>
+                            )}
+                          </div>
                         </div>
                       )}
                     </div>
