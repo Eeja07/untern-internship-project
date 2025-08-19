@@ -41,6 +41,30 @@ const upload = multer({
   }
 });
 
+// Configure multer for internship documents uploads
+const documentStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/internship-documents/');
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+const documentUpload = multer({
+  storage: documentStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['.pdf', '.jpg', '.jpeg', '.png'];
+    const fileExt = path.extname(file.originalname).toLowerCase();
+    if (allowedTypes.includes(fileExt)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF, JPG, JPEG, PNG files are allowed'));
+    }
+  }
+});
+
 // Upload or remove company logo
 router.post('/company/logo', authenticateToken, requireCompany, upload.single('logo'), async (req, res) => {
   try {
@@ -69,7 +93,7 @@ router.post('/company/logo', authenticateToken, requireCompany, upload.single('l
 router.get('/company/applications', authenticateToken, requireCompany, async (req, res) => {
   try {
     const { id: companyId } = req.user;
-    console.log('Fetching applications for company ID:', companyId);
+    // console.log('Fetching applications for company ID:', companyId);
 
     const result = await pool.query(`
       SELECT 
@@ -126,7 +150,7 @@ router.get('/company/internships', authenticateToken, requireCompany, async (req
   try {
     const { id: companyId } = req.user;
     
-    console.log('Fetching internships for company ID:', companyId);
+    // console.log('Fetching internships for company ID:', companyId);
 
     const result = await pool.query(`
       SELECT 
@@ -139,7 +163,7 @@ router.get('/company/internships', authenticateToken, requireCompany, async (req
       ORDER BY i.created_at DESC
     `, [companyId]);
 
-    console.log('Found internships:', result.rows.length);
+    // console.log('Found internships:', result.rows.length);
 
     res.json({
       success: true,
@@ -397,6 +421,56 @@ router.delete('/company/internships/:id', authenticateToken, requireCompany, asy
   }
 });
 
+// POST /api/internship-documents
+router.post('/internship-documents', authenticateToken, requireCompany, documentUpload.fields([
+  { name: 'certificate', maxCount: 1 },
+  { name: 'letter', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const { studentName, internshipPost, mentor, feedback } = req.body;
+    const companyId = req.user.id;
+    console.log('Received studentName:', studentName);
+    console.log('Received internshipPost:', internshipPost);
+    // Lookup student_id from students table
+    const studentRes = await pool.query('SELECT student_id, name FROM students WHERE name = $1', [studentName]);
+    console.log('Student query result:', studentRes.rows);
+    if (studentRes.rows.length === 0) {
+      console.error('Student not found:', studentName);
+      return res.status(400).json({ success: false, message: `Student not found: ${studentName}. Please check spelling/case.` });
+    }
+    const student_id = studentRes.rows[0].student_id;
+    // Lookup internship_id from internships table
+    const internshipRes = await pool.query('SELECT internship_id, title FROM internships WHERE title = $1 AND company_id = $2', [internshipPost, companyId]);
+    console.log('Internship query result:', internshipRes.rows);
+    if (internshipRes.rows.length === 0) {
+      console.error('Internship post not found:', internshipPost);
+      return res.status(400).json({ success: false, message: `Internship post not found: ${internshipPost}. Please check spelling/case.` });
+    }
+    const internship_id = internshipRes.rows[0].internship_id;
+    // You may want to get actual start/end dates from internship or request
+    const start_date = new Date();
+    const end_date = new Date();
+    let certificate_file_url = null;
+    let letter_file_url = null;
+    if (req.files['certificate']) {
+      certificate_file_url = `/uploads/internship-documents/${req.files['certificate'][0].filename}`;
+    }
+    if (req.files['letter']) {
+      letter_file_url = `/uploads/internship-documents/${req.files['letter'][0].filename}`;
+    }
+    // Insert into internship_documents table
+    await pool.query(`
+      INSERT INTO internship_documents (
+        student_id, company_id, internship_id, certificate_file_url, letter_file_url, mentor, feedback, start_date, end_date
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    `, [student_id, companyId, internship_id, certificate_file_url, letter_file_url, mentor, feedback, start_date, end_date]);
+    res.json({ success: true, message: 'Documents uploaded successfully.' });
+  } catch (error) {
+    console.error('Internship document upload error:', error);
+    res.status(500).json({ success: false, message: 'Failed to upload documents.' });
+  }
+});
+
 // Debug endpoint to test applications fetching
 router.get('/company/debug-applications', authenticateToken, requireCompany, async (req, res) => {
   try {
@@ -456,6 +530,150 @@ router.get('/company/debug-applications', authenticateToken, requireCompany, asy
       message: 'Debug failed',
       error: error.message
     });
+  }
+});
+
+// GET /api/students - return all students for dropdown
+router.get('/students', authenticateToken, requireCompany, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT student_id, name FROM students ORDER BY name ASC');
+    res.json({ success: true, students: result.rows });
+  } catch (error) {
+    console.error('Fetch students error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch students' });
+  }
+});
+
+// GET /api/internship-documents/student/:studentId - fetch internship documents for a student
+router.get('/internship-documents/student/:studentId', authenticateToken, async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const result = await pool.query(`
+      SELECT d.*, c.company_name, i.title AS internship_title
+      FROM internship_documents d
+      JOIN companies c ON d.company_id = c.company_id
+      JOIN internships i ON d.internship_id = i.internship_id
+      WHERE d.student_id = $1
+      ORDER BY d.created_at DESC
+    `, [studentId]);
+    res.json({ success: true, documents: result.rows });
+  } catch (error) {
+    console.error('Fetch internship documents error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch internship documents' });
+  }
+});
+
+// GET /api/company/student-applications?student_id=... - fetch applications for a student (company access)
+router.get('/company/student-applications', authenticateToken, requireCompany, async (req, res) => {
+  try {
+    const { student_id } = req.query;
+    if (!student_id) return res.status(400).json({ success: false, message: 'student_id is required' });
+    const result = await pool.query(`
+      SELECT a.application_id, a.internship_id, i.title as internship_title
+      FROM applications a
+      JOIN internships i ON a.internship_id = i.internship_id
+      WHERE a.student_profile_id = $1
+      ORDER BY a.applied_date DESC
+    `, [student_id]);
+    res.json({ success: true, applications: result.rows });
+  } catch (error) {
+    console.error('Company fetch student applications error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch student applications' });
+  }
+});
+
+// GET /api/internship-documents/company/:companyId - fetch internship documents for a company
+router.get('/internship-documents/company/:companyId', authenticateToken, requireCompany, async (req, res) => {
+  try {
+    const { companyId } = req.params;
+    const result = await pool.query(`
+      SELECT d.*, s.name AS student_name, i.title AS internship_title
+      FROM internship_documents d
+      JOIN students s ON d.student_id = s.student_id
+      JOIN internships i ON d.internship_id = i.internship_id
+      WHERE d.company_id = $1
+      ORDER BY d.created_at DESC
+    `, [companyId]);
+    res.json({ success: true, documents: result.rows });
+    // console.log('Fetched internship documents for company:', companyId);
+  } catch (error) {
+    console.error('Fetch internship documents for company error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch internship documents for company' });
+  }
+});
+
+// PUT /api/internship-documents/:id - update mentor, feedback, and files
+router.put('/internship-documents/:id', authenticateToken, requireCompany, documentUpload.fields([
+  { name: 'certificate', maxCount: 1 },
+  { name: 'letter', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { mentor, feedback } = req.body;
+    let certificate_file_url = null;
+    let letter_file_url = null;
+    if (req.files['certificate']) {
+      certificate_file_url = `/uploads/internship-documents/${req.files['certificate'][0].filename}`;
+    }
+    if (req.files['letter']) {
+      letter_file_url = `/uploads/internship-documents/${req.files['letter'][0].filename}`;
+    }
+    // Build dynamic update query
+    const fields = [];
+    const values = [];
+    let paramCount = 0;
+    if (mentor !== undefined) {
+      paramCount++;
+      fields.push(`mentor = $${paramCount}`);
+      values.push(mentor);
+    }
+    if (feedback !== undefined) {
+      paramCount++;
+      fields.push(`feedback = $${paramCount}`);
+      values.push(feedback);
+    }
+    if (certificate_file_url) {
+      paramCount++;
+      fields.push(`certificate_file_url = $${paramCount}`);
+      values.push(certificate_file_url);
+    }
+    if (letter_file_url) {
+      paramCount++;
+      fields.push(`letter_file_url = $${paramCount}`);
+      values.push(letter_file_url);
+    }
+    if (fields.length === 0) {
+      return res.status(400).json({ success: false, message: 'No valid fields to update' });
+    }
+    paramCount++;
+    values.push(id);
+    const updateQuery = `UPDATE internship_documents SET ${fields.join(', ')} WHERE document_id = $${paramCount}`;
+    await pool.query(updateQuery, values);
+    res.json({ success: true, message: 'Internship document updated' });
+  } catch (error) {
+    console.error('Internship document update error:', error);
+    res.status(500).json({ success: false, message: 'Failed to update internship document' });
+  }
+});
+
+// DELETE /api/internship-documents/:id - delete the post
+router.delete('/internship-documents/:id', authenticateToken, requireCompany, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { type } = req.query;
+    if (type === 'certificate' || type === 'letter') {
+      // Remove only the file
+      const field = type === 'certificate' ? 'certificate_file_url' : 'letter_file_url';
+      await pool.query(`UPDATE internship_documents SET ${field} = NULL WHERE document_id = $1`, [id]);
+      return res.json({ success: true, message: `${type} removed` });
+    } else {
+      // Delete the whole post
+      await pool.query('DELETE FROM internship_documents WHERE document_id = $1', [id]);
+      return res.json({ success: true, message: 'Internship document deleted' });
+    }
+  } catch (error) {
+    console.error('Internship document delete error:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete internship document' });
   }
 });
 

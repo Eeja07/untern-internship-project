@@ -581,6 +581,27 @@ export const internshipAPI = {
   }
 };
 
+// Internship Documents API calls
+export const internshipDocumentsAPI = {
+  // Upload internship documents
+  upload: async (formData) => {
+    const response = await api.post('/internship-documents', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  },
+  // Get internship documents for student
+  getForStudent: async (studentId) => {
+    const response = await api.get(`/internship-documents/student/${studentId}`);
+    return response.data;
+  },
+  // Get internship documents for company
+  getForCompany: async (companyId) => {
+    const response = await api.get(`/internship-documents/company/${companyId}`);
+    return response.data;
+  }
+};
+
 // Utility functions
 export const utils = {
   // Check if user is authenticated

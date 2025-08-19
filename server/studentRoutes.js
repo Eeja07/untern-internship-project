@@ -22,7 +22,7 @@ router.get('/student/applications', authenticateToken, requireStudent, async (re
     const { id: userId, student_id } = req.user;
     const profileId = student_id || userId;
 
-    console.log('Fetching applications for student ID:', profileId);
+    // console.log('Fetching applications for student ID:', profileId);
 
     const result = await pool.query(`
       SELECT 

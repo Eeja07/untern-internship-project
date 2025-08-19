@@ -166,7 +166,7 @@ const PostInternship = () => {
                 salary_max: formData.salary_max ? parseInt(formData.salary_max) : null
             };
             
-            console.log('Submitting internship data:', submissionData);
+            // console.log('Submitting internship data:', submissionData);
             
             let result;
             if (editingInternship) {
