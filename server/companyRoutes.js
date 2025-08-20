@@ -129,7 +129,7 @@ router.get('/company/applications', authenticateToken, requireCompany, async (re
       ORDER BY a.applied_date DESC
     `, [companyId]);
 
-    console.log('Found applications:', result.rows.length);
+    // console.log('Found applications:', result.rows.length);
 
     res.json({
       success: true,

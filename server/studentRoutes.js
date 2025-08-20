@@ -54,7 +54,7 @@ router.get('/student/applications', authenticateToken, requireStudent, async (re
       ORDER BY a.applied_date DESC
     `, [profileId]);
 
-    console.log('Found applications:', result.rows.length);
+    // console.log('Found applications:', result.rows.length);
 
     res.json({
       success: true,
@@ -65,7 +65,7 @@ router.get('/student/applications', authenticateToken, requireStudent, async (re
     console.error('Student applications fetch error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch applications',
+      message: 'Failed to fetch applications',  
       error: error.message
     });
   }
