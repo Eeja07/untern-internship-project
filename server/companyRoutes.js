@@ -719,4 +719,62 @@ router.delete('/internship-documents/:id', authenticateToken, requireCompany, as
   }
 });
 
+// GET /api/company/student-profile/:studentId - fetch student profile for company access
+router.get('/company/student-profile/:studentId', authenticateToken, requireCompany, async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    // Query student profile and login email
+    const result = await pool.query(
+      `SELECT s.student_id, s.name, s.phone_number, s.bio, s.resume_url, s.profile_picture_url,
+              l.email,
+              s.skills, s.education, s.address, s.portfolio_url,
+              s.languages, s.certifications, s.work_experience, s.event_experience, s.organization_experience
+       FROM students s
+       JOIN login l ON l.id = s.student_id
+       WHERE s.student_id = $1`,
+      [studentId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Student profile not found' });
+    }
+    const profile = result.rows[0];
+    // Parse skills and education if needed
+    try { profile.skills = profile.skills ? (typeof profile.skills === 'string' ? JSON.parse(profile.skills) : profile.skills) : []; } catch (err) { profile.skills = []; }
+    try { profile.education = profile.education ? (typeof profile.education === 'string' ? JSON.parse(profile.education) : profile.education) : []; } catch (err) { profile.education = []; }
+    try { profile.languages = profile.languages ? (typeof profile.languages === 'string' ? JSON.parse(profile.languages) : profile.languages) : []; } catch (err) { profile.languages = []; }
+    try { profile.certifications = profile.certifications ? (typeof profile.certifications === 'string' ? JSON.parse(profile.certifications) : profile.certifications) : []; } catch (err) { profile.certifications = []; }
+    try { profile.work_experience = profile.work_experience ? (typeof profile.work_experience === 'string' ? JSON.parse(profile.work_experience) : profile.work_experience) : []; } catch (err) { profile.work_experience = []; }
+    try { profile.event_experience = profile.event_experience ? (typeof profile.event_experience === 'string' ? JSON.parse(profile.event_experience) : profile.event_experience) : []; } catch (err) { profile.event_experience = []; }
+    try { profile.organization_experience = profile.organization_experience ? (typeof profile.organization_experience === 'string' ? JSON.parse(profile.organization_experience) : profile.organization_experience) : []; } catch (err) { profile.organization_experience = []; }
+    profile.address = profile.address || '';
+    profile.resume_url = profile.resume_url || '';
+    profile.portfolio_url = profile.portfolio_url || '';
+    profile.profile_picture_url = profile.profile_picture_url || '';
+    res.json({ success: true, profile });
+  } catch (error) {
+    console.error('Company fetch student profile error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch student profile' });
+  }
+});
+
+// Insert profile view when company views student profile
+router.post('/company/profile-view', authenticateToken, requireCompany, async (req, res) => {
+  try {
+    const { user_id, user_type } = req.user;
+    const { student_id } = req.body;
+    if (!student_id) {
+      return res.status(400).json({ success: false, message: 'student_id is required' });
+    }
+    await pool.query(
+      `INSERT INTO profile_views (user_id, user_type, viewed_id, viewed_type, viewed_at)
+       VALUES ($1, 'company', $2, 'student', CURRENT_TIMESTAMP)`,
+      [user_id || req.user.id, student_id]
+    );
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Insert profile view error:', error);
+    res.status(500).json({ success: false, message: 'Failed to insert profile view' });
+  }
+});
+
 export default router;
