@@ -16,7 +16,7 @@ const WhyChooseUs = ({ onGetStartedClick }) => {
   useEffect(() => {
     if (isAuthenticated && user && lastAction === 'getStarted') {
       if (user.userType === 'student') {
-        navigate('/student-dashboard');
+        navigate('/student-dashboard/overview');
       } else if (user.userType === 'company') {
         navigate('/company-dashboard');
       }

@@ -28,7 +28,7 @@ const TrackApplications = () => {
         // Remap any 'shortlisted' status to 'pending' just in case
         const mappedApps = (result.applications || []).map(app => ({ ...app, status: remapStatus(app.status) }));
         setApplications(mappedApps);
-        // console.log('Student applications:', mappedApps);
+        console.log('Student applications:', mappedApps);
       } else {
         setError(result.message || 'Failed to fetch applications');
       }
@@ -62,7 +62,7 @@ const TrackApplications = () => {
   };
 
   const filteredApplications = applications.filter(app => {
-    const title = app.internship_title?.toLowerCase() || '';
+    const title = app.title?.toLowerCase() || '';
     const company = app.company_name?.toLowerCase() || '';
     const term = searchTerm.toLowerCase();
     const statusMatch = statusFilter === 'all' || app.status === statusFilter;
@@ -183,7 +183,7 @@ const TrackApplications = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
                   <div>
                     <h4 style={{ color: '#2c3e50', marginBottom: '5px' }}>
-                      {application.internship_title || 'Internship Position'}
+                      {application.title || 'Internship Position'}
                     </h4>
                     <p style={{ color: '#007bff', fontWeight: '500', margin: '0 0 5px 0' }}>
                       {application.company_name || 'Company Name'}

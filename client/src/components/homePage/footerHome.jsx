@@ -98,7 +98,7 @@ const FooterHome = ({ onForStudentsClick, onForCompaniesClick }) => {
                         </div>
                         <div className="footer-link2" style={{ display: 'flex', flexDirection: 'column', margin: '0', flex: '1', minWidth: '200px' }}>
                                 <h2 onClick={handleStudentNavigation()} style={{ color: 'white', fontSize: '1.25rem', margin: '0', padding: '1rem 0', cursor:'pointer'}}>For Students</h2>
-                                <a onClick={handleStudentNavigation('/student-dashboard/discover-internships')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer'}}>Discover Internships</a>
+                                <a onClick={handleStudentNavigation('/student-dashboard/search')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer'}}>Discover Internships</a>
                                 <a onClick={handleStudentNavigation('/student-dashboard/profile')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer'}}>Build Your Profile</a>
                                 <a onClick={handleStudentNavigation('/student-dashboard/applications')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer' }}>Track Your Applications</a>
                                 <a onClick={handleStudentNavigation('/student-dashboard/success-stories')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer' }}>Read Success Stories</a>

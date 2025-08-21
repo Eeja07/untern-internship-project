@@ -11,7 +11,7 @@ const FeaturedInternships = ({ onForStudentsClick, onClose }) => {
 
   useEffect(() => {
     if (isAuthenticated && user && lastAction === 'student' && user.userType === 'student') {
-      navigate('/student-dashboard');
+      navigate('/student-dashboard/featured');
       setLastAction(null);
     }
     fetchFeaturedInternships();
@@ -36,7 +36,7 @@ const FeaturedInternships = ({ onForStudentsClick, onClose }) => {
   const handleForStudentsClick = (e) => {
     e.preventDefault();
     if (isAuthenticated && user?.userType === 'student') {
-      navigate('/student-dashboard');
+      navigate('/student-dashboard/featured');
       return;
     }
     if (isAuthenticated && user?.userType === 'company') {

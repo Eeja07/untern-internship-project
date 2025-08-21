@@ -10,14 +10,14 @@ const Navbar = ({ onForStudentsClick, onClose,onGetStartedClick, onForCompaniesC
   useEffect(() => {
     if (isAuthenticated && user) {
       if (lastAction === 'student' && user.userType === 'student') {
-        navigate('/student-dashboard');
+        navigate('/student-dashboard/overview');
         setLastAction(null);
       } else if (lastAction === 'company' && user.userType === 'company') {
         navigate('/company-dashboard');
         setLastAction(null);
       } else if (lastAction === 'getStarted') {
         if (user.userType === 'student') {
-          navigate('/student-dashboard');
+          navigate('/student-dashboard/overview');
         } else if (user.userType === 'company') {
           navigate('/company-dashboard');
         }
@@ -29,7 +29,7 @@ const Navbar = ({ onForStudentsClick, onClose,onGetStartedClick, onForCompaniesC
   const handleForStudentsClick = (e) => {
     e.preventDefault();
     if (isAuthenticated && user?.userType === 'student') {
-      navigate('/student-dashboard');
+      navigate('/student-dashboard/');
       return;
     }
     // If user is authenticated as company, show messagex`

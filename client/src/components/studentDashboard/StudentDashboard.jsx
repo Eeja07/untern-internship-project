@@ -10,7 +10,7 @@ import InternshipCertifications from './InternshipCertifications.jsx';
 import DashboardOverview from './DashboardOverview.jsx';
 
 const StudentDashboard = () => {
-  const [activeSection, setActiveSection] = useState('discover');
+  const [activeSection, setActiveSection] = useState('search');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const { user, profile, logout } = useContext(AuthContext);
   const [localProfile, setLocalProfile] = useState(null);
@@ -20,7 +20,7 @@ const StudentDashboard = () => {
 
   const sidebarItems = [
     { id: 'overview', label: 'Dashboard Overview', icon: '📊' },
-    { id: 'discover', label: 'Discover Internships', icon: '🔍' },
+    { id: 'search', label: 'Discover Internships', icon: '🔍' },
     { id: 'profile', label: 'Build Your Profile', icon: '👤' },
     { id: 'applications', label: 'Track Your Applications', icon: '📋' },
     { id: 'reviews', label: 'View Company Reviews', icon: '⭐' },
@@ -48,11 +48,23 @@ const StudentDashboard = () => {
 
   // Set active section based on URL path
   useEffect(() => {
-    const path = location.pathname.split('/').pop();
-    const validSections = sidebarItems.map(item => item.id);
-    
-    if (path && validSections.includes(path)) {
-      setActiveSection(path);
+    const pathSegments = location.pathname.split('/').filter(Boolean);
+    // Find the section after 'student-dashboard'
+    const dashboardIdx = pathSegments.indexOf('student-dashboard');
+    let section = 'overview';
+    if (dashboardIdx !== -1 && pathSegments.length > dashboardIdx + 1) {
+      section = pathSegments[dashboardIdx + 1];
+      // Handle nested tabs for discover
+      if (section === 'search' && pathSegments.length > dashboardIdx + 2) {
+        const tab = pathSegments[dashboardIdx + 2];
+        if (tab === 'featured' || tab === 'search') {
+          section = tab;
+        }
+      }
+    }
+    const validSections = sidebarItems.map(item => item.id).concat(['featured', 'search']);
+    if (section && validSections.includes(section)) {
+      setActiveSection(section);
     } else {
       setActiveSection('overview');
     }
@@ -79,8 +91,14 @@ const StudentDashboard = () => {
     switch (activeSection) {
       case 'overview':
         return <DashboardOverview />;
-      case 'discover':
-        return <DiscoverInternships />;
+      case 'featured':
+        return (
+          <DiscoverInternships activeTab="featured" />
+        );
+      case 'search':
+        return (
+          <DiscoverInternships activeTab="search" />
+        );
       case 'profile':
         return <BuildProfile onProfileSaved={() => setProfileRefreshFlag(f => f + 1)} />;
       case 'applications':

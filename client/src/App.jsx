@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './components/auth/AuthContext.jsx';
 import HomePage from './components/homePage/homePage.jsx';
 import StudentDashboard from './components/studentDashboard/StudentDashboard.jsx';
@@ -7,6 +7,7 @@ import CompanyDashboard from './components/companyDashboard/CompanyDashboard.jsx
 import Faq from './components/faq/FAQPage.jsx';
 import Blog from './components/blog/BlogPage.jsx';
 import AboutUs from './components/about/aboutPage.jsx';
+
 
 function App() {
   return (
@@ -50,22 +51,9 @@ function App() {
           <Route path="/" element={<HomePage/>} />
           <Route path="/student-dashboard/*" element={<StudentDashboard/>} />
           <Route path="/company-dashboard/*" element={<CompanyDashboard/>} />
-          {/* Student routes */}
-          <Route path="/profile" element={<div>Profile Page - Coming Soon</div>} />
-          <Route path="/applications" element={<div>Applications Page - Coming Soon</div>} />
-          <Route path="/success-stories" element={<div>Success Stories Page - Coming Soon</div>} />
-          <Route path="/company-reviews" element={<div>Company Reviews Page - Coming Soon</div>} />
-          <Route path="/certifications" element={<div>Certifications Page - Coming Soon</div>} />
-          {/* Company routes */}
-          <Route path="/post-internship" element={<div>Post Internship Page - Coming Soon</div>} />
-          <Route path="/manage-applications" element={<div>Manage Applications Page - Coming Soon</div>} />
-          <Route path="/pricing" element={<div>Pricing Page - Coming Soon</div>} />
-          <Route path="/partnerships" element={<div>Partnerships Page - Coming Soon</div>} />
-          <Route path="/analytics" element={<div>Analytics Page - Coming Soon</div>} />
-          <Route path="/post-certifications" element={<div>Post Certifications Page - Coming Soon</div>} />
-          <Route path="/faq" element={<Faq/>} />
-          <Route path="/blog" element={<Blog/>} />
-          <Route path="/about" element={<AboutUs/>} />
+          <Route path="/faq" element={<Faq />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/about" element={<AboutUs />} />
         </Routes>
       </div>
     </AuthProvider>

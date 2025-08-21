@@ -18,7 +18,7 @@ const RealExperience = ({ onGetStartedClick }) => {
   useEffect(() => {
     if (isAuthenticated && user && lastAction === 'getStarted') {
       if (user.userType === 'student') {
-        navigate('/student-dashboard');
+        navigate('/student-dashboard/reviews');
       } else if (user.userType === 'company') {
         navigate('/company-dashboard');
       }

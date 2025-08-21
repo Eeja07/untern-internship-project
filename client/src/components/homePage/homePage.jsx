@@ -76,7 +76,7 @@ const HomePage = () => {
         try {
           const { query } = JSON.parse(searchIntent);
           sessionStorage.removeItem('searchIntent');
-          navigate(`/student-dashboard/discover?q=${encodeURIComponent(query)}`);
+          navigate(`/student-dashboard/search?q=${encodeURIComponent(query)}`);
         } catch (error) {
           console.error('Error parsing search intent:', error);
           sessionStorage.removeItem('searchIntent');

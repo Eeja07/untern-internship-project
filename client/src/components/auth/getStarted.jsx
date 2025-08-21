@@ -25,7 +25,7 @@ const GetStartedModal = ({ isOpen, onClose, onStudentSelect, onCompanySelect }) 
     // If user is already authenticated as a student, navigate directly to internships
     if (isAuthenticated && userType === 'student') {
       onClose();
-      navigate('/student-dashboard');
+      navigate('/student-dashboard/overview');
       return;
     }
     

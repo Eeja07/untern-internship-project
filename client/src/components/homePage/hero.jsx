@@ -26,7 +26,7 @@ const Hero = ({ onOpenLoginModal }) => {
     if (searchTerm.trim()) {
       // If user is authenticated as student, navigate directly
       if (isAuthenticated && user?.userType === 'student') {
-        navigate(`/student-dashboard?tab=discover&q=${encodeURIComponent(searchTerm)}`);
+        navigate(`/student-dashboard?tab=search&q=${encodeURIComponent(searchTerm)}`);
         return;
       }
       
@@ -51,7 +51,7 @@ const Hero = ({ onOpenLoginModal }) => {
   const handleTagClick = (tag) => {
     // If user is authenticated as student, navigate directly
     if (isAuthenticated && user?.userType === 'student') {
-      navigate(`/student-dashboard?tab=discover&q=${encodeURIComponent(tag)}`);
+      navigate(`/student-dashboard?tab=search&q=${encodeURIComponent(tag)}`);
       return;
     }
     
