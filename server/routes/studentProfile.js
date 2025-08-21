@@ -78,14 +78,14 @@ router.get('/', authenticateToken, requireStudent, async (req, res) => {
     // Try to get additional fields if they exist
     try {
       const additionalResult = await pool.query(
-        `SELECT resume_url, portfolio_url, skills, address, education, phone_verified, profile_picture_url
+        `SELECT resume_url, portfolio_url, skills, address, education, phone_verified, profile_picture_url,
+                languages, certifications, work_experience, event_experience, organization_experience
          FROM students WHERE student_id = $1`,
         [profileId]
       );
       
       if (additionalResult.rows.length > 0) {
         const additional = additionalResult.rows[0];
-        
         // Parse skills from JSONB
         if (additional.skills) {
           try {
@@ -95,7 +95,6 @@ router.get('/', authenticateToken, requireStudent, async (req, res) => {
             profile.skills = [];
           }
         }
-
         // Parse education from JSONB
         if (additional.education) {
           try {
@@ -105,7 +104,56 @@ router.get('/', authenticateToken, requireStudent, async (req, res) => {
             profile.education = [];
           }
         }
-
+        // Parse languages
+        if (additional.languages) {
+          try {
+            profile.languages = typeof additional.languages === 'string' ? JSON.parse(additional.languages) : additional.languages;
+          } catch (error) {
+            profile.languages = [];
+          }
+        } else {
+          profile.languages = [];
+        }
+        // Parse certifications
+        if (additional.certifications) {
+          try {
+            profile.certifications = typeof additional.certifications === 'string' ? JSON.parse(additional.certifications) : additional.certifications;
+          } catch (error) {
+            profile.certifications = [];
+          }
+        } else {
+          profile.certifications = [];
+        }
+        // Parse work_experience
+        if (additional.work_experience) {
+          try {
+            profile.work_experience = typeof additional.work_experience === 'string' ? JSON.parse(additional.work_experience) : additional.work_experience;
+          } catch (error) {
+            profile.work_experience = [];
+          }
+        } else {
+          profile.work_experience = [];
+        }
+        // Parse event_experience
+        if (additional.event_experience) {
+          try {
+            profile.event_experience = typeof additional.event_experience === 'string' ? JSON.parse(additional.event_experience) : additional.event_experience;
+          } catch (error) {
+            profile.event_experience = [];
+          }
+        } else {
+          profile.event_experience = [];
+        }
+        // Parse organization_experience
+        if (additional.organization_experience) {
+          try {
+            profile.organization_experience = typeof additional.organization_experience === 'string' ? JSON.parse(additional.organization_experience) : additional.organization_experience;
+          } catch (error) {
+            profile.organization_experience = [];
+          }
+        } else {
+          profile.organization_experience = [];
+        }
         // Set other fields if they exist
         profile.address = additional.address || '';
         profile.resume_url = additional.resume_url || '';
@@ -155,7 +203,13 @@ router.put('/', authenticateToken, requireStudent, async (req, res) => {
       address,
       bio,
       portfolio_url,
-      education
+      education,
+      resume_url,
+      languages,
+      certifications,
+      work_experience,
+      event_experience,
+      organization_experience
     } = req.body;
 
     // Use id as student_id if student_id is not present
@@ -192,19 +246,46 @@ router.put('/', authenticateToken, requireStudent, async (req, res) => {
       updateQuery += `, portfolio_url = $${paramCount}`;
       updateParams.push(portfolio_url);
     }
-    
     if (address !== undefined) {
       paramCount++;
       updateQuery += `, address = $${paramCount}`;
       updateParams.push(address);
     }
-    
     if (education !== undefined) {
       paramCount++;
       updateQuery += `, education = $${paramCount}`;
       updateParams.push(JSON.stringify(education || []));
     }
-    
+    if (resume_url !== undefined) {
+      paramCount++;
+      updateQuery += `, resume_url = $${paramCount}`;
+      updateParams.push(resume_url);
+    }
+    if (languages !== undefined) {
+      paramCount++;
+      updateQuery += `, languages = $${paramCount}`;
+      updateParams.push(JSON.stringify(languages || []));
+    }
+    if (certifications !== undefined) {
+      paramCount++;
+      updateQuery += `, certifications = $${paramCount}`;
+      updateParams.push(JSON.stringify(certifications || []));
+    }
+    if (work_experience !== undefined) {
+      paramCount++;
+      updateQuery += `, work_experience = $${paramCount}`;
+      updateParams.push(JSON.stringify(work_experience || []));
+    }
+    if (event_experience !== undefined) {
+      paramCount++;
+      updateQuery += `, event_experience = $${paramCount}`;
+      updateParams.push(JSON.stringify(event_experience || []));
+    }
+    if (organization_experience !== undefined) {
+      paramCount++;
+      updateQuery += `, organization_experience = $${paramCount}`;
+      updateParams.push(JSON.stringify(organization_experience || []));
+    }
     paramCount++;
     updateQuery += ` WHERE student_id = $${paramCount}`;
     updateParams.push(profileId);
