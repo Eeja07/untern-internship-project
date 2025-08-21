@@ -94,7 +94,7 @@ const InternshipCertifications = () => {
 
   return (
     <div>
-      <h2 style={{ color: '#007bff', marginBottom: '20px' }}>My Internship Applications</h2>
+      <h2 style={{ color: '#007bff', marginBottom: '20px' }}>My Internship Completions</h2>
       <div style={{ display: 'flex', gap: '16px', marginBottom: '20px', flexWrap: 'wrap' }}>
         <input
           type="text"
