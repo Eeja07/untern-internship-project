@@ -572,36 +572,6 @@ const ManageApplicationsByStatus = () => {
                                         >
                                             {application.status === 'rejected' ? 'Rejected' : 'Reject'}
                                         </button>
-                                        {application.resume_url && (
-                                            <button 
-                                                onClick={() => window.open(`http://localhost:4000${application.resume_url}`, '_blank')}
-                                                style={{
-                                                    padding: '8px 16px',
-                                                    backgroundColor: 'white',
-                                                    color: '#007bff',
-                                                    border: '1px solid #007bff',
-                                                    borderRadius: '5px',
-                                                    cursor: 'pointer',
-                                                    fontSize: '0.9rem'
-                                                }}
-                                            >
-                                                View Resume
-                                            </button>
-                                        )}
-                                        <button 
-                                            onClick={() => handleViewProfile(application.student_profile_id)}
-                                            style={{
-                                                padding: '8px 16px',
-                                                backgroundColor: 'white',
-                                                color: '#17a2b8',
-                                                border: '1px solid #17a2b8',
-                                                borderRadius: '5px',
-                                                cursor: 'pointer',
-                                                fontSize: '0.9rem'
-                                            }}
-                                        >
-                                            View Profile
-                                        </button>
                                         <button 
                                             onClick={() => handleMarkDone(application.application_id)}
                                             disabled={application.done_intern}
@@ -616,6 +586,20 @@ const ManageApplicationsByStatus = () => {
                                             }}
                                         >
                                             {application.done_intern ? 'Internship Done' : 'Mark as Done'}
+                                        </button>
+                                        <button 
+                                            onClick={() => handleViewProfile(application.student_profile_id)}
+                                            style={{
+                                                padding: '8px 16px',
+                                                backgroundColor: 'white',
+                                                color: '#17a2b8',
+                                                border: '1px solid #17a2b8',
+                                                borderRadius: '5px',
+                                                cursor: 'pointer',
+                                                fontSize: '0.9rem'
+                                            }}
+                                        >
+                                            View Profile
                                         </button>
                                     </div>
                                 </div>
