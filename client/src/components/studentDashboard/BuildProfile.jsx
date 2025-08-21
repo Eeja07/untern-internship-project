@@ -122,7 +122,13 @@ const BuildProfile = ({ onProfileSaved }) => {
         address: formData.get('address') || profile?.address || '',
         bio: formData.get('bio') || profile?.bio || '',
         portfolio_url: formData.get('portfolio_url') || profile?.portfolio_url || '',
-        education: educationList
+        education: educationList,
+        skills: skills,
+        work_experience: workExperienceList,
+        event_experience: eventExperienceList,
+        organization_experience: organizationExperienceList,
+        languages: languageList,
+        certifications: certificationList,
       };
       
       console.log('Saving profile data:', profileData);
