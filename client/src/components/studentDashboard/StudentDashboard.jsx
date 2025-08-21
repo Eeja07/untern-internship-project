@@ -24,7 +24,7 @@ const StudentDashboard = () => {
     { id: 'profile', label: 'Build Your Profile', icon: '👤' },
     { id: 'applications', label: 'Track Your Applications', icon: '📋' },
     { id: 'reviews', label: 'View Company Reviews', icon: '⭐' },
-    { id: 'certifications', label: 'Receive Certifications', icon: '🏆' }
+    { id: 'certifications', label: 'Completion Internships', icon: '🏆' }
   ];
 
   // Fetch profile data
