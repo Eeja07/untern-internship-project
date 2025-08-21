@@ -478,6 +478,41 @@ export const companyAPI = {
     } catch (error) {
       throw new Error('Failed to mark application as done: ' + error.message);
     }
+  },
+
+  // Get student profile by ID (company access)
+  getStudentProfileById: async (studentId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/company/student-profile/${studentId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      return await response.json();
+    } catch (error) {
+      throw new Error('Failed to fetch student profile: ' + error.message);
+    }
+  },
+
+  // Insert profile view when company views student profile
+  insertProfileView: async (studentId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/company/profile-view`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ student_id: studentId })
+      });
+      return await response.json();
+    } catch (error) {
+      throw new Error('Failed to insert profile view: ' + error.message);
+    }
   }
 };
 
