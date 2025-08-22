@@ -206,6 +206,12 @@ const ManageApplicationsByPost = () => {
     const [expandedInternshipId, setExpandedInternshipId] = useState(null);
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [profileUserId, setProfileUserId] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterLocation, setFilterLocation] = useState('all');
+    const [filterType, setFilterType] = useState('all');
+    const [filterDuration, setFilterDuration] = useState('all');
+    const [filterSalaryMin, setFilterSalaryMin] = useState('');
+    const [filterSalaryMax, setFilterSalaryMax] = useState('');
 
     useEffect(() => {
         fetchInternshipsAndApplications();
@@ -303,18 +309,82 @@ const ManageApplicationsByPost = () => {
             default: return '#6c757d';
         }
     };
-
-    const filteredApplications = applications.filter(app => {
-        const statusMatch = selectedStatus === 'all' || app.status === selectedStatus;
-        const internshipMatch = selectedInternship === 'all' || String(app.internship_id) === String(selectedInternship);
-        return statusMatch && internshipMatch;
-    });
     let filteredApps = [];
     if (expandedInternshipId) {
-      filteredApps = applications.filter(app => String(app.internship_id) === String(expandedInternshipId));
+      filteredApps = applications.filter(app => String(app.internship_id) === String(expandedInternshipId) &&
+        (!searchTerm ||
+          (app.student_name && app.student_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (app.student_email && app.student_email.toLowerCase().includes(searchTerm.toLowerCase()))) &&
+        (filterLocation === 'all' || (app.location && app.location === filterLocation)) &&
+        (filterType === 'all' || (app.internship_type && app.internship_type === filterType)) &&
+        (filterDuration === 'all' || (app.duration_months && String(app.duration_months) === String(filterDuration))) &&
+        (!filterSalaryMin || (app.salary_min && Number(app.salary_min) >= Number(filterSalaryMin))) &&
+        (!filterSalaryMax || (app.salary_max && Number(app.salary_max) <= Number(filterSalaryMax)))
+      );
     }
 
+    // Filter internships based on search/filter options
+    const filteredInternships = internships.filter(int => {
+        const locationMatch = filterLocation === 'all' || (int.location && int.location === filterLocation);
+        const typeMatch = filterType === 'all' || (int.type && int.type === filterType);
+        const durationMatch = filterDuration === 'all' || (int.duration_months && String(int.duration_months) === String(filterDuration));
+        const salaryMinMatch = !filterSalaryMin || (int.salary_min && Number(int.salary_min) >= Number(filterSalaryMin));
+        const salaryMaxMatch = !filterSalaryMax || (int.salary_max && Number(int.salary_max) <= Number(filterSalaryMax));
+        const searchMatch = !searchTerm || (int.title && int.title.toLowerCase().includes(searchTerm.toLowerCase()));
+        return locationMatch && typeMatch && durationMatch && salaryMinMatch && salaryMaxMatch && searchMatch;
+    });
     return (
+        <>
+        <div style={{
+            background: '#f8f9fa',
+            borderRadius: '10px',
+            padding: '24px',
+            marginBottom: '30px',
+            boxShadow: '0 1px 6px rgba(0,0,0,0.07)'
+        }}>
+            <h3 style={{ marginBottom: '18px', color: '#2c3e50' }}>Search & Filter Applicants</h3>
+            <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
+                <input
+                    type="text"
+                    placeholder="Search by title"
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                    style={{ padding: '8px', borderRadius: '6px', border: '1px solid #e9ecef', minWidth: '200px' }}
+                />
+                <select value={filterLocation} onChange={e => setFilterLocation(e.target.value)} style={{ padding: '8px', borderRadius: '6px', border: '1px solid #e9ecef' }}>
+                    <option value="all">All Locations</option>
+                    {Array.from(new Set(internships.map(int => int.location))).map(loc => (
+                        <option key={loc} value={loc}>{loc}</option>
+                    ))}
+                </select>
+                <select value={filterType} onChange={e => setFilterType(e.target.value)} style={{ padding: '8px', borderRadius: '6px', border: '1px solid #e9ecef' }}>
+                    <option value="all">All Types</option>
+                    {Array.from(new Set(internships.map(int => int.type))).map(type => (
+                        <option key={type} value={type}>{type}</option>
+                    ))}
+                </select>
+                <select value={filterDuration} onChange={e => setFilterDuration(e.target.value)} style={{ padding: '8px', borderRadius: '6px', border: '1px solid #e9ecef' }}>
+                    <option value="all">All Durations</option>
+                    {Array.from(new Set(internships.map(int => int.duration_months))).map(dur => (
+                        <option key={dur} value={dur}>{dur} months</option>
+                    ))}
+                </select>
+                <input
+                    type="number"
+                    placeholder="Salary Min"
+                    value={filterSalaryMin}
+                    onChange={e => setFilterSalaryMin(e.target.value)}
+                    style={{ padding: '8px', borderRadius: '6px', border: '1px solid #e9ecef', width: '120px' }}
+                />
+                <input
+                    type="number"
+                    placeholder="Salary Max"
+                    value={filterSalaryMax}
+                    onChange={e => setFilterSalaryMax(e.target.value)}
+                    style={{ padding: '8px', borderRadius: '6px', border: '1px solid #e9ecef', width: '120px' }}
+                />
+            </div>
+        </div>
         <div style={{
             backgroundColor: 'white',
             borderRadius: '12px',
@@ -322,15 +392,15 @@ const ManageApplicationsByPost = () => {
             boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
         }}>
             <h2 style={{ color: '#2c3e50', marginBottom: '20px' }}>Applications by Post</h2>
-            {internships.length === 0 ? (
+            {filteredInternships.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '40px' }}>
                     <div style={{ fontSize: '48px', marginBottom: '20px' }}>📝</div>
-                    <h3 style={{ color: '#6c757d', marginBottom: '10px' }}>No internships posted yet</h3>
-                    <p style={{ color: '#6c757d' }}>Post an internship to see applications here.</p>
+                    <h3 style={{ color: '#6c757d', marginBottom: '10px' }}>No internships match your filters</h3>
+                    <p style={{ color: '#6c757d' }}>Try adjusting your search or filter options.</p>
                 </div>
             ) : (
                 <div style={{ display: 'grid', gap: '20px' }}>
-                    {internships.map(internship => (
+                    {filteredInternships.map(internship => (
                         <div key={internship.internship_id} style={{
                             border: '1px solid #e9ecef',
                             borderRadius: '12px',
@@ -514,6 +584,7 @@ const ManageApplicationsByPost = () => {
                 <ProfileModal userId={profileUserId} onClose={() => setShowProfileModal(false)} />
             )}
         </div>
+        </>
     );
 };
 

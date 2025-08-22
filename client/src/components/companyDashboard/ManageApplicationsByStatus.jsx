@@ -211,6 +211,7 @@ const ManageApplicationsByStatus = () => {
     const [expandedInternshipId, setExpandedInternshipId] = useState(null);
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [profileUserId, setProfileUserId] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         fetchInternshipsAndApplications();
@@ -320,7 +321,11 @@ const ManageApplicationsByStatus = () => {
     const filteredApplications = applications.filter(app => {
         const statusMatch = selectedStatus === 'all' || app.status === selectedStatus;
         const internshipMatch = selectedInternship === 'all' || String(app.internship_id) === String(selectedInternship);
-        return statusMatch && internshipMatch;
+        const searchMatch =
+            !searchTerm ||
+            (app.student_name && app.student_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (app.student_email && app.student_email.toLowerCase().includes(searchTerm.toLowerCase()));
+        return statusMatch && internshipMatch && searchMatch;
     });
 
     const selectedInternshipTitle = internships.find(int => String(int.internship_id) === String(selectedInternship))?.title || 'All Internships';
@@ -337,38 +342,28 @@ const ManageApplicationsByStatus = () => {
                         marginBottom: '20px',
                         boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
                     }}>
-                        {/* Status Filter Buttons */}
-                        <div>
-                            <label style={{
-                                display: 'block',
-                                marginBottom: '10px',
-                                fontWeight: '600',
-                                color: '#2c3e50'
-                            }}>
-                                Filter by Status:
-                            </label>
-                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                                {['all', 'pending', 'shortlisted', 'accepted', 'rejected'].map(status => (
-                                    <button
-                                        key={status}
-                                        onClick={() => setSelectedStatus(status)}
-                                        style={{
-                                            padding: '8px 16px',
-                                            backgroundColor: selectedStatus === status ? '#007bff' : 'white',
-                                            color: selectedStatus === status ? 'white' : '#007bff',
-                                            border: '2px solid #007bff',
-                                            borderRadius: '20px',
-                                            cursor: 'pointer',
-                                            fontSize: '0.9rem',
-                                            fontWeight: '500',
-                                            textTransform: 'capitalize',
-                                            transition: 'all 0.3s ease'
-                                        }}
-                                    >
-                                        {status === 'all' ? 'All Status' : status}
-                                    </button>
+                        {/* Search and Filter Controls */}
+                        <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
+                            <input
+                                type="text"
+                                placeholder="Search by name or email"
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
+                                style={{ padding: '8px', borderRadius: '6px', border: '1px solid #e9ecef', minWidth: '200px' }}
+                            />
+                            <select value={selectedInternship} onChange={e => setSelectedInternship(e.target.value)} style={{ padding: '8px', borderRadius: '6px', border: '1px solid #e9ecef' }}>
+                                <option value="all">All Internships</option>
+                                {internships.map(int => (
+                                    <option key={int.internship_id} value={int.internship_id}>{int.title}</option>
                                 ))}
-                            </div>
+                            </select>
+                            <select value={selectedStatus} onChange={e => setSelectedStatus(e.target.value)} style={{ padding: '8px', borderRadius: '6px', border: '1px solid #e9ecef' }}>
+                                <option value="all">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="shortlisted">Shortlisted</option>
+                                <option value="accepted">Accepted</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
                         </div>
                     </div>
                     {/* Results Summary */}
