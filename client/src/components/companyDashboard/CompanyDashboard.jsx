@@ -114,7 +114,7 @@ const CompanyDashboard = () => {
 
     return (
         <>
-            <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
+            <div style={{ display: 'flex', minHeight: '90vh', backgroundColor: '#f8f9fa' }}>
                 {/* Sidebar */}
                 <div style={{
                     width: '280px',
@@ -211,7 +211,7 @@ const CompanyDashboard = () => {
 
                 {/* Main Content */}
                 <div style={{
-                    flex: 1,
+                    flex: '1',
                     padding: '30px',
                     overflow: 'auto'
                 }}>
