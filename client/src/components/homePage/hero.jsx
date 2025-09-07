@@ -111,7 +111,7 @@ const Hero = ({ onOpenLoginModal }) => {
               
               
               <p style={{
-                fontSize: '1rem',
+                fontSize: '0.6rem',
                 color: '#3F72AF',
                 marginBottom: '2rem',
                 textAlign: 'center'

@@ -104,7 +104,7 @@ const WhyChooseUs = ({ onGetStartedClick }) => {
           }}>Why you must choose <span style={{ color: '#3F72AF' }}>Untern</span></h2>
         </div>
         
-        <div style={{ width: '100%' }}>
+        <div style={{ width: '100%', position: 'relative' }}>
           <div style={{
             background: '#DBE2EF',
             color: '#112D4E',
@@ -113,13 +113,14 @@ const WhyChooseUs = ({ onGetStartedClick }) => {
             display: 'block',
             width: isMobile ? '120px' : '135px',
             position: 'relative',
-            left: isMobile ? '-2rem' : '-6rem',
-            bottom: '-4rem',
+            left: isMobile ? '-1rem' : '-6rem',
             fontSize: isMobile ? '1rem' : '1.25rem',
             fontWeight: 600,
             transform: 'rotate(-12deg)',
             boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.5)',
-            marginBottom: '1rem'
+            marginBottom: '1rem',
+            bottom: '-3rem',
+            zIndex: 10
           }}>
             <span>For Student</span>
           </div>
@@ -132,7 +133,9 @@ const WhyChooseUs = ({ onGetStartedClick }) => {
             backgroundColor: 'white',
             padding: isMobile ? '1.5rem' : '2rem',
             borderRadius: '15px',
-            marginBottom: '1rem'
+            marginBottom: '1rem',
+            position: 'relative',
+            zIndex: 1
           }}>
             {studentFeatures.map((feature, index) => (
               <div key={index} style={{
@@ -185,7 +188,7 @@ const WhyChooseUs = ({ onGetStartedClick }) => {
           </div>
         </div>
         
-        <div style={{ width: '100%' }}>
+        <div style={{ width: '100%', position: 'relative' }}>
           <div style={{
             background: '#DBE2EF',
             color: '#112D4E',
@@ -194,13 +197,14 @@ const WhyChooseUs = ({ onGetStartedClick }) => {
             display: 'block',
             width: isMobile ? '130px' : '150px',
             position: 'relative',
-            left: isMobile ? '-2rem' : '-5rem',
-            bottom: '-4rem',
+            left: isMobile ? '-1rem' : '-5rem',
             fontSize: isMobile ? '1rem' : '1.25rem',
             fontWeight: 600,
             transform: 'rotate(-12deg)',
             boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.5)',
-            marginBottom: '1rem'
+            marginBottom: '1rem',
+            bottom: '-3rem',
+            zIndex: 10
           }}>
             <span>For Company</span>
           </div>
@@ -213,7 +217,9 @@ const WhyChooseUs = ({ onGetStartedClick }) => {
             backgroundColor: 'white',
             padding: isMobile ? '1.5rem' : '2rem',
             borderRadius: '15px',
-            marginBottom: '1rem'
+            marginBottom: '1rem',
+            position: 'relative',
+            zIndex: 1
           }}>
             {companyFeatures.map((feature, index) => (
               <div key={index} style={{
