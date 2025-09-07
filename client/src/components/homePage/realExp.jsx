@@ -14,6 +14,18 @@ const RealExperience = ({ onGetStartedClick }) => {
   const navigate = useNavigate();
   const [lastAction, setLastAction] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isTablet, setIsTablet] = useState(window.innerWidth <= 1024 && window.innerWidth > 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+      setIsTablet(window.innerWidth <= 1024 && window.innerWidth > 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated && user && lastAction === 'getStarted') {
@@ -55,22 +67,23 @@ const RealExperience = ({ onGetStartedClick }) => {
 
   return (
     <div className="real-experience" style={{backgroundColor: '#DBE2EF'}}>
-      <div className="container-realExperience" style={{maxWidth: '1500px', margin: '0 auto', textAlign: 'center'}}>
-        <div className="real-experience-header" style={{padding: '3rem 0'}}>
-          <h2 style={{ color: '#112D4E', fontWeight: "normal", fontSize: '1.75rem' }}>
+      <div className="container-realExperience" style={{maxWidth: '1500px', margin: '0 auto', textAlign: 'center', padding: isMobile ? '0 1rem' : '0 2rem'}}>
+        <div className="real-experience-header" style={{padding: isMobile ? '2rem 0' : '3rem 0'}}>
+          <h2 style={{ color: '#112D4E', fontWeight: "normal", fontSize: isMobile ? '1.25rem' : isTablet ? '1.5rem' : '1.75rem' }}>
             Go join <span style={{ fontWeight:'bold', color:'#3F72AF' }}>Untern</span> to reach your dream company<br />
             and share your experience
           </h2>
         </div>
-        <div className="container-realExperience-contents" style={{ backgroundColor: 'white', padding: '20px'}}>
+        <div className="container-realExperience-contents" style={{ backgroundColor: 'white', padding: isMobile ? '10px' : '20px'}}>
           <div className="container-realExperience-content" style={{ 
             display: 'flex', 
             backgroundColor: '#DBE2EF', 
-            padding: '20px', 
+            padding: isMobile ? '10px' : '20px', 
             borderRadius: '10px', 
             boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            flexDirection: 'row'
           }}>
             <button
               className="carousel-btn btn-left"
@@ -81,16 +94,16 @@ const RealExperience = ({ onGetStartedClick }) => {
                 border: 'none',
                 cursor: 'pointer',
                 zIndex: 10,
-                padding: '10px'
+                padding: isMobile ? '5px' : '10px'
               }}
             >
-              <img src={arwleft} alt="Previous"onMouseEnter={(e) => { e.target.style.backgroundColor = '#2563EB'; e.target.style.transform = 'translateY(0px)'; }} onMouseLeave={(e) => { e.target.style.backgroundColor = '#112D4E'; e.target.style.transform = 'translateY(0)'; }} className="arrow-icon" style={{ backgroundColor: '#112D4E', padding: '10px 20px', borderRadius: '10px' }} />
+              <img src={arwleft} alt="Previous"onMouseEnter={(e) => { e.target.style.backgroundColor = '#2563EB'; e.target.style.transform = 'translateY(0px)'; }} onMouseLeave={(e) => { e.target.style.backgroundColor = '#112D4E'; e.target.style.transform = 'translateY(0)'; }} className="arrow-icon" style={{ backgroundColor: '#112D4E', padding: isMobile ? '5px 10px' : '10px 20px', borderRadius: '10px' }} />
             </button>
             
             <div className="carousel-wrapper" style={{ 
               position: 'relative', 
-              width: '1500px', 
-              height: '600px', 
+              width: isMobile ? '300px' : isTablet ? '600px' : '1500px', 
+              height: isMobile ? '200px' : isTablet ? '300px' : '600px', 
               overflow: 'hidden',
               display: 'flex',
               alignItems: 'center',
@@ -100,11 +113,13 @@ const RealExperience = ({ onGetStartedClick }) => {
                 const isActive = index === currentSlide;
                 const isPrev = index === (currentSlide - 1 + experiences.length) % experiences.length;
                 const isNext = index === (currentSlide + 1) % experiences.length;
-                const isVisible = isActive || isPrev || isNext;
+                const isVisible = isMobile ? isActive : (isActive || isPrev || isNext);
                 
                 let translateX = 0;
-                if (isPrev) translateX = -325;
-                if (isNext) translateX = 325;
+                if (!isMobile) {
+                  if (isPrev) translateX = isTablet ? -200 : -325;
+                  if (isNext) translateX = isTablet ? 200 : 325;
+                }
                 
                 return (
                   <div 
@@ -113,12 +128,12 @@ const RealExperience = ({ onGetStartedClick }) => {
                     style={{ 
                       position: 'absolute',
                       transition: 'all 0.5s ease-in-out',
-                      transform: `translateX(${translateX}px) scale(${isActive ? 1.1 : 0.8})`,
-                      opacity: isVisible ? (isActive ? 1 : 0.4) : 0,
-                      filter: isActive ? 'none' : 'blur(2px)',
+                      transform: `translateX(${translateX}px) scale(${isActive ? (isMobile ? 1 : 1.1) : (isMobile ? 0 : 0.8)})`,
+                      opacity: isVisible ? (isActive ? 1 : (isMobile ? 0 : 0.4)) : 0,
+                      filter: isActive ? 'none' : (isMobile ? 'none' : 'blur(2px)'),
                       zIndex: isActive ? 5 : 1,
-                      width: '700px',
-                      height: '500px',
+                      width: isMobile ? '280px' : isTablet ? '400px' : '700px',
+                      height: isMobile ? '180px' : isTablet ? '280px' : '500px',
                       display: 'flex',
                       justifyContent: 'center',
                       alignItems: 'center',
@@ -130,8 +145,8 @@ const RealExperience = ({ onGetStartedClick }) => {
                       alt={`Real Experience ${index + 1}`}
                       className="experience-image"
                       style={{ 
-                        width: '700px', 
-                        height: '500px', 
+                        width: isMobile ? '280px' : isTablet ? '400px' : '700px', 
+                        height: isMobile ? '180px' : isTablet ? '280px' : '500px', 
                         objectFit: 'cover',
                         borderRadius: '10px'
                       }}
@@ -150,28 +165,28 @@ const RealExperience = ({ onGetStartedClick }) => {
                 border: 'none',
                 cursor: 'pointer',
                 zIndex: 10,
-                padding: '10px'
+                padding: isMobile ? '5px' : '10px'
               }}
             >
-              <img src={arwright}onMouseEnter={(e) => { e.target.style.backgroundColor = '#2563EB'; e.target.style.transform = 'translateY(0px)'; }} onMouseLeave={(e) => { e.target.style.backgroundColor = '#112D4E'; e.target.style.transform = 'translateY(0)'; }} alt="Next" className="arrow-icon" style={{ backgroundColor: '#112D4E', padding: '10px 20px', borderRadius: '10px' }}/>
+              <img src={arwright}onMouseEnter={(e) => { e.target.style.backgroundColor = '#2563EB'; e.target.style.transform = 'translateY(0px)'; }} onMouseLeave={(e) => { e.target.style.backgroundColor = '#112D4E'; e.target.style.transform = 'translateY(0)'; }} alt="Next" className="arrow-icon" style={{ backgroundColor: '#112D4E', padding: isMobile ? '5px 10px' : '10px 20px', borderRadius: '10px' }}/>
             </button>
           </div>
         </div>
         <div className="get-started-btn-container" style={{
           display: 'block',
-          padding: '3rem 0rem',
+          padding: isMobile ? '2rem 0rem' : '3rem 0rem',
           textAlign: 'center'
         }}>
           <button className="get-started-btn" style={{
               background: '#112D4E',
               color: 'white',
               border: 'none',
-              padding: '0.75rem 1.5rem',
+              padding: isMobile ? '0.5rem 1rem' : '0.75rem 1.5rem',
               borderRadius: '8px',
               fontWeight: 600,
               cursor: 'pointer',
               transition: 'background 0.3s',
-              fontSize: '1.75rem'
+              fontSize: isMobile ? '1.25rem' : isTablet ? '1.5rem' : '1.75rem'
             }}
             onMouseEnter={(e) => e.target.style.background = '#2563EB'}
             onMouseLeave={(e) => e.target.style.background = '#112D4E'}

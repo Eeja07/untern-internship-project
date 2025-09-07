@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 // It's better practice to use relative paths for assets so your project is portable.
 // For example: import pio from '../assets/pio.webp;
 import pio from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/pio.svg';
@@ -11,8 +11,19 @@ import eeja from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode
 import { Star } from 'lucide-react';
 
 const WhatCompany = () => {
-    // FIX: Initialize the state for the carousel's index
-    const [currentIndex, setCurrentIndex] = React.useState(0);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    const [isTablet, setIsTablet] = useState(window.innerWidth <= 1024 && window.innerWidth > 768);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+            setIsTablet(window.innerWidth <= 1024 && window.innerWidth > 768);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const whatCompanyCards = [
     {
@@ -62,7 +73,7 @@ const WhatCompany = () => {
     };
 
     const getVisibleCards = () => {
-        const cardsToShow = 4; 
+        const cardsToShow = isMobile ? 1 : isTablet ? 3 : 4;
         const result = [];
         for (let i = 0; i < cardsToShow; i++) {
             const index = (currentIndex + i) % whatCompanyCards.length;
@@ -73,36 +84,46 @@ const WhatCompany = () => {
     
     
 return (
-    <div className="container-what-company" style={{maxWidth:'1500px', margin: '0 auto' }}>
-        <div className="section-1-what-company" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding:'2rem 0'}}>
-            <button onMouseEnter={(e) => { e.target.style.backgroundColor = '#2563EB'; e.target.style.transform = 'translateY(0px)'; }} onMouseLeave={(e) => { e.target.style.backgroundColor = '#112D4E'; e.target.style.transform = 'translateY(0)'; }}className="btn-left-what-company" style={{ backgroundColor: '#112D4E', borderRadius: '10px', padding: '0.5rem 2rem', border: 'none', cursor: 'pointer' }} onClick={handlePrevious}>
+    <div className="container-what-company" style={{maxWidth:'1500px', margin: '50px auto', padding: isMobile ? '0 1rem' : '0 2rem' }}>
+        <div className="section-1-what-company" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isMobile ? '1rem 0' : '2rem 0'}}>
+            <button onMouseEnter={(e) => { e.target.style.backgroundColor = '#2563EB'; e.target.style.transform = 'translateY(0px)'; }} onMouseLeave={(e) => { e.target.style.backgroundColor = '#112D4E'; e.target.style.transform = 'translateY(0)'; }}className="btn-left-what-company" style={{ backgroundColor: '#112D4E', borderRadius: '10px', padding: isMobile ? '0.5rem 1rem' : '0.5rem 2rem', border: 'none', cursor: 'pointer' }} onClick={handlePrevious}>
                 <img src={arwleft} alt="Left Arrow" className="left-arrow-icon" />
             </button>
-            <h2 style={{ textAlign: 'center', fontWeight: '100' }} className="section-what-company-title">What <span style={{ fontWeight: 'bold' }}>Company</span> Think About <span className="palette3">Untern</span></h2>
-            <button onMouseEnter={(e) => { e.target.style.backgroundColor = '#2563EB'; e.target.style.transform = 'translateY(0px)'; }} onMouseLeave={(e) => { e.target.style.backgroundColor = '#112D4E'; e.target.style.transform = 'translateY(0)'; }} className="btn-right-what-company" style={{ backgroundColor: '#112D4E', borderRadius: '10px', padding: '0.5rem 2rem', border: 'none', cursor: 'pointer' }} onClick={handleNext}>
+            <h2 style={{ textAlign: 'center', fontWeight: '100', fontSize: isMobile ? '1.5rem' : isTablet ? '2rem' : '2.5rem', margin: '0 1rem' }} className="section-what-company-title">What <span style={{ fontWeight: 'bold' }}>Company</span> Think About <span className="palette3">Untern</span></h2>
+            <button onMouseEnter={(e) => { e.target.style.backgroundColor = '#2563EB'; e.target.style.transform = 'translateY(0px)'; }} onMouseLeave={(e) => { e.target.style.backgroundColor = '#112D4E'; e.target.style.transform = 'translateY(0)'; }} className="btn-right-what-company" style={{ backgroundColor: '#112D4E', borderRadius: '10px', padding: isMobile ? '0.5rem 1rem' : '0.5rem 2rem', border: 'none', cursor: 'pointer' }} onClick={handleNext}>
                 <img src={arwright} alt="Right Arrow" className="right-arrow-icon" />
             </button>
         </div>
-        <div className='section-2-what-company-container' style={{ display: 'flex', justifyContent: 'space-between', padding:'2rem 0'}}>
+        <div className='section-2-what-company-container' style={{ display: 'flex', flexWrap: 'nowrap', justifyContent: isMobile ? 'center' : 'space-between', gap: isMobile ? '0' : '1rem', padding: isMobile ? '1rem 0' : '2rem 0'}}>
             {getVisibleCards().map((feature) => (
                 // FIX: Use a unique and stable key, like an id from your data.
-                <div key={feature.id} className="section-2-what-company-card" style={{ width: '21%', padding: '1rem', color: '#112D4E', borderRadius: '8px', backgroundColor: '#DBE2EF', boxShadow: '0 2px 19px rgba(0, 0, 0, 0.1)' }}>
-                    <div className="name-whatinter-container" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: '#112D4E', fontWeight: 'bold' }}>
-                        <div className="profile-image-container" style={{ width: '50px', height: '50px', borderRadius: '50%', overflow: 'hidden' }}>
+                <div key={feature.id} className="section-2-what-company-card" style={{ 
+                    width: isMobile ? '90%' : isTablet ? 'calc(33.33% - 0.67rem)' : 'calc(25% - 0.75rem)', 
+                    maxWidth: isMobile ? '768px' : 'none',
+                    minHeight: isMobile ? '200px' : '350px',
+                    flex: isMobile ? 'none' : '1',
+                    padding: isMobile ? '1.25rem' : '1.5rem', 
+                    color: '#112D4E', 
+                    borderRadius: '8px', 
+                    backgroundColor: '#DBE2EF', 
+                    boxShadow: '0 2px 19px rgba(0, 0, 0, 0.1)' 
+                }}>
+                    <div className="name-whatinter-container" style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '0.5rem' : '1rem', color: '#112D4E', fontWeight: 'bold' }}>
+                        <div className="profile-image-container" style={{ width: isMobile ? '80px' : '125px', height: isMobile ? '75px' : '60px', borderRadius: '50%', overflow: 'hidden' }}>
                             <img src={feature.pic} alt={feature.name} className="icon-number" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scale(1.5)' }} />
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <h4 style={{ fontSize: '1rem' }}>{feature.name}</h4>
-                            <p style={{ fontSize: '0.75rem'}}>{feature.background}</p>
+                            <h4 style={{ fontSize: isMobile ? '0.8rem' : '1rem', margin: '0' }}>{feature.name}</h4>
+                            <p style={{ fontSize: isMobile ? '0.6rem' : '0.75rem', margin: '0' }}>{feature.background}</p>
                         </div>
                     </div>
-                    <p style={{ fontSize: '1.1rem', margin: '1rem 0', textAlign:'justify'}}>{feature.description}</p>
+                    <p style={{ fontSize: isMobile ? '0.8rem' : '1.1rem', margin: isMobile ? '0.5rem 0' : '1rem 0', textAlign:'justify'}}>{feature.description}</p>
                     <div className="flex items-center gap-2">
                         <div className="flex gap-1">
                             {[1, 2, 3, 4, 5].map((star) => (
                                 <Star 
                                     key={star} 
-                                    size={20}
+                                    size={isMobile ? 16 : 20}
                                     style={{ 
                                         stroke: '#112D4E',
                                         strokeWidth: '1px',

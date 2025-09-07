@@ -14,6 +14,16 @@ const FooterHome = ({ onForStudentsClick, onForCompaniesClick }) => {
     const navigate = useNavigate();
     const { isAuthenticated, user } = useAuth();
     const [lastAction, setLastAction] = useState(null);
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         if (isAuthenticated && user) {
@@ -77,8 +87,8 @@ const FooterHome = ({ onForStudentsClick, onForCompaniesClick }) => {
     return (
         <footer className="footer-home" style={{ backgroundColor: '#112D4E', color: 'white', padding: '20px 0' }}>
             <div className="container-footer" style={{ maxWidth: '1500px', margin: '0 auto', textAlign: 'left', padding: '0 20px' }}>
-                <div className="footer-links1" style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', marginTop: '10px', gap: '20px' }}>
-                        <div className="footer-link1" style={{ display: 'flex', flexDirection: 'column', margin: '0', flex: '1', minWidth: '250px' }}>
+                <div className="footer-links1" style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', marginTop: '10px', gap: '20px' }}>
+                        <div className="footer-link1" style={{ display: 'flex', flexDirection: 'column', margin: '0', flex: '1', minWidth: isMobile ? 'auto' : '250px' }}>
                                 <h2 onClick={() => navigate('/')} style={{ color: 'white', fontSize: '1.25rem', margin: '0', padding: '1rem 0' }}>Untern</h2>
                                 <p style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.5' }}>Connecting students with valuable internship opportunities nationwide.</p>
                                 <div className="footer-link" style={{padding:'2rem 0', display: 'flex', flexDirection: 'row', gap: '10px', margin: '0 0' }}>
@@ -96,7 +106,7 @@ const FooterHome = ({ onForStudentsClick, onForCompaniesClick }) => {
                                     </button>
                                 </div>
                         </div>
-                        <div className="footer-link2" style={{ display: 'flex', flexDirection: 'column', margin: '0', flex: '1', minWidth: '200px' }}>
+                        <div className="footer-link2" style={{ display: 'flex', flexDirection: 'column', margin: '0', flex: '1', minWidth: isMobile ? 'auto' : '200px' }}>
                                 <h2 onClick={handleStudentNavigation()} style={{ color: 'white', fontSize: '1.25rem', margin: '0', padding: '1rem 0', cursor:'pointer'}}>For Students</h2>
                                 <a onClick={handleStudentNavigation('/student-dashboard/search')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer'}}>Discover Internships</a>
                                 <a onClick={handleStudentNavigation('/student-dashboard/profile')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer'}}>Build Your Profile</a>
@@ -105,7 +115,7 @@ const FooterHome = ({ onForStudentsClick, onForCompaniesClick }) => {
                                 <a onClick={handleStudentNavigation('/student-dashboard/company-reviews')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer' }}>View Company Reviews</a>
                                 <a onClick={handleStudentNavigation('/student-dashboard/certifications')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer' }}>Receive Internship Certifications</a>
                         </div>
-                        <div className="footer-link3" style={{ display: 'flex', flexDirection: 'column', margin: '0', flex: '1', minWidth: '200px'}}>
+                        <div className="footer-link3" style={{ display: 'flex', flexDirection: 'column', margin: '0', flex: '1', minWidth: isMobile ? 'auto' : '200px'}}>
                                 <h2 onClick={handleCompaniesNavigation()} style={{ color: 'white', fontSize: '1.25rem', margin: '0', padding: '1rem 0', cursor:'pointer'}}>For Companies</h2>
                                 <a onClick={handleCompaniesNavigation('/company-dashboard/post-internship')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer'}}>Post Internship Openings</a>
                                 <a onClick={handleCompaniesNavigation('/company-dashboard/manage-applications')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer' }}>Manage Internship Applications</a>
@@ -114,7 +124,7 @@ const FooterHome = ({ onForStudentsClick, onForCompaniesClick }) => {
                                 <a onClick={handleCompaniesNavigation('/company-dashboard/analytics')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer'}}>Access Analytics and Reporting</a>
                                 <a onClick={handleCompaniesNavigation('/company-dashboard/post-certifications')} style={{ color: 'white', textDecoration: 'none', marginTop: '10px', lineHeight: '1.6', cursor: 'pointer'}}>Post Internship Certifications</a>
                         </div>
-                        <div className="footer-link4" style={{ display: 'flex', flexDirection: 'column', margin: '0', flex: '1', minWidth: '250px' }}>
+                        <div className="footer-link4" style={{ display: 'flex', flexDirection: 'column', margin: '0', flex: '1', minWidth: isMobile ? 'auto' : '250px' }}>
                                 <h2 style={{ color: 'white', fontSize: '1.25rem', margin: '0', padding: '1rem 0' }}>Contact Us</h2>
                                 <button className="contact-btn" onClick={() => window.location.href = 'mailto:mahijapradipta86@gmail.com'} style={{ backgroundColor: '#112D4E', color: 'white', boxShadow:'0 3px 10px rgba(0,0,0,0.75)', padding: '10px 15px', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', marginBottom: '10px', width: '100%' }}>
                                     <img src={gmail} alt="Email" style={{ width: '20px', height: '20px', marginRight: '10px' }} />
@@ -130,7 +140,7 @@ const FooterHome = ({ onForStudentsClick, onForCompaniesClick }) => {
                                 </button>
                         </div>
                 </div>
-                <div className="footer-links2" style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', marginTop: '40px', gap: '20px' }}>
+                <div className="footer-links2" style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', marginTop: '40px', gap: '20px' }}>
                         <div className="footer-link5" style={{ display: 'flex', flexDirection: 'column', margin: '0', flex: '1', cursor: 'pointer' }}>
                                 <h2 onClick={() => navigate('/about')} style={{ color: 'white', fontSize: '1.25rem', margin: '0', padding: '1rem 0' }}>About Us</h2>
                         </div>
@@ -143,7 +153,7 @@ const FooterHome = ({ onForStudentsClick, onForCompaniesClick }) => {
                         <div className="footer-link8" style={{ display: 'flex', flexDirection: 'column', margin: '0', flex: '1', padding: '1rem 0', alignItems: 'flex-start' }}>
                                 <button className="get-started-btn" onClick={() => window.open('https://wa.me/6281288092766', '_blank')}  style={{
                                         backgroundColor: '#112D4E',
-                                        width: '100%',
+                                        width: isMobile ? '100%' : '100%',
                                         color: 'white',
                                         padding: '12px 24px',
                                         border: 'none',

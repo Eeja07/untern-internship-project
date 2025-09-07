@@ -12,6 +12,18 @@ const WhyChooseUs = ({ onGetStartedClick }) => {
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const [lastAction, setLastAction] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isTablet, setIsTablet] = useState(window.innerWidth <= 1024 && window.innerWidth > 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+      setIsTablet(window.innerWidth <= 1024 && window.innerWidth > 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated && user && lastAction === 'getStarted') {
@@ -81,11 +93,11 @@ const WhyChooseUs = ({ onGetStartedClick }) => {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          padding: '3rem'
+          padding: isMobile ? '2rem 1rem' : '3rem'
         }}>
           <h2 style={{
             textAlign: 'center',
-            fontSize: '2.5rem',
+            fontSize: isMobile ? '2rem' : (isTablet ? '2.25rem' : '2.5rem'),
             fontWeight: 700,
             color: '#112D4E',
             margin: 0
@@ -99,11 +111,11 @@ const WhyChooseUs = ({ onGetStartedClick }) => {
             padding: '0.75rem 2rem',
             borderRadius: '15px',
             display: 'block',
-            width: '135px',
+            width: isMobile ? '120px' : '135px',
             position: 'relative',
-            left: '-6rem',
+            left: isMobile ? '-2rem' : '-6rem',
             bottom: '-4rem',
-            fontSize: '1.25rem',
+            fontSize: isMobile ? '1rem' : '1.25rem',
             fontWeight: 600,
             transform: 'rotate(-12deg)',
             boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.5)',
@@ -114,10 +126,11 @@ const WhyChooseUs = ({ onGetStartedClick }) => {
           
           <div style={{
             display: 'flex',
-            gap: '2rem',
+            flexDirection: isMobile ? 'column' : 'row',
+            gap: isMobile ? '1.5rem' : '2rem',
             justifyContent: 'center',
             backgroundColor: 'white',
-            padding: '2rem',
+            padding: isMobile ? '1.5rem' : '2rem',
             borderRadius: '15px',
             marginBottom: '1rem'
           }}>
@@ -127,7 +140,7 @@ const WhyChooseUs = ({ onGetStartedClick }) => {
                 padding: '2rem',
                 borderRadius: '12px',
                 boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
-                width: '100%',
+                maxWidth: '100%',
                 transition: 'transform 0.8s, box-shadow 0.3s'
               }}
               onMouseEnter={(e) => {
@@ -179,11 +192,11 @@ const WhyChooseUs = ({ onGetStartedClick }) => {
             padding: '0.75rem 2rem',
             borderRadius: '15px',
             display: 'block',
-            width: '150px',
+            width: isMobile ? '130px' : '150px',
             position: 'relative',
-            left: '-5rem',
+            left: isMobile ? '-2rem' : '-5rem',
             bottom: '-4rem',
-            fontSize: '1.25rem',
+            fontSize: isMobile ? '1rem' : '1.25rem',
             fontWeight: 600,
             transform: 'rotate(-12deg)',
             boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.5)',
@@ -194,20 +207,21 @@ const WhyChooseUs = ({ onGetStartedClick }) => {
           
           <div style={{
             display: 'flex',
-            gap: '2rem',
+            flexDirection: isMobile ? 'column' : 'row',
+            gap: isMobile ? '1.5rem' : '2rem',
             justifyContent: 'center',
             backgroundColor: 'white',
-            padding: '2rem',
+            padding: isMobile ? '1.5rem' : '2rem',
             borderRadius: '15px',
             marginBottom: '1rem'
           }}>
             {companyFeatures.map((feature, index) => (
               <div key={index} style={{
                 background: '#DBE2EF',
-                padding: '2rem',
+                padding: isMobile ? '1.5rem' : '2rem',
                 borderRadius: '12px',
                 boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
-                width: '100%',
+                maxwidth: '100%',
                 transition: 'transform 0.8s, box-shadow 0.3s'
               }}
               onMouseEnter={(e) => {
@@ -254,11 +268,11 @@ const WhyChooseUs = ({ onGetStartedClick }) => {
         
         <div style={{
           display: 'block',
-          padding: '3rem 0rem',
+          padding: isMobile ? '2rem 0' : '3rem 0rem',
           textAlign: 'center'
         }}>
           <button style={{
-            fontSize: '1.75rem',
+            fontSize: isMobile ? '1.5rem' : '1.75rem',
             background: '#112D4E',
             color: 'white',
             border: 'none',

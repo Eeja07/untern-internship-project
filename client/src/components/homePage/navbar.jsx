@@ -6,6 +6,20 @@ const Navbar = ({ onForStudentsClick, onClose,onGetStartedClick, onForCompaniesC
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
   const [lastAction, setLastAction] = useState(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+      if (window.innerWidth > 768) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -76,6 +90,10 @@ const Navbar = ({ onForStudentsClick, onClose,onGetStartedClick, onForCompaniesC
     logout();
   };
 
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
   return (
     <nav style={{
       background: 'white',
@@ -103,12 +121,35 @@ const Navbar = ({ onForStudentsClick, onClose,onGetStartedClick, onForCompaniesC
             margin: 0
           }}>Untern</h2>
         </div>
+
+        {/* Hamburger Menu for Mobile */}
+        {isMobile && (
+          <button onClick={toggleMenu} style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '1.5rem',
+            color: '#64748B',
+            padding: '0.5rem'
+          }}>
+            {isMenuOpen ? '✕' : '☰'}
+          </button>
+        )}
+
         <ul style={{
-          display: 'flex',
+          display: isMobile ? (isMenuOpen ? 'flex' : 'none') : 'flex',
+          flexDirection: isMobile ? 'column' : 'row',
+          position: isMobile ? 'absolute' : 'static',
+          top: isMobile ? '100%' : 'auto',
+          left: isMobile ? '0' : 'auto',
+          right: isMobile ? '0' : 'auto',
+          backgroundColor: isMobile ? 'white' : 'transparent',
+          boxShadow: isMobile ? '0 2px 10px rgba(0,0,0,0.1)' : 'none',
+          padding: isMobile ? '1rem' : '0',
           listStyle: 'none',
-          gap: '2rem',
+          gap: isMobile ? '1rem' : '2rem',
           margin: 0,
-          padding: 0
+          zIndex: 998
         }}>
           <li>
             <a href="/" style={{
@@ -177,7 +218,9 @@ const Navbar = ({ onForStudentsClick, onClose,onGetStartedClick, onForCompaniesC
           </li>
         </ul>
         
-        <div>
+        <div style={{
+          display: isMobile ? (isMenuOpen ? 'none' : 'block') : 'block'
+        }}>
           {isAuthenticated ? (
             <div className="user-menu" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <span className="user-welcome" style={{ color: '#64748B', fontSize: '0.9rem' }}>
