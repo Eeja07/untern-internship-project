@@ -15,7 +15,7 @@ const Hero = ({ onOpenLoginModal }) => {
 
   const shuffleTags = () => {
     const shuffled = [...allTags].sort(() => Math.random() - 0.5);  
-    setTags(shuffled.slice(0, 4));
+    setTags(shuffled.slice(0, isMobile ? 3 : 4));
   };
 
   useEffect(() => {
@@ -29,9 +29,14 @@ const Hero = ({ onOpenLoginModal }) => {
   }, []);
 
   useEffect(() => {
+    // Update tags immediately when mobile state changes
+    shuffleTags();
+  }, [isMobile]);
+
+  useEffect(() => {
     const interval = setInterval(shuffleTags, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [isMobile]);
 
   const handleSearch = (e) => {
     e.preventDefault();
