@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const PricingInformation = () => {
@@ -67,6 +67,13 @@ const PricingInformation = () => {
     const [loading, setLoading] = useState(false);
     const [paymentInfo, setPaymentInfo] = useState(null);
     const [errorMsg, setErrorMsg] = useState('');
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth <= 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const handleUpgrade = async (plan) => { 
         setLoading(true);
@@ -91,16 +98,16 @@ const PricingInformation = () => {
     };
 
     return (
-        <div>
+        <div style={{ padding: isMobile ? '10px' : '0' }}>
             <div style={{ marginBottom: '30px' }}>
-                <h1 style={{ color: '#2c3e50', marginBottom: '10px' }}>Flexible Pricing for Every Company</h1>
-                <p style={{ color: '#6c757d', fontSize: '1.15rem' }}>Choose a plan that scales with your hiring needs.</p>
+                <h1 style={{ color: '#2c3e50', marginBottom: '10px', fontSize: isMobile ? '1.8rem' : '2.5rem' }}>Flexible Pricing for Every Company</h1>
+                <p style={{ color: '#6c757d', fontSize: isMobile ? '1rem' : '1.15rem' }}>Choose a plan that scales with your hiring needs.</p>
             </div>
 
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-                gap: '40px',
+                gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(340px, 1fr))',
+                gap: isMobile ? '20px' : '40px',
                 marginBottom: '50px',
                 alignItems: 'stretch'
             }}>
@@ -108,12 +115,12 @@ const PricingInformation = () => {
                     <div key={index} style={{
                         background: 'linear-gradient(135deg, #f8fafc 60%, #e9ecef 100%)',
                         borderRadius: '20px',
-                        padding: '48px 36px',
+                        padding: isMobile ? '24px 16px' : '48px 36px',
                         boxShadow: plan.recommended ? '0 12px 40px rgba(0,123,255,0.18)' : '0 6px 24px rgba(0,0,0,0.08)',
                         border: plan.recommended ? '2.5px solid #007bff' : '2px solid #e9ecef',
                         position: 'relative',
                         textAlign: 'center',
-                        minHeight: '520px',
+                        minHeight: isMobile ? 'auto' : '520px',
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'space-between'
@@ -126,9 +133,9 @@ const PricingInformation = () => {
                                 transform: 'translateX(-50%)',
                                 backgroundColor: '#007bff',
                                 color: 'white',
-                                padding: '7px 28px',
+                                padding: isMobile ? '5px 16px' : '7px 28px',
                                 borderRadius: '18px',
-                                fontSize: '1.5rem',
+                                fontSize: isMobile ? '0.8rem' : '1.5rem',
                                 fontWeight: '700',
                                 letterSpacing: '0.5px',
                                 boxShadow: '0 2px 8px rgba(0,123,255,0.12)'
@@ -136,25 +143,25 @@ const PricingInformation = () => {
                                 RECOMMENDED
                             </div>
                         )}
-                        <h3 style={{ color: '#2c3e50', marginBottom: '8px', fontSize: '2rem', fontWeight: 700 }}>{plan.name}</h3>
-                        <div style={{ color: '#6c757d', marginBottom: '18px', fontSize: '1.08rem' }}>{plan.description}</div>
+                        <h3 style={{ color: '#2c3e50', marginBottom: '8px', fontSize: isMobile ? '1.5rem' : '2rem', fontWeight: 700 }}>{plan.name}</h3>
+                        <div style={{ color: '#6c757d', marginBottom: '18px', fontSize: isMobile ? '0.9rem' : '1.08rem' }}>{plan.description}</div>
                         <div style={{ marginBottom: '28px' }}>
-                            <span style={{ fontSize: '2rem', fontWeight: 'bold', color: plan.type === 'contact' ? '#fd7e14' : '#007bff' }}>{plan.price}</span>
+                            <span style={{ fontSize: isMobile ? '1.5rem' : '2rem', fontWeight: 'bold', color: plan.type === 'contact' ? '#fd7e14' : '#007bff' }}>{plan.price}</span>
                             {plan.price !== 'Free' && plan.type !== 'contact' && (
-                                <span style={{ color: '#6c757d', fontSize: '1.1rem' }}> / {plan.duration}</span>
+                                <span style={{ color: '#6c757d', fontSize: isMobile ? '0.9rem' : '1.1rem' }}> / {plan.duration}</span>
                             )}
                         </div>
                         <ul style={{ listStyle: 'none', padding: 0, marginBottom: '32px', textAlign: 'left' }}>
                             {plan.features.map((feature, idx) => (
                                 <li key={idx} style={{
-                                    padding: '10px 0',
+                                    padding: isMobile ? '8px 0' : '10px 0',
                                     color: '#444',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '12px',
-                                    fontSize: '1.08rem'
+                                    fontSize: isMobile ? '0.95rem' : '1.08rem'
                                 }}>
-                                    <span style={{ color: '#28a745', fontSize: '1.2rem' }}>✓</span>
+                                    <span style={{ color: '#28a745', fontSize: isMobile ? '1rem' : '1.2rem' }}>✓</span>
                                     {feature}
                                 </li>
                             ))}
@@ -232,30 +239,30 @@ const PricingInformation = () => {
             <div style={{
                 backgroundColor: 'white',
                 borderRadius: '12px',
-                padding: '30px',
+                padding: isMobile ? '20px' : '30px',
                 boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
             }}>
-                <h2 style={{ color: '#2c3e50', marginBottom: '20px' }}>Frequently Asked Questions</h2>
-                <div style={{ display: 'grid', gap: '20px' }}>
+                <h2 style={{ color: '#2c3e50', marginBottom: '20px', fontSize: isMobile ? '1.5rem' : '1.75rem' }}>Frequently Asked Questions</h2>
+                <div style={{ display: 'grid', gap: isMobile ? '16px' : '20px' }}>
                     <div>
-                        <h4 style={{ color: '#007bff', marginBottom: '8px' }}>Can I change my plan anytime?</h4>
-                        <p style={{ color: '#6c757d', margin: 0 }}>Yes, upgrades/downgrades apply next billing cycle.</p>
+                        <h4 style={{ color: '#007bff', marginBottom: '8px', fontSize: isMobile ? '1rem' : '1.1rem' }}>Can I change my plan anytime?</h4>
+                        <p style={{ color: '#6c757d', margin: 0, fontSize: isMobile ? '0.9rem' : '1rem' }}>Yes, upgrades/downgrades apply next billing cycle.</p>
                     </div>
                     <div>
-                        <h4 style={{ color: '#007bff', marginBottom: '8px' }}>Do you offer trials?</h4>
-                        <p style={{ color: '#6c757d', margin: 0 }}>Yes, a 14-day free trial for Growth/Professional plans.</p>
+                        <h4 style={{ color: '#007bff', marginBottom: '8px', fontSize: isMobile ? '1rem' : '1.1rem' }}>Do you offer trials?</h4>
+                        <p style={{ color: '#6c757d', margin: 0, fontSize: isMobile ? '0.9rem' : '1rem' }}>Yes, a 14-day free trial for Growth/Professional plans.</p>
                     </div>
                     <div>
-                        <h4 style={{ color: '#007bff', marginBottom: '8px' }}>Do job postings roll over?</h4>
-                        <p style={{ color: '#6c757d', margin: 0 }}>Yes, unused postings carry into the next month.</p>
+                        <h4 style={{ color: '#007bff', marginBottom: '8px', fontSize: isMobile ? '1rem' : '1.1rem' }}>Do job postings roll over?</h4>
+                        <p style={{ color: '#6c757d', margin: 0, fontSize: isMobile ? '0.9rem' : '1rem' }}>Yes, unused postings carry into the next month.</p>
                     </div>
                     <div>
-                        <h4 style={{ color: '#007bff', marginBottom: '8px' }}>What payment methods are accepted?</h4>
-                        <p style={{ color: '#6c757d', margin: 0 }}>Credit cards, bank transfers, GoPay, OVO.</p>
+                        <h4 style={{ color: '#007bff', marginBottom: '8px', fontSize: isMobile ? '1rem' : '1.1rem' }}>What payment methods are accepted?</h4>
+                        <p style={{ color: '#6c757d', margin: 0, fontSize: isMobile ? '0.9rem' : '1rem' }}>Credit cards, bank transfers, GoPay, OVO.</p>
                     </div>
                     <div>
-                        <h4 style={{ color: '#007bff', marginBottom: '8px' }}>Is there a refund policy?</h4>
-                        <p style={{ color: '#6c757d', margin: 0 }}>Cancellations are prorated for the unused period.</p>
+                        <h4 style={{ color: '#007bff', marginBottom: '8px', fontSize: isMobile ? '1rem' : '1.1rem' }}>Is there a refund policy?</h4>
+                        <p style={{ color: '#6c757d', margin: 0, fontSize: isMobile ? '0.9rem' : '1rem' }}>Cancellations are prorated for the unused period.</p>
                     </div>
                 </div>
             </div>

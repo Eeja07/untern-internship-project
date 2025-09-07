@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../auth/AuthContext.jsx';
 import { companyAPI } from '../auth/api.jsx';
 import { useNavigate } from 'react-router-dom';
@@ -28,6 +28,13 @@ const PostInternship = () => {
     const [captchaToken, setCaptchaToken] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth <= 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     React.useEffect(() => {
         fetchPostedInternships();
@@ -215,6 +222,133 @@ const PostInternship = () => {
         return matchesSearch && matchesStatus;
     });
 
+    // Update form layout for mobile responsiveness
+    // Make form inputs stack vertically on mobile and adjust grid layouts
+    // Update any filter/search rows to stack on mobile
+    // Make buttons full-width on mobile where appropriate
+    // Update any grid layouts to use single column on mobile
+    // Make modals responsive for mobile
+
+    // Example responsive grid helper
+    const responsiveCols = {
+      grid3: isMobile ? '1fr' : 'repeat(3, 1fr)',
+      grid2: isMobile ? '1fr' : '1fr 1fr'
+    };
+
+    // Update form styles to be mobile-friendly
+    const formContainerStyle = {
+      padding: isMobile ? '16px' : '24px',
+      backgroundColor: 'white',
+      borderRadius: '12px',
+      boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+      marginBottom: '30px'
+    };
+
+    const inputStyle = {
+      width: '100%',
+      padding: '0px',
+      border: '2px solid #e9ecef',
+      borderRadius: '8px',
+      fontSize: '1rem',
+      marginBottom: '16px'
+    };
+
+    const buttonStyle = {
+      width: isMobile ? '100%' : 'auto',
+      padding: '12px 24px',
+      backgroundColor: '#007bff',
+      color: 'white',
+      border: 'none',
+      borderRadius: '8px',
+      cursor: 'pointer',
+      fontSize: '1.1rem',
+      fontWeight: '600',
+      transition: 'background-color 0.3s ease',
+      marginTop: '10px'
+    };
+
+    // Update form layouts and styles for mobile responsiveness
+    // Search/Filter rows should stack on mobile
+    // Form grids should become single column on mobile
+    // Buttons should be full-width on mobile
+    // Modals should be responsive
+
+    // Update any search/filter containers like this:
+    const searchFilterStyle = {
+      display: 'flex',
+      gap: '16px',
+      marginBottom: '20px',
+      flexDirection: isMobile ? 'column' : 'row',
+      alignItems: isMobile ? 'stretch' : 'center'
+    };
+
+    // Update form containers like this:
+    const formStyle = {
+      padding: isMobile ? '16px' : '24px',
+      borderRadius: '12px',
+      backgroundColor: 'white',
+      boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+      marginBottom: '30px'
+    };
+
+    // Update form grids like this:
+    const formGridStyle = {
+      display: 'grid',
+      gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+      gap: '15px',
+      marginBottom: '20px'
+    };
+
+    // Update input styles like this:
+    const inputBaseStyle = {
+      width: '100%',
+      padding: '10px',
+      borderRadius: '6px',
+      border: '1px solid #ddd',
+      fontSize: '1rem',
+      marginBottom: '16px'
+    };
+
+    // Update button styles like this:
+    const buttonBaseStyle = {
+      padding: '12px 24px',
+      borderRadius: '8px',
+      cursor: 'pointer',
+      fontWeight: 'bold',
+      width: isMobile ? '100%' : 'auto',
+      backgroundColor: '#007bff',
+      color: 'white',
+      border: 'none',
+      transition: 'background-color 0.3s ease',
+      marginTop: '10px'
+    };
+
+    // Update modal styles like this:
+    const modalStyle = {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      background: 'rgba(0,0,0,0.4)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 9999
+    };
+
+    const modalContentStyle = {
+      background: 'white',
+      padding: isMobile ? '18px' : '30px',
+      borderRadius: '12px',
+      boxShadow: '0 2px 16px rgba(0,0,0,0.2)',
+      width: isMobile ? '94vw' : 'auto',
+      maxWidth: isMobile ? '94vw' : '600px',
+      maxHeight: isMobile ? '86vh' : 'auto',
+      overflowY: isMobile ? 'auto' : 'visible',
+      position: 'relative'
+    };
+
     return (
         <div>
             <div style={{ marginBottom: '30px' }}>
@@ -226,7 +360,9 @@ const PostInternship = () => {
             <div style={{
                 display: 'flex',
                 marginBottom: '30px',
-                borderBottom: '2px solid #e9ecef'
+                borderBottom: '2px solid #e9ecef',
+                flexDirection: isMobile ? 'column' : 'row',
+                gap: isMobile ? '10px' : '0'
             }}>
                 <button
                     onClick={() => setActiveTab('post')}
@@ -235,12 +371,13 @@ const PostInternship = () => {
                         border: 'none',
                         background: activeTab === 'post' ? '#007bff' : 'transparent',
                         color: activeTab === 'post' ? 'white' : '#6c757d',
-                        borderRadius: '8px 8px 0 0',
+                        borderRadius: isMobile ? '8px' : '8px 8px 0 0',
                         fontSize: '1rem',
                         fontWeight: '600',
                         cursor: 'pointer',
-                        marginRight: '10px',
-                        transition: 'all 0.3s ease'
+                        marginRight: isMobile ? '0' : '10px',
+                        transition: 'all 0.3s ease',
+                        width: isMobile ? '100%' : 'auto'
                     }}
                 >
                     Post New Internship
@@ -252,11 +389,12 @@ const PostInternship = () => {
                         border: 'none',
                         background: activeTab === 'manage' ? '#007bff' : 'transparent',
                         color: activeTab === 'manage' ? 'white' : '#6c757d',
-                        borderRadius: '8px 8px 0 0',
+                        borderRadius: isMobile ? '8px' : '8px 8px 0 0',
                         fontSize: '1rem',
                         fontWeight: '600',
                         cursor: 'pointer',
-                        transition: 'all 0.3s ease'
+                        transition: 'all 0.3s ease',
+                        width: isMobile ? '100%' : 'auto'
                     }}
                 >
                     Manage Posted Internships ({postedInternships.length})
@@ -266,12 +404,7 @@ const PostInternship = () => {
             {/* Tab Content */}
             {activeTab === 'post' ? (
                 /* Post New Internship Form */
-                <div style={{
-                    backgroundColor: 'white',
-                    borderRadius: '12px',
-                    padding: '40px',
-                    boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
-                }}>
+                <div style={formContainerStyle}>
                     {editingInternship && (
                         <div style={{
                             marginBottom: '20px',
@@ -312,13 +445,7 @@ const PostInternship = () => {
                                 value={formData.title}
                                 onChange={handleInputChange}
                                 required
-                                style={{
-                                    width: '100%',
-                                    padding: '12px 16px',
-                                    border: '2px solid #e9ecef',
-                                    borderRadius: '8px',
-                                    fontSize: '1rem'
-                                }}
+                                style={inputStyle}
                                 placeholder="e.g., Frontend Developer Intern"
                             />
                         </div>
@@ -334,11 +461,7 @@ const PostInternship = () => {
                                 required
                                 rows={5}
                                 style={{
-                                    width: '100%',
-                                    padding: '12px 16px',
-                                    border: '2px solid #e9ecef',
-                                    borderRadius: '8px',
-                                    fontSize: '1rem',
+                                    ...inputStyle,
                                     resize: 'vertical'
                                 }}
                                 placeholder="Describe the role, responsibilities, and what the intern will learn..."
@@ -356,18 +479,14 @@ const PostInternship = () => {
                                 required
                                 rows={4}
                                 style={{
-                                    width: '100%',
-                                    padding: '12px 16px',
-                                    border: '2px solid #e9ecef',
-                                    borderRadius: '8px',
-                                    fontSize: '1rem',
+                                    ...inputStyle,
                                     resize: 'vertical'
                                 }}
                                 placeholder="List required skills, education level, experience, etc..."
                             />
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '20px' }}>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#2c3e50' }}>
                                     Location *
@@ -378,13 +497,7 @@ const PostInternship = () => {
                                     value={formData.location}
                                     onChange={handleInputChange}
                                     required
-                                    style={{
-                                        width: '100%',
-                                        padding: '12px 16px',
-                                        border: '2px solid #e9ecef',
-                                        borderRadius: '8px',
-                                        fontSize: '1rem'
-                                    }}
+                                    style={inputStyle}
                                     placeholder="e.g., Jakarta or Remote"
                                 />
                             </div>
@@ -397,13 +510,7 @@ const PostInternship = () => {
                                     name="type"
                                     value={formData.type}
                                     onChange={handleInputChange}
-                                    style={{
-                                        width: '100%',
-                                        padding: '12px 16px',
-                                        border: '2px solid #e9ecef',
-                                        borderRadius: '8px',
-                                        fontSize: '1rem'
-                                    }}
+                                    style={inputStyle}
                                 >
                                     <option value="remote">Remote</option>
                                     <option value="on-site">On-site</option>
@@ -413,7 +520,7 @@ const PostInternship = () => {
                             </div>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '20px' }}>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#2c3e50' }}>
                                     Duration (months) *
@@ -422,13 +529,7 @@ const PostInternship = () => {
                                     name="duration_months"
                                     value={formData.duration_months}
                                     onChange={handleInputChange}
-                                    style={{
-                                        width: '100%',
-                                        padding: '12px 16px',
-                                        border: '2px solid #e9ecef',
-                                        borderRadius: '8px',
-                                        fontSize: '1rem'
-                                    }}
+                                    style={inputStyle}
                                 >
                                     <option value="3">3 months</option>
                                     <option value="4">4 months</option>
@@ -446,19 +547,13 @@ const PostInternship = () => {
                                     name="salary_min"
                                     value={formData.salary_min}
                                     onChange={handleInputChange}
-                                    style={{
-                                        width: '100%',
-                                        padding: '12px 16px',
-                                        border: '2px solid #e9ecef',
-                                        borderRadius: '8px',
-                                        fontSize: '1rem'
-                                    }}
+                                    style={inputStyle}
                                     placeholder="e.g., 2000000"
                                 />
                             </div>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '20px' }}>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#2c3e50' }}>
                                     Salary Range (Max)
@@ -468,13 +563,7 @@ const PostInternship = () => {
                                     name="salary_max"
                                     value={formData.salary_max}
                                     onChange={handleInputChange}
-                                    style={{
-                                        width: '100%',
-                                        padding: '12px 16px',
-                                        border: '2px solid #e9ecef',
-                                        borderRadius: '8px',
-                                        fontSize: '1rem'
-                                    }}
+                                    style={inputStyle}
                                     placeholder="e.g., 3000000"
                                 />
                             </div>
@@ -488,13 +577,7 @@ const PostInternship = () => {
                                 name="application_deadline"
                                 value={formData.application_deadline}
                                 onChange={handleInputChange}
-                                style={{
-                                    width: '100%',
-                                    padding: '12px 16px',
-                                    border: '2px solid #e9ecef',
-                                    borderRadius: '8px',
-                                    fontSize: '1rem'
-                                }}
+                                style={inputStyle}
                             />
                         </div>
                         </div>
@@ -502,17 +585,7 @@ const PostInternship = () => {
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            style={{
-                                padding: '15px 30px',
-                                backgroundColor: isSubmitting ? '#6c757d' : '#007bff',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '8px',
-                                cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                                fontSize: '1.1rem',
-                                fontWeight: '600',
-                                transition: 'background-color 0.3s ease'
-                            }}
+                            style={buttonStyle}
                             onMouseEnter={(e) => {
                                 if (!isSubmitting) e.target.style.backgroundColor = '#0056b3';
                             }}
@@ -530,23 +603,24 @@ const PostInternship = () => {
                 <div style={{
                     backgroundColor: 'white',
                     borderRadius: '12px',
-                    padding: '40px',
+                    padding: isMobile ? '20px' : '40px',
                     boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
                 }}>
                     <h2 style={{ color: '#2c3e50', marginBottom: '20px' }}>Your Posted Internships</h2>
                     {/* Search and Filter Controls */}
-                    <div style={{ display: 'flex', gap: '20px', marginBottom: '25px', alignItems: 'center' }}>
+                    <div style={searchFilterStyle}>
                         <input
                             type="text"
                             placeholder="Search by title..."
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
                             style={{
-                                padding: '10px 16px',
+                                padding: '0px',
                                 border: '2px solid #e9ecef',
                                 borderRadius: '8px',
                                 fontSize: '1rem',
-                                flex: '1'
+                                flex: isMobile ? 'none' : '1',
+                                width: isMobile ? '100%' : 'auto'
                             }}
                         />
                         <select
@@ -556,7 +630,8 @@ const PostInternship = () => {
                                 padding: '10px 16px',
                                 border: '2px solid #e9ecef',
                                 borderRadius: '8px',
-                                fontSize: '1rem'
+                                fontSize: '1rem',
+                                width: isMobile ? '100%' : 'auto'
                             }}
                         >
                             <option value="all">All Status</option>
@@ -606,7 +681,7 @@ const PostInternship = () => {
                                     </div>
 
                                     {/* Internship Details */}
-                                    <div style={{ marginRight: '100px' }}>
+                                    <div style={{ marginRight: isMobile ? '0' : '100px' }}>
                                         <h3 style={{ 
                                             color: '#2c3e50', 
                                             marginBottom: '8px',
@@ -617,7 +692,7 @@ const PostInternship = () => {
                                         
                                         <div style={{ 
                                             display: 'grid', 
-                                            gridTemplateColumns: '1fr 1fr', 
+                                            gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', 
                                             gap: '15px',
                                             marginBottom: '15px'
                                         }}>
@@ -690,7 +765,12 @@ const PostInternship = () => {
                                         </div>
 
                                         {/* Action Buttons */}
-                                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                        <div style={{ 
+                                            display: 'flex', 
+                                            gap: '10px', 
+                                            flexDirection: isMobile ? 'column' : 'row',
+                                            flexWrap: isMobile ? 'nowrap' : 'wrap'
+                                        }}>
                                             <button
                                                 onClick={() => handleToggleInternshipStatus(internship.internship_id, internship.is_active)}
                                                 style={{
@@ -701,7 +781,8 @@ const PostInternship = () => {
                                                     borderRadius: '6px',
                                                     cursor: 'pointer',
                                                     fontSize: '0.9rem',
-                                                    fontWeight: '600'
+                                                    fontWeight: '600',
+                                                    width: isMobile ? '100%' : 'auto'
                                                 }}
                                             >
                                                 {internship.is_active ? 'Deactivate' : 'Activate'}
@@ -717,7 +798,8 @@ const PostInternship = () => {
                                                     borderRadius: '6px',
                                                     cursor: 'pointer',
                                                     fontSize: '0.9rem',
-                                                    fontWeight: '600'
+                                                    fontWeight: '600',
+                                                    width: isMobile ? '100%' : 'auto'
                                                 }}
                                             >
                                                 View Applications ({internship.application_count || 0})
@@ -733,7 +815,8 @@ const PostInternship = () => {
                                                     borderRadius: '6px',
                                                     cursor: 'pointer',
                                                     fontSize: '0.9rem',
-                                                    fontWeight: '600'
+                                                    fontWeight: '600',
+                                                    width: isMobile ? '100%' : 'auto'
                                                 }}
                                             >
                                                 Edit
@@ -749,7 +832,8 @@ const PostInternship = () => {
                                                     borderRadius: '6px',
                                                     cursor: 'pointer',
                                                     fontSize: '0.9rem',
-                                                    fontWeight: '600'
+                                                    fontWeight: '600',
+                                                    width: isMobile ? '100%' : 'auto'
                                                 }}
                                             >
                                                 Delete
@@ -772,26 +856,8 @@ const PostInternship = () => {
 
             {/* CAPTCHA Modal */}
             {showCaptchaModal && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    width: '100vw',
-                    height: '100vh',
-                    background: 'rgba(0,0,0,0.4)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 9999
-                }}>
-                    <div style={{
-                        background: 'white',
-                        padding: '30px',
-                        borderRadius: '12px',
-                        boxShadow: '0 2px 16px rgba(0,0,0,0.2)',
-                        minWidth: '320px',
-                        textAlign: 'center'
-                    }}>
+                <div style={modalStyle}>
+                    <div style={modalContentStyle}>
                         <h3 style={{ marginBottom: '20px' }}>Confirm Action</h3>
                         <p style={{ marginBottom: '20px' }}>Please complete the CAPTCHA to confirm this action.</p>
                         <ReCAPTCHA

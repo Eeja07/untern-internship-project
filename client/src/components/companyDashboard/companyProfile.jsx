@@ -11,6 +11,7 @@ const CompanyProfile = ({ onProfileSaved }) => {
     const [isEditMode, setIsEditMode] = useState(false);
     const [logoPreview, setLogoPreview] = useState('');
     const [logoFile, setLogoFile] = useState(null);
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
     useEffect(() => {
         const fetchCompanyProfile = async () => {
@@ -30,6 +31,12 @@ const CompanyProfile = ({ onProfileSaved }) => {
             fetchCompanyProfile();
         }
     }, [user]);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth <= 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -111,8 +118,8 @@ const CompanyProfile = ({ onProfileSaved }) => {
             marginBottom: '40px'
         }}>
             {/* Profile Header Section */}
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '25px' }}>
-                <div style={{ position: 'relative', marginRight: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '25px', flexDirection: isMobile ? 'column' : 'row' }}>
+                <div style={{ position: 'relative', marginRight: isMobile ? '0' : '20px', marginBottom: isMobile ? '15px' : '0' }}>
                     <div style={{
                         width: '80px',
                         height: '80px',
@@ -189,16 +196,16 @@ const CompanyProfile = ({ onProfileSaved }) => {
                         </button>
                     )}
                 </div>
-                <div>
+                <div style={{ textAlign: isMobile ? 'center' : 'left' }}>
                     <h3 style={{ margin: 0 }}>{companyData?.company_name || 'Company Name'}</h3>
                     <p style={{ color: '#6c757d', margin: '5px 0 0 0' }}>Complete your profile to attract employers</p>
                 </div>
-                <div style={{ marginLeft: 'auto', display: 'flex', gap: '10px' }}>
+                <div style={{ marginLeft: 'auto', display: 'flex', gap: '10px', flexDirection: isMobile ? 'column' : 'row', width: '100%' }}>
                     {!isEditMode ? (
                         <button
                             type="button"
                             onClick={handleEdit}
-                            style={{ padding: '10px 20px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '1rem', fontWeight: '600' }}
+                            style={{ padding: '10px 20px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '1rem', fontWeight: '600', width: isMobile ? '100%' : 'auto' }}
                         >
                             Edit Profile
                         </button>
@@ -207,14 +214,14 @@ const CompanyProfile = ({ onProfileSaved }) => {
                             <button
                                 type="submit"
                                 disabled={saving}
-                                style={{ background: saving ? '#6c757d' : '#28a745', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '4px', cursor: saving ? 'not-allowed' : 'pointer', fontSize: '1rem', fontWeight: '600' }}
+                                style={{ background: saving ? '#6c757d' : '#28a745', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '4px', cursor: saving ? 'not-allowed' : 'pointer', fontSize: '1rem', fontWeight: '600', width: isMobile ? '100%' : 'auto' }}
                             >
                                 {saving ? 'Saving...' : 'Save Profile'}
                             </button>
                             <button
                                 type="button"
                                 onClick={handleCancelEdit}
-                                style={{ padding: '10px 20px', backgroundColor: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '1rem', fontWeight: '600' }}
+                                style={{ padding: '10px 20px', backgroundColor: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '1rem', fontWeight: '600', width: isMobile ? '100%' : 'auto' }}
                             >
                                 Cancel Edit
                             </button>

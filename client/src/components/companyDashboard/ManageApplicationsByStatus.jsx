@@ -212,6 +212,7 @@ const ManageApplicationsByStatus = () => {
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [profileUserId, setProfileUserId] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
     useEffect(() => {
         fetchInternshipsAndApplications();
@@ -219,6 +220,12 @@ const ManageApplicationsByStatus = () => {
             setSelectedInternship(location.state.selectedInternshipId);
         }
     }, [location.state]);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth <= 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const fetchInternshipsAndApplications = async () => {
         setLoading(true);
@@ -343,21 +350,51 @@ const ManageApplicationsByStatus = () => {
                         boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
                     }}>
                         {/* Search and Filter Controls */}
-                        <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
+                        <div style={{ 
+                            display: 'flex', 
+                            gap: '20px', 
+                            flexDirection: isMobile ? 'column' : 'row',
+                            flexWrap: isMobile ? 'nowrap' : 'wrap', 
+                            alignItems: isMobile ? 'stretch' : 'center' 
+                        }}>
                             <input
                                 type="text"
                                 placeholder="Search by name or email"
                                 value={searchTerm}
                                 onChange={e => setSearchTerm(e.target.value)}
-                                style={{ padding: '8px', borderRadius: '6px', border: '1px solid #e9ecef', minWidth: '200px' }}
+                                style={{ 
+                                    padding: '8px', 
+                                    borderRadius: '6px', 
+                                    border: '1px solid #e9ecef', 
+                                    minWidth: isMobile ? '100%' : '200px',
+                                    width: isMobile ? '100%' : 'auto'
+                                }}
                             />
-                            <select value={selectedInternship} onChange={e => setSelectedInternship(e.target.value)} style={{ padding: '8px', borderRadius: '6px', border: '1px solid #e9ecef' }}>
+                            <select 
+                                value={selectedInternship} 
+                                onChange={e => setSelectedInternship(e.target.value)} 
+                                style={{ 
+                                    padding: '8px', 
+                                    borderRadius: '6px', 
+                                    border: '1px solid #e9ecef',
+                                    width: isMobile ? '100%' : 'auto'
+                                }}
+                            >
                                 <option value="all">All Internships</option>
                                 {internships.map(int => (
                                     <option key={int.internship_id} value={int.internship_id}>{int.title}</option>
                                 ))}
                             </select>
-                            <select value={selectedStatus} onChange={e => setSelectedStatus(e.target.value)} style={{ padding: '8px', borderRadius: '6px', border: '1px solid #e9ecef' }}>
+                            <select 
+                                value={selectedStatus} 
+                                onChange={e => setSelectedStatus(e.target.value)} 
+                                style={{ 
+                                    padding: '8px', 
+                                    borderRadius: '6px', 
+                                    border: '1px solid #e9ecef',
+                                    width: isMobile ? '100%' : 'auto'
+                                }}
+                            >
                                 <option value="all">All Status</option>
                                 <option value="pending">Pending</option>
                                 <option value="shortlisted">Shortlisted</option>
@@ -374,7 +411,8 @@ const ManageApplicationsByStatus = () => {
                                         border: '1px solid #007bff',
                                         borderRadius: '6px',
                                         cursor: 'pointer',
-                                        fontSize: '0.8rem'
+                                        fontSize: '0.8rem',
+                                        width: isMobile ? '100%' : 'auto'
                                     }}
                                 >
                                     Clear Internship Filter
@@ -517,7 +555,7 @@ const ManageApplicationsByStatus = () => {
                                         </div>
                                     </div>
                                     {/* Application Actions */}
-                                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                    <div style={{ display: 'flex', gap: '10px', flexDirection: isMobile ? 'column' : 'row', flexWrap: isMobile ? 'nowrap' : 'wrap' }}>
                                         <button 
                                             onClick={() => handleUpdateApplicationStatus(application.application_id, 'accepted')}
                                             disabled={application.status === 'accepted'}
@@ -528,7 +566,8 @@ const ManageApplicationsByStatus = () => {
                                                 border: 'none',
                                                 borderRadius: '5px',
                                                 cursor: application.status === 'accepted' ? 'not-allowed' : 'pointer',
-                                                fontSize: '0.9rem'
+                                                fontSize: '0.9rem',
+                                                width: isMobile ? '100%' : 'auto'
                                             }}
                                         >
                                             {application.status === 'accepted' ? 'Accepted' : 'Accept'}
@@ -543,7 +582,8 @@ const ManageApplicationsByStatus = () => {
                                                 border: 'none',
                                                 borderRadius: '5px',
                                                 cursor: (application.status === 'shortlisted' || application.status === 'accepted') ? 'not-allowed' : 'pointer',
-                                                fontSize: '0.9rem'
+                                                fontSize: '0.9rem',
+                                                width: isMobile ? '100%' : 'auto'
                                             }}
                                         >
                                             {application.status === 'shortlisted' ? 'Shortlisted' : 'Shortlist'}
@@ -558,7 +598,8 @@ const ManageApplicationsByStatus = () => {
                                                 border: 'none',
                                                 borderRadius: '5px',
                                                 cursor: application.status === 'rejected' ? 'not-allowed' : 'pointer',
-                                                fontSize: '0.9rem'
+                                                fontSize: '0.9rem',
+                                                width: isMobile ? '100%' : 'auto'
                                             }}
                                         >
                                             {application.status === 'rejected' ? 'Rejected' : 'Reject'}
@@ -573,7 +614,8 @@ const ManageApplicationsByStatus = () => {
                                                 border: 'none',
                                                 borderRadius: '5px',
                                                 cursor: application.done_intern ? 'not-allowed' : 'pointer',
-                                                fontSize: '0.9rem'
+                                                fontSize: '0.9rem',
+                                                width: isMobile ? '100%' : 'auto'
                                             }}
                                         >
                                             {application.done_intern ? 'Internship Done' : 'Mark as Done'}
@@ -587,7 +629,8 @@ const ManageApplicationsByStatus = () => {
                                                 border: '1px solid #17a2b8',
                                                 borderRadius: '5px',
                                                 cursor: 'pointer',
-                                                fontSize: '0.9rem'
+                                                fontSize: '0.9rem',
+                                                width: isMobile ? '100%' : 'auto'
                                             }}
                                         >
                                             View Profile

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 
 const AnalyticsReporting = () => {
@@ -7,6 +7,7 @@ const AnalyticsReporting = () => {
     const [sortBy, setSortBy] = useState('views');
     const [sortDir, setSortDir] = useState('desc');
     const [showAll, setShowAll] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
     const analyticsData = {
         jobViews: [
@@ -28,6 +29,12 @@ const AnalyticsReporting = () => {
         { title: 'QA Tester Intern', views: 600, applications: 18, conversion: 3.0, date: '2024-01-10', status: 'Active' },
         { title: 'Marketing Intern', views: 500, applications: 15, conversion: 3.0, date: '2024-02-01', status: 'Closed' }
     ];
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth <= 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // Sorting
     const sortedJobs = [...jobs]

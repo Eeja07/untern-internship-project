@@ -7,6 +7,7 @@ const PartnershipOpportunities = () => {
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState(null);
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const modalRef = useRef(null);
 
     useEffect(() => {
@@ -214,6 +215,12 @@ const PartnershipOpportunities = () => {
         );
     };
 
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth <= 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     return (
         <div>
             <div style={{ marginBottom: '30px' }}>
@@ -222,7 +229,7 @@ const PartnershipOpportunities = () => {
             </div>
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+                gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(350px, 1fr))',
                 gap: '30px',
                 marginBottom: '40px'
             }}>

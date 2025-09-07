@@ -29,6 +29,7 @@ const PostCertifications = () => {
 	const [searchTerm, setSearchTerm] = useState('');
 	const [filterStudent, setFilterStudent] = useState('');
 	const [filterPost, setFilterPost] = useState('');
+	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
 	useEffect(() => {
 		const fetchStudents = async () => {
@@ -88,6 +89,12 @@ const PostCertifications = () => {
 	};
 	useEffect(() => {
 		fetchUploadedDocs();
+	}, []);
+
+	useEffect(() => {
+		const handleResize = () => setIsMobile(window.innerWidth <= 768);
+		window.addEventListener('resize', handleResize);
+		return () => window.removeEventListener('resize', handleResize);
 	}, []);
 
 	const handleStudentChange = (e) => {
@@ -209,7 +216,12 @@ const PostCertifications = () => {
 				<p style={{ color: '#6c757d' }}>Upload and manage certificates and letters for your interns. These will be visible in the student dashboard.</p>
 			</div>
 			{/* Tab Navigation */}
-			<div style={{ display: 'flex', gap: '16px', marginBottom: '30px' }}>
+			<div style={{ 
+				display: 'flex', 
+				gap: '16px', 
+				marginBottom: '30px',
+				flexDirection: isMobile ? 'column' : 'row' 
+			}}>
 				{Object.values(TABS).map(tab => (
 					<button
 						key={tab}
@@ -225,6 +237,7 @@ const PostCertifications = () => {
 							fontSize: '1rem',
 							boxShadow: activeTab === tab ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
 							transition: 'background-color 0.2s',
+							width: isMobile ? '100%' : 'auto'
 						}}
 					>
 						{tab}
@@ -235,7 +248,7 @@ const PostCertifications = () => {
 			{/* Tab Content */}
 			{activeTab === TABS.POST && (
 				<div>
-					<div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '40px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)', marginBottom: '30px' }}>
+					<div style={{ backgroundColor: 'white', borderRadius: '12px', padding: isMobile ? '20px' : '40px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)', marginBottom: '30px' }}>
 						<form onSubmit={handleSubmit}>
 							<div style={{ display: 'grid', gap: '25px' }}>
 								<div>
@@ -273,7 +286,7 @@ const PostCertifications = () => {
 										value={mentor}
 										onChange={handleMentorChange}
 										required
-										style={{ width: '100%', padding: '12px 16px', border: '2px solid #e9ecef', borderRadius: '8px', fontSize: '1rem' }}
+										style={{ width: '100%', padding: '0', border: '2px solid #e9ecef', borderRadius: '8px', fontSize: '1rem' }}
 										placeholder="e.g., John Smith"
 									/>
 								</div>
@@ -284,7 +297,7 @@ const PostCertifications = () => {
 										onChange={handleFeedbackChange}
 										required
 										rows={3}
-										style={{ width: '100%', padding: '12px 16px', border: '2px solid #e9ecef', borderRadius: '8px', fontSize: '1rem', resize: 'vertical' }}
+										style={{ width: '100%', padding: '0', border: '2px solid #e9ecef', borderRadius: '8px', fontSize: '1rem', resize: 'vertical' }}
 										placeholder="Feedback or evaluation for the intern"
 									/>
 								</div>
@@ -294,7 +307,7 @@ const PostCertifications = () => {
 										type="file"
 										accept=".pdf,.jpg,.png"
 										onChange={handleCertificateFile}
-										style={{ width: '100%', padding: '12px 16px', border: '2px solid #e9ecef', borderRadius: '8px', fontSize: '1rem' }}
+										style={{ width: '100%', padding: '0', border: '2px solid #e9ecef', borderRadius: '8px', fontSize: '1rem' }}
 									/>
 								</div>
 								<div>
@@ -303,7 +316,7 @@ const PostCertifications = () => {
 										type="file"
 										accept=".pdf,.jpg,.png"
 										onChange={handleLetterFile}
-										style={{ width: '100%', padding: '12px 16px', border: '2px solid #e9ecef', borderRadius: '8px', fontSize: '1rem' }}
+										style={{ width: '100%', padding: '0', border: '2px solid #e9ecef', borderRadius: '8px', fontSize: '1rem' }}
 									/>
 								</div>
 								<button
@@ -322,18 +335,38 @@ const PostCertifications = () => {
 			{activeTab === TABS.MANAGE && (
 				<div>
 					<div style={{ marginBottom: '24px' }}>
-						<div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '16px' }}>
+						<div style={{ 
+							display: 'flex', 
+							gap: '16px', 
+							flexWrap: 'wrap', 
+							marginBottom: '16px',
+							flexDirection: isMobile ? 'column' : 'row' 
+						}}>
 							<input
 								type="text"
 								value={searchTerm}
 								onChange={e => setSearchTerm(e.target.value)}
 								placeholder="Search by student or post"
-								style={{ padding: '10px 16px', borderRadius: '8px', border: '2px solid #e9ecef', fontSize: '1rem', minWidth: '180px' }}
+								style={{ 
+									padding: '0', 
+									borderRadius: '8px', 
+									border: '2px solid #e9ecef', 
+									fontSize: '1rem', 
+									minWidth: isMobile ? '100%' : '180px',
+									width: isMobile ? '100%' : 'auto'
+								}}
 							/>
 							<select
 								value={filterStudent}
 								onChange={e => setFilterStudent(e.target.value)}
-								style={{ padding: '10px 16px', borderRadius: '8px', border: '2px solid #e9ecef', fontSize: '1rem', minWidth: '160px' }}
+								style={{ 
+									padding: '10px 16px', 
+									borderRadius: '8px', 
+									border: '2px solid #e9ecef', 
+									fontSize: '1rem', 
+									minWidth: isMobile ? '100%' : '160px',
+									width: isMobile ? '100%' : 'auto'
+								}}
 							>
 								<option value="">All Students</option>
 								{[...new Set(uploadedDocs.map(doc => doc.student_name))].map(name => (
@@ -343,7 +376,14 @@ const PostCertifications = () => {
 							<select
 								value={filterPost}
 								onChange={e => setFilterPost(e.target.value)}
-								style={{ padding: '10px 16px', borderRadius: '8px', border: '2px solid #e9ecef', fontSize: '1rem', minWidth: '160px' }}
+								style={{ 
+									padding: '10px 16px', 
+									borderRadius: '8px', 
+									border: '2px solid #e9ecef', 
+									fontSize: '1rem', 
+									minWidth: isMobile ? '100%' : '160px',
+									width: isMobile ? '100%' : 'auto'
+								}}
 							>
 								<option value="">All Posts</option>
 								{[...new Set(uploadedDocs.map(doc => doc.internship_title))].map(title => (
@@ -397,9 +437,27 @@ const PostCertifications = () => {
 													) : null}
 													<input type="file" accept=".pdf,.jpg,.png" onChange={e => handleEditFile(e, 'letter')} style={{ marginTop: '8px' }} />
 												</div>
-												<div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '18px' }}>
-													<button style={{ background: '#007bff', color: 'white', border: 'none', borderRadius: '4px', padding: '10px 22px', cursor: 'pointer', fontWeight: 'bold' }} onClick={() => handleEditSubmit(doc)}>Save</button>
-													<button style={{ background: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', padding: '10px 22px', cursor: 'pointer', fontWeight: 'bold' }} onClick={() => handleDelete(doc.document_id, 'post')}>Delete Post</button>
+												<div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '18px', flexDirection: isMobile ? 'column' : 'row' }}>
+													<button style={{ 
+														background: '#007bff', 
+														color: 'white', 
+														border: 'none', 
+														borderRadius: '4px', 
+														padding: '10px 22px', 
+														cursor: 'pointer', 
+														fontWeight: 'bold',
+														width: isMobile ? '100%' : 'auto'
+													}} onClick={() => handleEditSubmit(doc)}>Save</button>
+													<button style={{ 
+														background: '#dc3545', 
+														color: 'white', 
+														border: 'none', 
+														borderRadius: '4px', 
+														padding: '10px 22px', 
+														cursor: 'pointer', 
+														fontWeight: 'bold',
+														width: isMobile ? '100%' : 'auto'
+													}} onClick={() => handleDelete(doc.document_id, 'post')}>Delete Post</button>
 												</div>
 											</div>
 										) : (

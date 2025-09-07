@@ -19,7 +19,8 @@ const Mission = () => {
       <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: isMobile ? '0 15px' : '0 20px' }}>
         <h2 style={{ 
               fontSize: isMobile ? '1.8rem' : isTablet ? '2.2rem' : '2.5rem', 
-              marginBottom: '3rem',
+              marginTop: '3rem',
+              marginBottom: '2rem',
               color: '#2c3e50',
               fontWeight: '600',
               display: 'flex',

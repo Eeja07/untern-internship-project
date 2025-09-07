@@ -23,6 +23,11 @@ const CompanyDashboard = () => {
     const [isStudentModalOpen, setIsStudentModalOpen] = useState(false);
     const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
 
+    // Let me add the mobile responsiveness to CompanyDashboard similar to StudentDashboard
+    // Adding isMobile state and sidebar functionality
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+
     const sidebarItems = [
         { id: 'overview', label: 'Dashboard Overview', icon: '📊' },
         { id: 'profile', label: 'Company Profile', icon: '🏢' },
@@ -76,9 +81,37 @@ const CompanyDashboard = () => {
         setIsCompanyModalOpen(true);
     };
 
+    // Handle window resize for mobile responsiveness
+    React.useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+            if (window.innerWidth > 768) {
+                setSidebarOpen(false);
+            }
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Prevent background scrolling when mobile sidebar is open
+    React.useEffect(() => {
+        const originalOverflow = document.body.style.overflow;
+        if (isMobile && sidebarOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = originalOverflow || '';
+        }
+        return () => {
+            document.body.style.overflow = originalOverflow || '';
+        };
+    }, [isMobile, sidebarOpen]);
+
     const handleSectionChange = (sectionId) => {
         setActiveSection(sectionId);
         navigate(`/company-dashboard/${sectionId}`);
+        if (isMobile) {
+            setSidebarOpen(false);
+        }
     };
 
     const handleLogout = () => {
@@ -113,114 +146,186 @@ const CompanyDashboard = () => {
     };
 
     return (
-        <>
-            <div style={{ display: 'flex', minHeight: '90vh', backgroundColor: '#f8f9fa' }}>
-                {/* Sidebar */}
-                <div style={{
-                    width: '280px',
-                    backgroundColor: 'white',
-                    borderRight: '1px solid #e9ecef',
-                    padding: '20px'
-                }}>
-                    {/* Company Info Section */}
-                    <div style={{
-                        borderBottom: '1px solid #e9ecef',
-                        paddingBottom: '20px',
-                        marginBottom: '20px'
-                    }}>
-                        {/* Profile Picture from DB */}
-                        <div style={{
-                            width: '60px',
-                            height: '60px',
-                            backgroundColor: companyProfile?.logo_url ? 'transparent' : '#007bff',
-                            backgroundImage: companyProfile?.logo_url ? `url(${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${companyProfile.logo_url})` : 'none',
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'center',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'white',
-                            fontSize: '20px',
-                            marginBottom: '10px'
-                        }}>
-                            {!companyProfile?.logo_url && (companyProfile?.company_name?.charAt(0).toUpperCase() || 'C')}
-                        </div>
-                        <h4 style={{ margin: 0, marginBottom: '5px' }}>Company Dashboard</h4>
-                        <p style={{ margin: 0, color: '#2c3e50', fontSize: '16px' }}>{companyProfile?.company_name || ''}</p>
-                    </div>
+        <div style={{ display: 'flex', minHeight: '100vh', background: '#f8f9fa' }}>
+            {/* Mobile Overlay */}
+            {isMobile && sidebarOpen && (
+                <div 
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        zIndex: 998
+                    }}
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
 
-                    {/* Navigation Items */}
-                    <nav>
-                        {sidebarItems.map(item => (
-                            <button
-                                key={item.id}
-                                onClick={() => handleSectionChange(item.id)}
-                                style={{
-                                    width: '100%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    padding: '12px 16px',
-                                    margin: '4px 0',
-                                    background: activeSection === item.id ? '#e7f3ff' : 'transparent',
-                                    color: activeSection === item.id ? '#007bff' : '#495057',
-                                    border: 'none',
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    fontSize: '14px',
-                                    textAlign: 'left',
-                                    transition: 'all 0.2s'
-                                }}
-                                onMouseEnter={(e) => {
-                                    if (activeSection !== item.id) {
-                                        e.target.style.background = '#f8f9fa';
-                                    }
-                                }}
-                                onMouseLeave={(e) => {
-                                    if (activeSection !== item.id) {
-                                        e.target.style.background = 'transparent';
-                                    }
-                                }}
-                            >
-                                <span style={{ marginRight: '12px', fontSize: '18px' }}>{item.icon}</span>
-                                {item.label}
-                            </button>
-                        ))}
-                    </nav>
-
-                    {/* Logout Button */}
+            {/* Sidebar */}
+            <div style={{
+                width: isMobile ? '280px' : '280px',
+                background: 'white',
+                borderRight: '1px solid #e9ecef',
+                padding: '20px',
+                position: isMobile ? 'fixed' : 'static',
+                top: 0,
+                left: 0,
+                height: isMobile ? '100vh' : 'auto',
+                zIndex: 999,
+                transform: isMobile ? (sidebarOpen ? 'translateX(0)' : 'translateX(-100%)') : 'none',
+                transition: isMobile ? 'transform 0.3s ease-in-out' : 'none',
+                overflowY: 'auto'
+            }}>
+                {/* Close button for mobile sidebar */}
+                {isMobile && (
                     <button
-                        onClick={handleLogout}
+                        onClick={() => setSidebarOpen(false)}
+                        aria-label="Close sidebar"
                         style={{
-                            width: '100%',
-                            padding: '12px 16px',
-                            margin: '20px 0 0 0',
-                            background: '#dc3545',
-                            color: 'white',
+                            position: 'absolute',
+                            top: 16,
+                            right: 16,
+                            zIndex: 1001,
+                            background: 'transparent',
                             border: 'none',
-                            borderRadius: '8px',
+                            fontSize: 22,
                             cursor: 'pointer',
-                            fontSize: '14px'
+                            color: '#495057'
                         }}
-                        onMouseEnter={(e) => e.target.style.background = '#c82333'}
-                        onMouseLeave={(e) => e.target.style.background = '#dc3545'}
                     >
-                        🚪 Logout
+                        ✕
                     </button>
+                )}
+
+                {/* Company Info Section */}
+                <div style={{
+                    borderBottom: '1px solid #e9ecef',
+                    paddingBottom: '20px',
+                    marginBottom: '20px'
+                }}>
+                    {/* Profile Picture from DB */}
+                    <div style={{
+                        width: '60px',
+                        height: '60px',
+                        backgroundColor: companyProfile?.logo_url ? 'transparent' : '#007bff',
+                        backgroundImage: companyProfile?.logo_url ? `url(${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${companyProfile.logo_url})` : 'none',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontSize: '20px',
+                        marginBottom: '10px'
+                    }}>
+                        {!companyProfile?.logo_url && (companyProfile?.company_name?.charAt(0).toUpperCase() || 'C')}
+                    </div>
+                    <h4 style={{ margin: 0, marginBottom: '5px' }}>Company Dashboard</h4>
+                    <p style={{ margin: 0, color: '#2c3e50', fontSize: '16px' }}>{companyProfile?.company_name || ''}</p>
                 </div>
 
-                {/* Main Content */}
+                {/* Navigation Items */}
+                <nav>
+                    {sidebarItems.map(item => (
+                        <button
+                            key={item.id}
+                            onClick={() => handleSectionChange(item.id)}
+                            style={{
+                                width: '100%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                padding: '12px 16px',
+                                margin: '4px 0',
+                                background: activeSection === item.id ? '#e7f3ff' : 'transparent',
+                                color: activeSection === item.id ? '#007bff' : '#495057',
+                                border: 'none',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                fontSize: '14px',
+                                textAlign: 'left',
+                                transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e) => {
+                                if (activeSection !== item.id) {
+                                    e.target.style.background = '#f8f9fa';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (activeSection !== item.id) {
+                                    e.target.style.background = 'transparent';
+                                }
+                            }}
+                        >
+                            <span style={{ marginRight: '12px', fontSize: '18px' }}>{item.icon}</span>
+                            {item.label}
+                        </button>
+                    ))}
+                </nav>
+
+                {/* Logout Button */}
+                <button
+                    onClick={handleLogout}
+                    style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        margin: '20px 0 0 0',
+                        background: '#dc3545',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        fontSize: '14px'
+                    }}
+                    onMouseEnter={(e) => e.target.style.background = '#c82333'}
+                    onMouseLeave={(e) => e.target.style.background = '#dc3545'}
+                >
+                    🚪 Logout
+                </button>
+            </div>
+
+            {/* Main Content */}
+            <div style={{
+                flex: 1,
+                padding: isMobile ? '10px' : '30px',
+                overflow: 'auto'
+            }}>
+                {/* Mobile Menu Toggle */}
+                {isMobile && !sidebarOpen && (
+                    <button
+                        onClick={() => setSidebarOpen(true)}
+                        style={{
+                            position: 'fixed',
+                            top: '20px',
+                            left: '20px',
+                            zIndex: 1000,
+                            background: '#007bff',
+                            color: 'white',
+                            border: 'none',
+                            padding: '10px',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            fontSize: '18px',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                        }}
+                    >
+                        ☰
+                    </button>
+                )}
+                
                 <div style={{
-                    flex: '1',
+                    background: 'white',
+                    borderRadius: '8px',
                     padding: '30px',
-                    overflow: 'auto'
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                    marginTop: isMobile ? '60px' : '0'
                 }}>
                     {renderContent()}
                 </div>
             </div>
-
-            <FooterHome onForStudentsClick={handleForStudentsClick} onForCompaniesClick={handleForCompaniesClick} />
-        </>
+        </div>
     );
 };
 

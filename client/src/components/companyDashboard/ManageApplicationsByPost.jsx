@@ -212,6 +212,7 @@ const ManageApplicationsByPost = () => {
     const [filterDuration, setFilterDuration] = useState('all');
     const [filterSalaryMin, setFilterSalaryMin] = useState('');
     const [filterSalaryMax, setFilterSalaryMax] = useState('');
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
     useEffect(() => {
         fetchInternshipsAndApplications();
@@ -219,6 +220,12 @@ const ManageApplicationsByPost = () => {
             setSelectedInternship(location.state.selectedInternshipId);
         }
     }, [location.state]);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth <= 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const fetchInternshipsAndApplications = async () => {
         setLoading(true);
@@ -338,32 +345,71 @@ const ManageApplicationsByPost = () => {
         <div style={{
             background: '#f8f9fa',
             borderRadius: '10px',
-            padding: '24px',
+            padding: isMobile ? '16px' : '24px',
             marginBottom: '30px',
             boxShadow: '0 1px 6px rgba(0,0,0,0.07)'
         }}>
             <h3 style={{ marginBottom: '18px', color: '#2c3e50' }}>Search & Filter Applicants</h3>
-            <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <div style={{ 
+                display: 'flex', 
+                gap: '20px', 
+                flexDirection: isMobile ? 'column' : 'row',
+                flexWrap: isMobile ? 'nowrap' : 'wrap', 
+                alignItems: isMobile ? 'stretch' : 'center' 
+            }}>
                 <input
                     type="text"
                     placeholder="Search by title"
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
-                    style={{ padding: '8px', borderRadius: '6px', border: '1px solid #e9ecef', minWidth: '200px' }}
+                    style={{ 
+                        padding: '8px', 
+                        borderRadius: '6px', 
+                        border: '1px solid #e9ecef', 
+                        minWidth: isMobile ? '100%' : '200px',
+                        width: isMobile ? '100%' : 'auto'
+                    }}
                 />
-                <select value={filterLocation} onChange={e => setFilterLocation(e.target.value)} style={{ padding: '8px', borderRadius: '6px', border: '1px solid #e9ecef' }}>
+                <select 
+                    value={filterLocation} 
+                    onChange={e => setFilterLocation(e.target.value)} 
+                    style={{ 
+                        padding: '8px', 
+                        borderRadius: '6px', 
+                        border: '1px solid #e9ecef',
+                        width: isMobile ? '100%' : 'auto'
+                    }}
+                >
                     <option value="all">All Locations</option>
                     {Array.from(new Set(internships.map(int => int.location))).map(loc => (
                         <option key={loc} value={loc}>{loc}</option>
                     ))}
                 </select>
-                <select value={filterType} onChange={e => setFilterType(e.target.value)} style={{ padding: '8px', borderRadius: '6px', border: '1px solid #e9ecef' }}>
+                <select 
+                    value={filterType} 
+                    onChange={e => setFilterType(e.target.value)} 
+                    style={{ 
+                        padding: '8px', 
+                        borderRadius: '6px', 
+                        border: '1px solid #e9ecef',
+                        width: isMobile ? '100%' : 'auto'
+                    }}
+                >
                     <option value="all">All Types</option>
                     {Array.from(new Set(internships.map(int => int.type))).map(type => (
                         <option key={type} value={type}>{type}</option>
                     ))}
                 </select>
-                <select value={filterDuration} onChange={e => setFilterDuration(e.target.value)} style={{ padding: '8px', borderRadius: '6px', border: '1px solid #e9ecef' }}>
+                <select 
+                    value={filterDuration} 
+                    onChange={e => setFilterDuration(e.target.value)} 
+                    style={{ 
+                        padding: '8px', 
+                        borderRadius: '6px', 
+                        border: '1px solid #e9ecef',
+                        width: isMobile ? '100%' : 'auto'
+                    }}
+                >
                     <option value="all">All Durations</option>
                     {Array.from(new Set(internships.map(int => int.duration_months))).map(dur => (
                         <option key={dur} value={dur}>{dur} months</option>
@@ -374,21 +420,31 @@ const ManageApplicationsByPost = () => {
                     placeholder="Salary Min"
                     value={filterSalaryMin}
                     onChange={e => setFilterSalaryMin(e.target.value)}
-                    style={{ padding: '8px', borderRadius: '6px', border: '1px solid #e9ecef', width: '120px' }}
+                    style={{ 
+                        padding: '8px', 
+                        borderRadius: '6px', 
+                        border: '1px solid #e9ecef', 
+                        width: isMobile ? '100%' : '120px'
+                    }}
                 />
                 <input
                     type="number"
                     placeholder="Salary Max"
                     value={filterSalaryMax}
                     onChange={e => setFilterSalaryMax(e.target.value)}
-                    style={{ padding: '8px', borderRadius: '6px', border: '1px solid #e9ecef', width: '120px' }}
+                    style={{ 
+                        padding: '8px', 
+                        borderRadius: '6px', 
+                        border: '1px solid #e9ecef', 
+                        width: isMobile ? '100%' : '120px'
+                    }}
                 />
             </div>
         </div>
         <div style={{
             backgroundColor: 'white',
             borderRadius: '12px',
-            padding: '40px',
+            padding: isMobile ? '20px' : '40px',
             boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
         }}>
             <h2 style={{ color: '#2c3e50', marginBottom: '20px' }}>Applications by Post</h2>
@@ -458,7 +514,7 @@ const ManageApplicationsByPost = () => {
                                             </span>
                                           </div>
                                           {/* ...existing code for details and actions... */}
-                                          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                          <div style={{ display: 'flex', gap: '10px', flexDirection: isMobile ? 'column' : 'row', flexWrap: isMobile ? 'nowrap' : 'wrap' }}>
                                             <button 
                                                 onClick={() => handleUpdateApplicationStatus(application.application_id, 'accepted')}
                                                 disabled={application.status === 'accepted'}
@@ -469,7 +525,8 @@ const ManageApplicationsByPost = () => {
                                                     border: 'none',
                                                     borderRadius: '5px',
                                                     cursor: application.status === 'accepted' ? 'not-allowed' : 'pointer',
-                                                    fontSize: '0.9rem'
+                                                    fontSize: '0.9rem',
+                                                    width: isMobile ? '100%' : 'auto'
                                                 }}
                                             >
                                                 {application.status === 'accepted' ? 'Accepted' : 'Accept'}
@@ -484,7 +541,8 @@ const ManageApplicationsByPost = () => {
                                                     border: 'none',
                                                     borderRadius: '5px',
                                                     cursor: (application.status === 'shortlisted' || application.status === 'accepted') ? 'not-allowed' : 'pointer',
-                                                    fontSize: '0.9rem'
+                                                    fontSize: '0.9rem',
+                                                    width: isMobile ? '100%' : 'auto'
                                                 }}
                                             >
                                                 {application.status === 'shortlisted' ? 'Shortlisted' : 'Shortlist'}
@@ -499,7 +557,8 @@ const ManageApplicationsByPost = () => {
                                                     border: 'none',
                                                     borderRadius: '5px',
                                                     cursor: application.status === 'rejected' ? 'not-allowed' : 'pointer',
-                                                    fontSize: '0.9rem'
+                                                    fontSize: '0.9rem',
+                                                    width: isMobile ? '100%' : 'auto'
                                                 }}
                                             >
                                                 {application.status === 'rejected' ? 'Rejected' : 'Reject'}
@@ -514,7 +573,8 @@ const ManageApplicationsByPost = () => {
                                                     border: 'none',
                                                     borderRadius: '5px',
                                                     cursor: application.done_intern ? 'not-allowed' : 'pointer',
-                                                    fontSize: '0.9rem'
+                                                    fontSize: '0.9rem',
+                                                    width: isMobile ? '100%' : 'auto'
                                                 }}
                                             >
                                                 {application.done_intern ? 'Internship Done' : 'Mark as Done'}
@@ -528,7 +588,8 @@ const ManageApplicationsByPost = () => {
                                                     border: '1px solid #17a2b8',
                                                     borderRadius: '5px',
                                                     cursor: 'pointer',
-                                                    fontSize: '0.9rem'
+                                                    fontSize: '0.9rem',
+                                                    width: isMobile ? '100%' : 'auto'
                                                 }}
                                             >
                                                 View Profile
