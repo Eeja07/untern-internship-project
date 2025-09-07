@@ -14,53 +14,53 @@ const PricingInformation = () => {
                 'Application notifications'
             ],
             recommended: false,
-            type: 'basic'
+            type: 'basic',
+            description: 'For small teams just getting started.'
+        },
+        {
+            name: 'Growth',
+            price: 'Rp 750,000',
+            duration: 'per month',
+            features: [
+                'Everything in Basic',
+                'Up to 15 active postings',
+                'Candidate recommendations',
+                'Featured job visibility',
+                'Priority support'
+            ],
+            recommended: false,
+            type: 'payable',
+            description: 'Best for growing startups.'
         },
         {
             name: 'Professional',
-            price: 'Rp 500,000',
+            price: 'Rp 1,250,000',
             duration: 'per month',
             features: [
                 'Unlimited internship postings',
-                'Advanced candidate search',
-                'Priority support',
-                'Analytics dashboard',
-                'Featured job listings',
-                'Application management tools'
+                'Advanced candidate search & filters',
+                'Full analytics dashboard',
+                'Employer branding profile',
+                'Dedicated support manager'
             ],
             recommended: true,
-            type: 'payable'
+            type: 'payable',
+            description: 'For scaling companies.'
         },
         {
             name: 'Enterprise',
-            price: 'Rp 1,500,000',
-            duration: 'per month',
-            features: [
-                'Everything in Professional',
-                'Dedicated account manager',
-                'Custom branding',
-                'API access',
-                'Advanced analytics',
-                'Bulk operations',
-                'Custom integrations'
-            ],
-            recommended: false,
-            type: 'payable'
-        },
-        {
-            name: 'Custom/Enterprise',
-            price: 'Contact Sales',
+            price: 'Custom Pricing',
             duration: '',
             features: [
-                'Tailored solutions for large organizations',
-                'Custom integrations & onboarding',
-                'Dedicated enterprise support',
-                'SLAs & compliance',
-                'On-premise or hybrid deployment',
-                'Consulting & training'
+                'Everything in Professional',
+                'API & bulk posting',
+                'Custom branding',
+                'Advanced analytics & reports',
+                'Custom integrations & onboarding'
             ],
             recommended: false,
-            type: 'contact'
+            type: 'contact',
+            description: 'For large organizations.'
         }
     ];
 
@@ -68,21 +68,21 @@ const PricingInformation = () => {
     const [paymentInfo, setPaymentInfo] = useState(null);
     const [errorMsg, setErrorMsg] = useState('');
 
-    const handleUpgrade = async (plan) => {
+    const handleUpgrade = async (plan) => { 
         setLoading(true);
         setPaymentInfo(null);
         setErrorMsg('');
         try {
             const res = await axios.post('http://localhost:4000/api/pay/midtrans', {
-                amount: plan.name === 'Professional' ? 500000 : 1500000,
+                amount: plan.name === 'Growth' ? 750000 : plan.name === 'Professional' ? 1250000 : 0,
                 orderId: `order-${Date.now()}`,
-                name: 'Company Name', // Replace with actual company name
-                email: 'company@email.com', // Replace with actual company email
+                name: 'Company Name', // Replace with actual company 
+                email: 'company@espospmail.com', // Replace with actual company email
                 phone: '081234567890', // Replace with actual company phone
             });
             setPaymentInfo(res.data);
             if (res.data.redirect_url) {
-                window.location.href = res.data.redirect_url;
+                window.open(res.data.redirect_url, '_blank');
             }
         } catch (err) {
             setErrorMsg(err.response?.data?.error || 'Payment initiation failed');
@@ -93,8 +93,8 @@ const PricingInformation = () => {
     return (
         <div>
             <div style={{ marginBottom: '30px' }}>
-                <h1 style={{ color: '#2c3e50', marginBottom: '10px' }}>Pricing Information</h1>
-                <p style={{ color: '#6c757d' }}>Choose the plan that best fits your company's needs.</p>
+                <h1 style={{ color: '#2c3e50', marginBottom: '10px' }}>Flexible Pricing for Every Company</h1>
+                <p style={{ color: '#6c757d', fontSize: '1.15rem' }}>Choose a plan that scales with your hiring needs.</p>
             </div>
 
             <div style={{
@@ -128,7 +128,7 @@ const PricingInformation = () => {
                                 color: 'white',
                                 padding: '7px 28px',
                                 borderRadius: '18px',
-                                fontSize: '1rem',
+                                fontSize: '1.5rem',
                                 fontWeight: '700',
                                 letterSpacing: '0.5px',
                                 boxShadow: '0 2px 8px rgba(0,123,255,0.12)'
@@ -136,9 +136,10 @@ const PricingInformation = () => {
                                 RECOMMENDED
                             </div>
                         )}
-                        <h3 style={{ color: '#2c3e50', marginBottom: '16px', fontSize: '2rem', fontWeight: 700 }}>{plan.name}</h3>
+                        <h3 style={{ color: '#2c3e50', marginBottom: '8px', fontSize: '2rem', fontWeight: 700 }}>{plan.name}</h3>
+                        <div style={{ color: '#6c757d', marginBottom: '18px', fontSize: '1.08rem' }}>{plan.description}</div>
                         <div style={{ marginBottom: '28px' }}>
-                            <span style={{ fontSize: '2.8rem', fontWeight: 'bold', color: plan.type === 'contact' ? '#fd7e14' : '#007bff' }}>{plan.price}</span>
+                            <span style={{ fontSize: '2rem', fontWeight: 'bold', color: plan.type === 'contact' ? '#fd7e14' : '#007bff' }}>{plan.price}</span>
                             {plan.price !== 'Free' && plan.type !== 'contact' && (
                                 <span style={{ color: '#6c757d', fontSize: '1.1rem' }}> / {plan.duration}</span>
                             )}
@@ -227,7 +228,7 @@ const PricingInformation = () => {
                 ))}
             </div>
 
-            {/* Additional Information */}
+            {/* FAQ Section Expanded */}
             <div style={{
                 backgroundColor: 'white',
                 borderRadius: '12px',
@@ -238,15 +239,23 @@ const PricingInformation = () => {
                 <div style={{ display: 'grid', gap: '20px' }}>
                     <div>
                         <h4 style={{ color: '#007bff', marginBottom: '8px' }}>Can I change my plan anytime?</h4>
-                        <p style={{ color: '#6c757d', margin: 0 }}>Yes, you can upgrade or downgrade your plan at any time. Changes will be reflected in your next billing cycle.</p>
+                        <p style={{ color: '#6c757d', margin: 0 }}>Yes, upgrades/downgrades apply next billing cycle.</p>
                     </div>
                     <div>
-                        <h4 style={{ color: '#007bff', marginBottom: '8px' }}>Is there a setup fee?</h4>
-                        <p style={{ color: '#6c757d', margin: 0 }}>No, there are no setup fees. You only pay the monthly subscription fee for your chosen plan.</p>
+                        <h4 style={{ color: '#007bff', marginBottom: '8px' }}>Do you offer trials?</h4>
+                        <p style={{ color: '#6c757d', margin: 0 }}>Yes, a 14-day free trial for Growth/Professional plans.</p>
                     </div>
                     <div>
-                        <h4 style={{ color: '#007bff', marginBottom: '8px' }}>What payment methods do you accept?</h4>
-                        <p style={{ color: '#6c757d', margin: 0 }}>We accept all major credit cards, bank transfers, and popular Indonesian payment methods like GoPay and OVO.</p>
+                        <h4 style={{ color: '#007bff', marginBottom: '8px' }}>Do job postings roll over?</h4>
+                        <p style={{ color: '#6c757d', margin: 0 }}>Yes, unused postings carry into the next month.</p>
+                    </div>
+                    <div>
+                        <h4 style={{ color: '#007bff', marginBottom: '8px' }}>What payment methods are accepted?</h4>
+                        <p style={{ color: '#6c757d', margin: 0 }}>Credit cards, bank transfers, GoPay, OVO.</p>
+                    </div>
+                    <div>
+                        <h4 style={{ color: '#007bff', marginBottom: '8px' }}>Is there a refund policy?</h4>
+                        <p style={{ color: '#6c757d', margin: 0 }}>Cancellations are prorated for the unused period.</p>
                     </div>
                 </div>
             </div>
