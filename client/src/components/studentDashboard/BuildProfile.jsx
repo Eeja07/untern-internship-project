@@ -53,7 +53,6 @@ const BuildProfile = ({ onProfileSaved }) => {
       
       if (profileResponse.success) {
         setProfile(profileResponse.profile);
-        
         // Parse and set education
         if (profileResponse.profile.education) {
           try {
@@ -66,7 +65,66 @@ const BuildProfile = ({ onProfileSaved }) => {
             setEducationList([]);
           }
         }
-        
+        // Parse and set languages
+        if (profileResponse.profile.languages) {
+          try {
+            const parsedLanguages = typeof profileResponse.profile.languages === 'string'
+              ? JSON.parse(profileResponse.profile.languages)
+              : profileResponse.profile.languages;
+            setLanguageList(Array.isArray(parsedLanguages) ? parsedLanguages : []);
+          } catch (error) {
+            console.error('Error parsing languages:', error);
+            setLanguageList([]);
+          }
+        }
+        // Parse and set certifications
+        if (profileResponse.profile.certifications) {
+          try {
+            const parsedCertifications = typeof profileResponse.profile.certifications === 'string'
+              ? JSON.parse(profileResponse.profile.certifications)
+              : profileResponse.profile.certifications;
+            setCertificationList(Array.isArray(parsedCertifications) ? parsedCertifications : []);
+          } catch (error) {
+            console.error('Error parsing certifications:', error);
+            setCertificationList([]);
+          }
+        }
+        // Parse and set work experience
+        if (profileResponse.profile.work_experience) {
+          try {
+            const parsedWorkExperience = typeof profileResponse.profile.work_experience === 'string'
+              ? JSON.parse(profileResponse.profile.work_experience)
+              : profileResponse.profile.work_experience;
+            setWorkExperienceList(Array.isArray(parsedWorkExperience) ? parsedWorkExperience : []);
+          } catch (error) {
+            console.error('Error parsing work experience:', error);
+            setWorkExperienceList([]);
+          }
+        }
+        // Parse and set event experience
+        if (profileResponse.profile.event_experience) {
+          try {
+            const parsedEventExperience = typeof profileResponse.profile.event_experience === 'string'
+              ? JSON.parse(profileResponse.profile.event_experience)
+              : profileResponse.profile.event_experience;
+            setEventExperienceList(Array.isArray(parsedEventExperience) ? parsedEventExperience : []);
+          } catch (error) {
+            console.error('Error parsing event experience:', error);
+            setEventExperienceList([]);
+          }
+        }
+        // Parse and set organization experience
+        if (profileResponse.profile.organization_experience) {
+          try {
+            const parsedOrganizationExperience = typeof profileResponse.profile.organization_experience === 'string'
+              ? JSON.parse(profileResponse.profile.organization_experience)
+              : profileResponse.profile.organization_experience;
+            setOrganizationExperienceList(Array.isArray(parsedOrganizationExperience) ? parsedOrganizationExperience : []);
+          } catch (error) {
+            console.error('Error parsing organization experience:', error);
+            setOrganizationExperienceList([]);
+          }
+        }
         // Set profile picture preview if exists
         if (profileResponse.profile.profile_picture_url) {
           const imageUrl = profileResponse.profile.profile_picture_url.startsWith('http') 
