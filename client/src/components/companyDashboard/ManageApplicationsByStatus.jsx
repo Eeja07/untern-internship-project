@@ -364,23 +364,9 @@ const ManageApplicationsByStatus = () => {
                                 <option value="accepted">Accepted</option>
                                 <option value="rejected">Rejected</option>
                             </select>
-                        </div>
-                    </div>
-                    {/* Results Summary */}
-                    <div style={{
-                        marginBottom: '20px',
-                        padding: '15px',
-                        backgroundColor: '#f8f9fa',
-                        borderRadius: '8px',
-                        border: '1px solid #e9ecef'
-                    }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ color: '#2c3e50', fontWeight: '600' }}>
-                                Showing {filteredApplications.length} application{filteredApplications.length !== 1 ? 's' : ''}
-                            </span>
                             {selectedInternship !== 'all' && (
                                 <button
-                                    onClick={() => setSelectedInternship('all')}
+                                    onClick={() => (setSelectedInternship('all'), setSelectedStatus('all'))}
                                     style={{
                                         padding: '6px 12px',
                                         backgroundColor: 'transparent',
@@ -394,7 +380,17 @@ const ManageApplicationsByStatus = () => {
                                     Clear Internship Filter
                                 </button>
                             )}
+                    </div>
+                    {/* Results Summary */}
+                    <div style={{
+                        padding: '15px',
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span style={{ color: '#2c3e50', fontWeight: '600' }}>
+                                Showing {filteredApplications.length} application{filteredApplications.length !== 1 ? 's' : ''}
+                            </span>
                         </div>
+                    </div>
                     </div>
                     {/* Applications List */}
                     <div style={{
