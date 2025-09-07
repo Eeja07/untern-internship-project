@@ -12,6 +12,7 @@ import DashboardOverview from './DashboardOverview.jsx';
 const StudentDashboard = () => {
   const [activeSection, setActiveSection] = useState('search');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, profile, logout } = useContext(AuthContext);
   const [localProfile, setLocalProfile] = useState(null);
   const [profileRefreshFlag, setProfileRefreshFlag] = useState(0);
@@ -72,14 +73,35 @@ const StudentDashboard = () => {
 
   // Handle window resize for mobile responsiveness
   React.useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+      if (window.innerWidth > 768) {
+        setSidebarOpen(false);
+      }
+    };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Prevent background scrolling when mobile sidebar is open
+  React.useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    if (isMobile && sidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = originalOverflow || '';
+    }
+    return () => {
+      document.body.style.overflow = originalOverflow || '';
+    };
+  }, [isMobile, sidebarOpen]);
+
   const handleSectionChange = (sectionId) => {
     setActiveSection(sectionId);
     navigate(`/student-dashboard/${sectionId}`);
+    if (isMobile) {
+      setSidebarOpen(false);
+    }
   };
 
   const handleLogout = () => {
@@ -114,14 +136,58 @@ const StudentDashboard = () => {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f8f9fa' }}>
+      {/* Mobile Overlay */}
+      {isMobile && sidebarOpen && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 998
+          }}
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <div style={{
-        width: isMobile ? '100%' : '280px',
+        width: isMobile ? '280px' : '280px',
         background: 'white',
         borderRight: '1px solid #e9ecef',
         padding: '20px',
-        display: isMobile && activeSection ? 'none' : 'block'
+        position: isMobile ? 'fixed' : 'static',
+        top: 0,
+        left: 0,
+        height: isMobile ? '100vh' : 'auto',
+        zIndex: 999,
+        transform: isMobile ? (sidebarOpen ? 'translateX(0)' : 'translateX(-100%)') : 'none',
+        transition: isMobile ? 'transform 0.3s ease-in-out' : 'none',
+        overflowY: 'auto'
       }}>
+        {/* Close button for mobile sidebar */}
+        {isMobile && (
+          <button
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close sidebar"
+            style={{
+              position: 'absolute',
+              top: 16,
+              right: 16,
+              zIndex: 1001,
+              background: 'transparent',
+              border: 'none',
+              fontSize: 22,
+              cursor: 'pointer',
+              color: '#495057'
+            }}
+          >
+            ✕
+          </button>
+        )}
+
         {/* User Info */}
         <div style={{
           borderBottom: '1px solid #e9ecef',
@@ -220,21 +286,26 @@ const StudentDashboard = () => {
         padding: isMobile ? '10px' : '30px',
         overflow: 'auto'
       }}>
-        {isMobile && (
+        {/* Mobile Menu Toggle */}
+        {isMobile && !sidebarOpen && (
           <button
-            onClick={() => setActiveSection(null)}
+            onClick={() => setSidebarOpen(true)}
             style={{
-              display: 'block',
-              marginBottom: '20px',
+              position: 'fixed',
+              top: '20px',
+              left: '20px',
+              zIndex: 1000,
               background: '#007bff',
               color: 'white',
               border: 'none',
-              padding: '8px 16px',
-              borderRadius: '4px',
-              cursor: 'pointer'
+              padding: '10px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '18px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
             }}
           >
-            ← Back to Menu
+            ☰
           </button>
         )}
         
@@ -242,7 +313,8 @@ const StudentDashboard = () => {
           background: 'white',
           borderRadius: '8px',
           padding: '30px',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+          marginTop: isMobile ? '60px' : '0'
         }}>
           {renderContent()}
         </div>

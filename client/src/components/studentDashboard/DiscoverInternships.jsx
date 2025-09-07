@@ -35,6 +35,7 @@ const DiscoverInternships = ({ activeTab: propActiveTab }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(propActiveTab || (location.pathname.includes('/featured') ? 'featured' : 'search'));
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
     // Get the search query from URL parameters
@@ -58,6 +59,17 @@ const DiscoverInternships = ({ activeTab: propActiveTab }) => {
       setActiveTab('search');
     }
   }, [location.pathname]);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const responsiveCols = {
+    grid3: isMobile ? '1fr' : 'repeat(3, 1fr)',
+    grid2: isMobile ? '1fr' : '1fr 1fr'
+  };
 
   const fetchFeaturedInternships = async () => {
     try {
@@ -274,7 +286,7 @@ const DiscoverInternships = ({ activeTab: propActiveTab }) => {
             {featuredInternships.length > 0 ? (
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
+                gridTemplateColumns: responsiveCols.grid3,
                 gap: '20px',
                 marginBottom: '20px'
               }}>
@@ -433,7 +445,7 @@ const DiscoverInternships = ({ activeTab: propActiveTab }) => {
           }}>
             <h3 style={{ marginBottom: '20px', color: '#2c3e50' }}>Search & Filters</h3>
             {/* Search Input */}
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px', width: '100%', margin: '0 auto' }}>
+            <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center', marginBottom: '20px', width: '100%', margin: '0 auto' }}>
               <div style={{ flex: 1 }}>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#2c3e50' }}>
                   Search Internships
@@ -444,8 +456,8 @@ const DiscoverInternships = ({ activeTab: propActiveTab }) => {
                   value={searchTerm}
                   onChange={handleSearchChange}
                   style={{
-                    width: '95%',
-                    padding: '12px 16px',
+                    width: '100%',
+                    padding: '0px',
                     border: '2px solid #e9ecef',
                     borderRadius: '8px',
                     fontSize: '1rem',
@@ -466,8 +478,8 @@ const DiscoverInternships = ({ activeTab: propActiveTab }) => {
                   setSearchTerm('');
                 }}
                 style={{
-                  marginLeft: '16px',
-                  marginTop: '35px',
+                  marginLeft: isMobile ? '0' : '16px',
+                  marginTop: isMobile ? '12px' : '35px',
                   padding: '10px 20px',
                   backgroundColor: '#6c757d',
                   color: 'white',
@@ -475,14 +487,15 @@ const DiscoverInternships = ({ activeTab: propActiveTab }) => {
                   borderRadius: '8px',
                   cursor: 'pointer',
                   fontSize: '0.9rem',
-                  height: '44px'
+                  height: '44px',
+                  width: isMobile ? '100%' : 'auto'
                 }}
               >
                 Clear Filters
               </button>
             </div>
             {/* Filter Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: responsiveCols.grid2, gap: '15px', marginBottom: '20px' }}>
               <div>
                 <label style={{ 
                   display: 'block', 
@@ -719,7 +732,7 @@ const DiscoverInternships = ({ activeTab: propActiveTab }) => {
                 ) : (
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 1fr)',
+                    gridTemplateColumns: responsiveCols.grid3,
                     gap: '20px',
                     marginBottom: '30px'
                   }}>
@@ -901,10 +914,13 @@ const DiscoverInternships = ({ activeTab: propActiveTab }) => {
         }}>
           <div style={{
             background: 'white',
-            padding: '30px',
+            padding: isMobile ? '18px' : '30px',
             borderRadius: '12px',
             boxShadow: '0 2px 16px rgba(0,0,0,0.2)',
-            minWidth: '320px',
+            width: isMobile ? '92vw' : 'auto',
+            maxWidth: isMobile ? '92vw' : '420px',
+            maxHeight: isMobile ? '84vh' : 'auto',
+            overflowY: isMobile ? 'auto' : 'visible',
             textAlign: 'center'
           }}>
             <h3 style={{ marginBottom: '20px' }}>Confirm Application</h3>
@@ -939,11 +955,13 @@ const DiscoverInternships = ({ activeTab: propActiveTab }) => {
         }}>
           <div style={{
             background: 'white',
-            padding: '30px',
+            padding: isMobile ? '18px' : '30px',
             borderRadius: '12px',
             boxShadow: '0 2px 16px rgba(0,0,0,0.2)',
-            minWidth: '400px',
-            maxWidth: '600px',
+            width: isMobile ? '94vw' : 'auto',
+            maxWidth: isMobile ? '94vw' : '600px',
+            maxHeight: isMobile ? '86vh' : 'auto',
+            overflowY: isMobile ? 'auto' : 'visible',
             textAlign: 'left',
             position: 'relative'
           }}>

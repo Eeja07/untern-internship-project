@@ -597,7 +597,7 @@ const BuildProfile = ({ onProfileSaved }) => {
               disabled={!isEditMode}
               style={{
                 width: '100%',
-                padding: '10px',
+                padding: '0px',
                 border: '1px solid #ddd',
                 borderRadius: '4px',
                 resize: 'vertical',

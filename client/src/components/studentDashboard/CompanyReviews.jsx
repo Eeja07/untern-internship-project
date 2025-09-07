@@ -8,6 +8,7 @@ const CompanyReviews = () => {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('');
   const [activeTab, setActiveTab] = useState('view');
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [reviewForm, setReviewForm] = useState({
     company: '',
     post: '',
@@ -191,10 +192,16 @@ const CompanyReviews = () => {
     setRecaptchaToken('');
   };
 
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <div>
       <h2 style={{ color: '#007bff', marginBottom: '20px' }}>Company Reviews</h2>
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '24px', flexDirection: isMobile ? 'column' : 'row' }}>
         <button
           onClick={() => setActiveTab('view')}
           style={{
@@ -204,7 +211,8 @@ const CompanyReviews = () => {
             border: '1px solid #007bff',
             borderRadius: '8px',
             cursor: 'pointer',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            width: isMobile ? '100%' : 'auto'
           }}
         >
           View Reviews
@@ -218,7 +226,8 @@ const CompanyReviews = () => {
             border: '1px solid #007bff',
             borderRadius: '8px',
             cursor: 'pointer',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            width: isMobile ? '100%' : 'auto'
           }}
         >
           Write Review
@@ -226,18 +235,18 @@ const CompanyReviews = () => {
       </div>
       {activeTab === 'view' ? (
         <>
-          <div style={{ display: 'flex', gap: '16px', marginBottom: '20px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '16px', marginBottom: '20px', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center' }}>
             <input
               type="text"
               placeholder="Search by company or student name..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              style={{ flex: '1', minWidth: '220px', padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
+              style={{ flex: isMobile ? 'none' : '1', width: isMobile ? '100%' : 'auto', minWidth: isMobile ? 'auto' : '220px', padding: '0px', border: '1px solid #ddd', borderRadius: '4px' }}
             />
             <select
               value={filter}
               onChange={e => setFilter(e.target.value)}
-              style={{ minWidth: '180px', padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
+              style={{ minWidth: isMobile ? '100%' : '180px', padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
             >
               <option value="">All Companies</option>
               {uniqueCompanies.map(company => (
@@ -267,7 +276,7 @@ const CompanyReviews = () => {
           </div>
         </>
       ) : (
-        <form onSubmit={handleReviewSubmit} style={{ width: '100%', background: '#f8f9fa', padding: '24px', borderRadius: '12px', border: '1px solid #e9ecef' }}>
+        <form onSubmit={handleReviewSubmit} style={{ maxwidth: '100%', background: '#f8f9fa', padding: isMobile ? '16px' : '24px', borderRadius: '12px', border: '1px solid #e9ecef' }}>
           <h3 style={{ color: '#007bff', marginBottom: '16px' }}>Write a Review</h3>
           <div style={{ marginBottom: '12px' }}>
             <label style={{ fontWeight: 'bold', color: '#343a40' }}>Company</label>
@@ -314,7 +323,7 @@ const CompanyReviews = () => {
               value={reviewForm.rating}
               onChange={e => setReviewForm({ ...reviewForm, rating: parseInt(e.target.value) })}
               required
-              style={{ width: '100px', padding: '10px', borderRadius: '6px', border: '1px solid #ddd', marginTop: '6px' }}
+              style={{ width: isMobile ? '100%' : '100px', padding: '10px', borderRadius: '6px', border: '1px solid #ddd', marginTop: '6px' }}
             >
               {[1,2,3,4,5].map(star => (
                 <option key={star} value={star}>{star} Star{star > 1 ? 's' : ''}</option>
@@ -334,7 +343,7 @@ const CompanyReviews = () => {
               onChange={handleFormChange}
               required
               disabled={!isCompanyVerified || acceptedPosts.length === 0}
-              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ddd', marginTop: '6px', minHeight: '80px', background: !isCompanyVerified || acceptedPosts.length === 0 ? '#e9ecef' : 'white' }}
+              style={{ width: '100%', padding: '0px', borderRadius: '6px', border: '1px solid #ddd', marginTop: '6px', minHeight: isMobile ? '120px' : '80px', background: !isCompanyVerified || acceptedPosts.length === 0 ? '#e9ecef' : 'white' }}
               placeholder="Write your review here..."
             />
           </div>
@@ -343,12 +352,13 @@ const CompanyReviews = () => {
             <ReCAPTCHA
               sitekey={RECAPTCHA_SITE_KEY}
               onChange={token => setRecaptchaToken(token)}
+              size={isMobile ? "compact" : "normal"}
             />
           </div>
           <button
             type="submit"
             disabled={!isCompanyVerified || acceptedPosts.length === 0}
-            style={{ background: '#007bff', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '6px', cursor: !isCompanyVerified || acceptedPosts.length === 0 ? 'not-allowed' : 'pointer', fontWeight: 'bold', marginTop: '10px' }}
+            style={{ background: '#007bff', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '6px', cursor: !isCompanyVerified || acceptedPosts.length === 0 ? 'not-allowed' : 'pointer', fontWeight: 'bold', marginTop: '10px', width: isMobile ? '100%' : 'auto' }}
           >
             Submit Review
           </button>

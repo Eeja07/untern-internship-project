@@ -76,18 +76,18 @@ const TrackApplications = () => {
         background: '#f8f9fa',
         padding: '20px',
         borderRadius: '8px',
-        border: '1px solid #e9ecef'
+        border: '1px solid #e9ecef',
       }}>
         {/* Search input for applications */}
-        <div style={{ marginBottom: '20px' }}>
+        <div style={{marginBottom: '20px' }}>
           <input
             type="text"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             placeholder="Search by internship title or company name..."
             style={{
+              padding: '0px',
               width: '100%',
-              padding: '10px 14px',
               border: '2px solid #e9ecef',
               borderRadius: '8px',
               fontSize: '1rem',

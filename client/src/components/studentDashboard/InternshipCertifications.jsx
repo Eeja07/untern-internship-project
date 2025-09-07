@@ -11,6 +11,13 @@ const InternshipCertifications = () => {
   const [companyFilter, setCompanyFilter] = useState('');
   const [jobTitleFilter, setJobTitleFilter] = useState('');
   const [certificates, setCertificates] = useState([]);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchDocs = async () => {
@@ -95,18 +102,18 @@ const InternshipCertifications = () => {
   return (
     <div>
       <h2 style={{ color: '#007bff', marginBottom: '20px' }}>My Internship Completions</h2>
-      <div style={{ display: 'flex', gap: '16px', marginBottom: '20px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '16px', marginBottom: '20px', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center' }}>
         <input
           type="text"
           placeholder="Search by company or job title..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          style={{ flex: '1', minWidth: '220px', padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
+          style={{ flex: isMobile ? 'none' : '1', width: isMobile ? '100%' : 'auto', minWidth: isMobile ? 'auto' : '220px', padding: '0px', border: '1px solid #ddd', borderRadius: '4px' }}
         />
         <select
           value={companyFilter}
           onChange={e => setCompanyFilter(e.target.value)}
-          style={{ minWidth: '180px', padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
+          style={{ minWidth: isMobile ? '100%' : '180px', padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
         >
           <option value="">All Companies</option>
           {allCompanies.map(company => (
@@ -116,7 +123,7 @@ const InternshipCertifications = () => {
         <select
           value={jobTitleFilter}
           onChange={e => setJobTitleFilter(e.target.value)}
-          style={{ minWidth: '180px', padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
+          style={{ minWidth: isMobile ? '100%' : '180px', padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
         >
           <option value="">All Job Titles</option>
           {allJobTitles.map(title => (
@@ -140,14 +147,14 @@ const InternshipCertifications = () => {
                   const postKey = `${company}-${post.key}`;
                   return (
                     <div key={postKey} style={{ marginBottom: '8px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: isMobile ? 'stretch' : 'center', gap: isMobile ? '12px' : '0' }}>
                         <div>
                           <div style={{ fontWeight: 'bold', color: '#343a40', marginBottom: '4px' }}>{post.jobTitle}</div>
                           <div style={{ color: '#343a40', marginBottom: '4px' }}>Internship Period: {post.startDate} - {post.endDate}</div>
                         </div>
                         <button
                           onClick={() => setOpenPost(prev => ({ ...prev, [postKey]: !prev[postKey] }))}
-                          style={{ background: '#007bff', color: 'white', border: 'none', padding: '8px 20px', borderRadius: '6px', cursor: 'pointer' }}
+                          style={{ background: '#007bff', color: 'white', border: 'none', padding: '8px 20px', borderRadius: '6px', cursor: 'pointer', width: isMobile ? '100%' : 'auto' }}
                         >
                           {openPost[postKey] ? 'Hide' : 'View'}
                         </button>
