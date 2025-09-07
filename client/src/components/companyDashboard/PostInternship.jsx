@@ -26,12 +26,13 @@ const PostInternship = () => {
     const [showCaptchaModal, setShowCaptchaModal] = useState(false);
     const [pendingAction, setPendingAction] = useState({ type: null, internshipId: null, currentStatus: null });
     const [captchaToken, setCaptchaToken] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
 
     React.useEffect(() => {
-        if (activeTab === 'manage') {
-            fetchPostedInternships();
-        }
-    }, [activeTab]);
+        fetchPostedInternships();
+    }, []);
+
 
     const fetchPostedInternships = async () => {
         setLoadingInternships(true);
@@ -206,6 +207,13 @@ const PostInternship = () => {
             setIsSubmitting(false);
         }
     };
+
+    // Filtered internships for manage tab
+    const filteredInternships = postedInternships.filter(internship => {
+        const matchesSearch = internship.title.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesStatus = statusFilter === 'all' || (statusFilter === 'active' && internship.is_active) || (statusFilter === 'inactive' && !internship.is_active);
+        return matchesSearch && matchesStatus;
+    });
 
     return (
         <div>
@@ -526,37 +534,51 @@ const PostInternship = () => {
                     boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
                 }}>
                     <h2 style={{ color: '#2c3e50', marginBottom: '20px' }}>Your Posted Internships</h2>
-                    
+                    {/* Search and Filter Controls */}
+                    <div style={{ display: 'flex', gap: '20px', marginBottom: '25px', alignItems: 'center' }}>
+                        <input
+                            type="text"
+                            placeholder="Search by title..."
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                            style={{
+                                padding: '10px 16px',
+                                border: '2px solid #e9ecef',
+                                borderRadius: '8px',
+                                fontSize: '1rem',
+                                flex: '1'
+                            }}
+                        />
+                        <select
+                            value={statusFilter}
+                            onChange={e => setStatusFilter(e.target.value)}
+                            style={{
+                                padding: '10px 16px',
+                                border: '2px solid #e9ecef',
+                                borderRadius: '8px',
+                                fontSize: '1rem'
+                            }}
+                        >
+                            <option value="all">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
                     {loadingInternships ? (
                         <div style={{ textAlign: 'center', padding: '40px' }}>
                             <p>Loading your internships...</p>
                         </div>
-                    ) : postedInternships.length === 0 ? (
+                    ) : filteredInternships.length === 0 ? (
                         <div style={{ textAlign: 'center', padding: '40px' }}>
                             <div style={{ fontSize: '48px', marginBottom: '20px' }}>📝</div>
-                            <h3 style={{ color: '#6c757d', marginBottom: '10px' }}>No internships posted yet</h3>
+                            <h3 style={{ color: '#6c757d', marginBottom: '10px' }}>No internships found</h3>
                             <p style={{ color: '#6c757d', marginBottom: '20px' }}>
-                                Start by posting your first internship opportunity to attract talented students.
+                                Try adjusting your search or filter options.
                             </p>
-                            <button
-                                onClick={() => setActiveTab('post')}
-                                style={{
-                                    padding: '12px 24px',
-                                    backgroundColor: '#007bff',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    fontSize: '1rem',
-                                    fontWeight: '600'
-                                }}
-                            >
-                                Post Your First Internship
-                            </button>
                         </div>
                     ) : (
                         <div style={{ display: 'grid', gap: '20px' }}>
-                            {postedInternships.map(internship => (
+                            {filteredInternships.map(internship => (
                                 <div 
                                     key={internship.internship_id}
                                     style={{
