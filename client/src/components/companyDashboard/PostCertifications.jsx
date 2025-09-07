@@ -3,6 +3,12 @@ import { internshipDocumentsAPI } from '../auth/api.jsx';
 import api from '../auth/api.jsx';
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 const FILE_BASE_URL = API_BASE_URL.replace(/\/api$/, '');
+
+const TABS = {
+	POST: 'Post Certificate',
+	MANAGE: 'Manage Certificates',
+};
+
 const PostCertifications = () => {
 	const [selectedStudent, setSelectedStudent] = useState('');
 	const [selectedPost, setSelectedPost] = useState('');
@@ -19,6 +25,10 @@ const PostCertifications = () => {
 	const [editFeedback, setEditFeedback] = useState('');
 	const [editCertificateFile, setEditCertificateFile] = useState(null);
 	const [editLetterFile, setEditLetterFile] = useState(null);
+	const [activeTab, setActiveTab] = useState(TABS.POST);
+	const [searchTerm, setSearchTerm] = useState('');
+	const [filterStudent, setFilterStudent] = useState('');
+	const [filterPost, setFilterPost] = useState('');
 
 	useEffect(() => {
 		const fetchStudents = async () => {
@@ -181,180 +191,253 @@ const PostCertifications = () => {
 		}
 	};
 
+	// Filtered uploadedDocs for Manage tab
+	const filteredDocs = uploadedDocs.filter(doc => {
+		const matchesSearch =
+			searchTerm === '' ||
+			(doc.student_name && doc.student_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+			(doc.internship_title && doc.internship_title.toLowerCase().includes(searchTerm.toLowerCase()));
+		const matchesStudent = filterStudent === '' || doc.student_name === filterStudent;
+		const matchesPost = filterPost === '' || doc.internship_title === filterPost;
+		return matchesSearch && matchesStudent && matchesPost;
+	});
+
 	return (
 		<div>
 			<div style={{ marginBottom: '30px' }}>
-				<h1 style={{ color: '#2c3e50', marginBottom: '10px' }}>Upload Certificate & Letter</h1>
-				<p style={{ color: '#6c757d' }}>Upload certificates and letters for your interns. These will be visible in the student dashboard.</p>
+				<h1 style={{ color: '#2c3e50', marginBottom: '10px' }}>Certificate & Letter</h1>
+				<p style={{ color: '#6c757d' }}>Upload and manage certificates and letters for your interns. These will be visible in the student dashboard.</p>
 			</div>
-			<div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '40px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)', marginBottom: '30px' }}>
-				<form onSubmit={handleSubmit}>
-					<div style={{ display: 'grid', gap: '25px' }}>
-						<div>
-							<label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#2c3e50' }}>Student Name *</label>
-							<select
-								value={selectedStudent}
-								onChange={handleStudentChange}
-								required
-								style={{ width: '100%', padding: '12px 16px', border: '2px solid #e9ecef', borderRadius: '8px', fontSize: '1rem' }}
-							>
-								<option value="">Select Student</option>
-								{students.map(s => (
-									<option key={s.student_id} value={s.name}>{s.name}</option>
-								))}
-							</select>
-						</div>
-						<div>
-							<label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#2c3e50' }}>Internship Post *</label>
-							<select
-								value={selectedPost}
-								onChange={handlePostChange}
-								required
-								style={{ width: '100%', padding: '12px 16px', border: '2px solid #e9ecef', borderRadius: '8px', fontSize: '1rem' }}
-							>
-								<option value="">Select Internship Post</option>
-								{studentApplications.map(app => (
-									<option key={app.internship_id} value={app.internship_title}>{app.internship_title}</option>
-								))}
-							</select>
-						</div>
-						<div>
-							<label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#2c3e50' }}>Mentor *</label>
+			{/* Tab Navigation */}
+			<div style={{ display: 'flex', gap: '16px', marginBottom: '30px' }}>
+				{Object.values(TABS).map(tab => (
+					<button
+						key={tab}
+						onClick={() => setActiveTab(tab)}
+						style={{
+							padding: '12px 32px',
+							backgroundColor: activeTab === tab ? '#007bff' : '#e9ecef',
+							color: activeTab === tab ? 'white' : '#343a40',
+							border: 'none',
+							borderRadius: '8px',
+							cursor: 'pointer',
+							fontWeight: 'bold',
+							fontSize: '1rem',
+							boxShadow: activeTab === tab ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
+							transition: 'background-color 0.2s',
+						}}
+					>
+						{tab}
+					</button>
+				))}
+			</div>
+
+			{/* Tab Content */}
+			{activeTab === TABS.POST && (
+				<div>
+					<div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '40px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)', marginBottom: '30px' }}>
+						<form onSubmit={handleSubmit}>
+							<div style={{ display: 'grid', gap: '25px' }}>
+								<div>
+									<label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#2c3e50' }}>Student Name *</label>
+									<select
+										value={selectedStudent}
+										onChange={handleStudentChange}
+										required
+										style={{ width: '100%', padding: '12px 16px', border: '2px solid #e9ecef', borderRadius: '8px', fontSize: '1rem' }}
+									>
+										<option value="">Select Student</option>
+										{students.map(s => (
+											<option key={s.student_id} value={s.name}>{s.name}</option>
+										))}
+									</select>
+								</div>
+								<div>
+									<label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#2c3e50' }}>Internship Post *</label>
+									<select
+										value={selectedPost}
+										onChange={handlePostChange}
+										required
+										style={{ width: '100%', padding: '12px 16px', border: '2px solid #e9ecef', borderRadius: '8px', fontSize: '1rem' }}
+									>
+										<option value="">Select Internship Post</option>
+										{studentApplications.map(app => (
+											<option key={app.internship_id} value={app.internship_title}>{app.internship_title}</option>
+										))}
+									</select>
+								</div>
+								<div>
+									<label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#2c3e50' }}>Mentor *</label>
+									<input
+										type="text"
+										value={mentor}
+										onChange={handleMentorChange}
+										required
+										style={{ width: '100%', padding: '12px 16px', border: '2px solid #e9ecef', borderRadius: '8px', fontSize: '1rem' }}
+										placeholder="e.g., John Smith"
+									/>
+								</div>
+								<div>
+									<label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#2c3e50' }}>Feedback/Evaluation *</label>
+									<textarea
+										value={feedback}
+										onChange={handleFeedbackChange}
+										required
+										rows={3}
+										style={{ width: '100%', padding: '12px 16px', border: '2px solid #e9ecef', borderRadius: '8px', fontSize: '1rem', resize: 'vertical' }}
+										placeholder="Feedback or evaluation for the intern"
+									/>
+								</div>
+								<div>
+									<label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#2c3e50' }}>Upload Certificate (PDF/JPG/PNG)</label>
+									<input
+										type="file"
+										accept=".pdf,.jpg,.png"
+										onChange={handleCertificateFile}
+										style={{ width: '100%', padding: '12px 16px', border: '2px solid #e9ecef', borderRadius: '8px', fontSize: '1rem' }}
+									/>
+								</div>
+								<div>
+									<label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#2c3e50' }}>Upload Letter (PDF/JPG/PNG)</label>
+									<input
+										type="file"
+										accept=".pdf,.jpg,.png"
+										onChange={handleLetterFile}
+										style={{ width: '100%', padding: '12px 16px', border: '2px solid #e9ecef', borderRadius: '8px', fontSize: '1rem' }}
+									/>
+								</div>
+								<button
+									type="submit"
+									style={{ padding: '15px 30px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '1.1rem', fontWeight: '600', transition: 'background-color 0.3s ease' }}
+									onMouseEnter={e => e.target.style.backgroundColor = '#0056b3'}
+									onMouseLeave={e => e.target.style.backgroundColor = '#007bff'}
+								>
+									Upload Certificate & Letter
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			)}
+			{activeTab === TABS.MANAGE && (
+				<div>
+					<div style={{ marginBottom: '24px' }}>
+						<div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '16px' }}>
 							<input
 								type="text"
-								value={mentor}
-								onChange={handleMentorChange}
-								required
-								style={{ width: '100%', padding: '12px 16px', border: '2px solid #e9ecef', borderRadius: '8px', fontSize: '1rem' }}
-								placeholder="e.g., John Smith"
+								value={searchTerm}
+								onChange={e => setSearchTerm(e.target.value)}
+								placeholder="Search by student or post"
+								style={{ padding: '10px 16px', borderRadius: '8px', border: '2px solid #e9ecef', fontSize: '1rem', minWidth: '180px' }}
 							/>
+							<select
+								value={filterStudent}
+								onChange={e => setFilterStudent(e.target.value)}
+								style={{ padding: '10px 16px', borderRadius: '8px', border: '2px solid #e9ecef', fontSize: '1rem', minWidth: '160px' }}
+							>
+								<option value="">All Students</option>
+								{[...new Set(uploadedDocs.map(doc => doc.student_name))].map(name => (
+									<option key={name} value={name}>{name}</option>
+								))}
+							</select>
+							<select
+								value={filterPost}
+								onChange={e => setFilterPost(e.target.value)}
+								style={{ padding: '10px 16px', borderRadius: '8px', border: '2px solid #e9ecef', fontSize: '1rem', minWidth: '160px' }}
+							>
+								<option value="">All Posts</option>
+								{[...new Set(uploadedDocs.map(doc => doc.internship_title))].map(title => (
+									<option key={title} value={title}>{title}</option>
+								))}
+							</select>
 						</div>
-						<div>
-							<label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#2c3e50' }}>Feedback/Evaluation *</label>
-							<textarea
-								value={feedback}
-								onChange={handleFeedbackChange}
-								required
-								rows={3}
-								style={{ width: '100%', padding: '12px 16px', border: '2px solid #e9ecef', borderRadius: '8px', fontSize: '1rem', resize: 'vertical' }}
-								placeholder="Feedback or evaluation for the intern"
-							/>
-						</div>
-						<div>
-							<label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#2c3e50' }}>Upload Certificate (PDF/JPG/PNG)</label>
-							<input
-								type="file"
-								accept=".pdf,.jpg,.png"
-								onChange={handleCertificateFile}
-								style={{ width: '100%', padding: '12px 16px', border: '2px solid #e9ecef', borderRadius: '8px', fontSize: '1rem' }}
-							/>
-						</div>
-						<div>
-							<label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#2c3e50' }}>Upload Letter (PDF/JPG/PNG)</label>
-							<input
-								type="file"
-								accept=".pdf,.jpg,.png"
-								onChange={handleLetterFile}
-								style={{ width: '100%', padding: '12px 16px', border: '2px solid #e9ecef', borderRadius: '8px', fontSize: '1rem' }}
-							/>
-						</div>
-						<button
-							type="submit"
-							style={{ padding: '15px 30px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '1.1rem', fontWeight: '600', transition: 'background-color 0.3s ease' }}
-							onMouseEnter={e => e.target.style.backgroundColor = '#0056b3'}
-							onMouseLeave={e => e.target.style.backgroundColor = '#007bff'}
-						>
-							Upload Certificate & Letter
-						</button>
 					</div>
-				</form>
-			</div>
-			{/* Uploaded Certificates/Letters grouped by internship post and student */}
-			<div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '30px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)', marginTop: '30px' }}>
-				<h2 style={{ color: '#2c3e50', marginBottom: '20px' }}>Uploaded Certificates & Letters</h2>
-				<div style={{ display: 'grid', gap: '32px' }}>
-					{uploadedDocs.length === 0 ? (
-						<div style={{ color: '#6c757d', textAlign: 'center', padding: '20px' }}>No certificates or letters uploaded yet.</div>
-					) : (
-						uploadedDocs.map((doc, idx) => (
-							<div key={doc.document_id || idx} style={{ background: '#e7f3ff', padding: '24px', borderRadius: '14px', border: '1px solid #b6d4fe', marginBottom: '16px' }}>
-								<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-									<h3 style={{ color: '#007bff', marginBottom: '8px' }}>{doc.internship_title}</h3>
-									{editDocId === doc.document_id ? (
-										<button style={{ background: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', padding: '8px 18px', cursor: 'pointer', marginLeft: '10px' }} onClick={cancelEdit}>Cancel Edit</button>
-									) : (
-										<button style={{ background: '#ffc107', color: '#343a40', border: 'none', borderRadius: '4px', padding: '8px 18px', cursor: 'pointer', marginLeft: '10px' }} onClick={() => startEdit(doc)}>Edit</button>
-									)}
-								</div>
-								{editDocId === doc.document_id ? (
-									<div style={{ marginTop: '12px' }}>
-										<div style={{ marginBottom: '10px' }}>
-											<label style={{ fontWeight: 'bold' }}>Mentor:</label>
-											<input type="text" value={editMentor} onChange={e => setEditMentor(e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #e9ecef', marginTop: '4px' }} />
-										</div>
-										<div style={{ marginBottom: '10px' }}>
-											<label style={{ fontWeight: 'bold' }}>Feedback/Evaluation:</label>
-											<textarea value={editFeedback} onChange={e => setEditFeedback(e.target.value)} rows={3} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #e9ecef', marginTop: '4px' }} />
-										</div>
-										<div style={{ marginBottom: '10px' }}>
-											<span style={{ fontWeight: 'bold', color: '#007bff' }}>Certificate:</span>
-											{doc.certificate_file_url ? (
-												<div style={{ marginTop: '8px' }}>
-													<a href={doc.certificate_file_url ? `${FILE_BASE_URL}${doc.certificate_file_url}` : '#'} target="_blank" rel="noopener noreferrer" style={{ background: '#28a745', color: 'white', textDecoration: 'none', padding: '6px 16px', borderRadius: '4px', fontSize: '14px' }}>View Certificate</a>
-													<button style={{ marginLeft: '10px', background: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', padding: '6px 12px', cursor: 'pointer' }} onClick={() => handleRemoveFile(doc.document_id, 'certificate')}>Remove</button>
-												</div>
-											) : null}
-											<input type="file" accept=".pdf,.jpg,.png" onChange={e => handleEditFile(e, 'certificate')} style={{ marginTop: '8px' }} />
-										</div>
-										<div style={{ marginBottom: '10px' }}>
-											<span style={{ fontWeight: 'bold', color: '#007bff' }}>Letter:</span>
-											{doc.letter_file_url ? (
-												<div style={{ marginTop: '8px' }}>
-													<a href={doc.letter_file_url ? `${FILE_BASE_URL}${doc.letter_file_url}` : '#'} target="_blank" rel="noopener noreferrer" style={{ background: '#28a745', color: 'white', textDecoration: 'none', padding: '6px 16px', borderRadius: '4px', fontSize: '14px' }}>View Letter</a>
-													<button style={{ marginLeft: '10px', background: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', padding: '6px 12px', cursor: 'pointer' }} onClick={() => handleRemoveFile(doc.document_id, 'letter')}>Remove</button>
-												</div>
-											) : null}
-											<input type="file" accept=".pdf,.jpg,.png" onChange={e => handleEditFile(e, 'letter')} style={{ marginTop: '8px' }} />
-										</div>
-										<div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '18px' }}>
-											<button style={{ background: '#007bff', color: 'white', border: 'none', borderRadius: '4px', padding: '10px 22px', cursor: 'pointer', fontWeight: 'bold' }} onClick={() => handleEditSubmit(doc)}>Save</button>
-											<button style={{ background: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', padding: '10px 22px', cursor: 'pointer', fontWeight: 'bold' }} onClick={() => handleDelete(doc.document_id, 'post')}>Delete Post</button>
-										</div>
-									</div>
-								) : (
-									<div>
-										<p style={{ margin: '4px 0', color: '#343a40' }}><strong>Student:</strong> {doc.student_name}</p>
-										<p style={{ margin: '4px 0', color: '#6c757d' }}><strong>Mentor:</strong> {doc.mentor}</p>
-										<div style={{ margin: '8px 0', color: '#343a40', background: '#e7f3ff', padding: '10px', borderRadius: '8px' }}>
-											<strong>Feedback/Evaluation:</strong> {doc.feedback}
-										</div>
-										<div style={{ marginBottom: '10px' }}>
-											<span style={{ fontWeight: 'bold', color: '#007bff' }}>Certificate:</span>
-											{doc.certificate_file_url ? (
-												<div style={{ background: '#f8f9fa', padding: '12px', borderRadius: '8px', border: '1px solid #e9ecef', marginTop: '8px' }}>
-													<a href={doc.certificate_file_url ? `${FILE_BASE_URL}${doc.certificate_file_url}` : '#'} target="_blank" rel="noopener noreferrer" style={{ background: '#28a745', color: 'white', textDecoration: 'none', padding: '6px 16px', borderRadius: '4px', fontSize: '14px' }}>View Certificate</a>
-												</div>
+					<div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '30px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)', marginTop: '10px' }}>
+						<div style={{ display: 'grid', gap: '32px' }}>
+							{filteredDocs.length === 0 ? (
+								<div style={{ color: '#6c757d', textAlign: 'center', padding: '20px' }}>No certificates or letters found.</div>
+							) : (
+								filteredDocs.map((doc, idx) => (
+									<div key={doc.document_id || idx} style={{ background: '#e7f3ff', padding: '24px', borderRadius: '14px', border: '1px solid #b6d4fe', marginBottom: '16px' }}>
+										<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+											<h3 style={{ color: '#007bff', marginBottom: '8px' }}>{doc.internship_title}</h3>
+											{editDocId === doc.document_id ? (
+												<button style={{ background: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', padding: '8px 18px', cursor: 'pointer', marginLeft: '10px' }} onClick={cancelEdit}>Cancel Edit</button>
 											) : (
-												<div style={{ color: '#dc3545', marginTop: '8px' }}>No certificate uploaded.</div>
+												<button style={{ background: '#ffc107', color: '#343a40', border: 'none', borderRadius: '4px', padding: '8px 18px', cursor: 'pointer', marginLeft: '10px' }} onClick={() => startEdit(doc)}>Edit</button>
 											)}
 										</div>
-										<div style={{ marginBottom: '10px' }}>
-											<span style={{ fontWeight: 'bold', color: '#007bff' }}>Letter:</span>
-											{doc.letter_file_url ? (
-												<div style={{ background: '#f8f9fa', padding: '12px', borderRadius: '8px', border: '1px solid #e9ecef', marginTop: '8px' }}>
-													<a href={doc.letter_file_url ? `${FILE_BASE_URL}${doc.letter_file_url}` : '#'} target="_blank" rel="noopener noreferrer" style={{ background: '#28a745', color: 'white', textDecoration: 'none', padding: '6px 16px', borderRadius: '4px', fontSize: '14px' }}>View Letter</a>
+										{editDocId === doc.document_id ? (
+											<div style={{ marginTop: '12px' }}>
+												<div style={{ marginBottom: '10px' }}>
+													<label style={{ fontWeight: 'bold' }}>Mentor:</label>
+													<input type="text" value={editMentor} onChange={e => setEditMentor(e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #e9ecef', marginTop: '4px' }} />
 												</div>
-											) : (
-												<div style={{ color: '#dc3545', marginTop: '8px' }}>No letter uploaded.</div>
-											)}
-										</div>
+												<div style={{ marginBottom: '10px' }}>
+													<label style={{ fontWeight: 'bold' }}>Feedback/Evaluation:</label>
+													<textarea value={editFeedback} onChange={e => setEditFeedback(e.target.value)} rows={3} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #e9ecef', marginTop: '4px' }} />
+												</div>
+												<div style={{ marginBottom: '10px' }}>
+													<span style={{ fontWeight: 'bold', color: '#007bff' }}>Certificate:</span>
+													{doc.certificate_file_url ? (
+														<div style={{ marginTop: '8px' }}>
+															<a href={doc.certificate_file_url ? `${FILE_BASE_URL}${doc.certificate_file_url}` : '#'} target="_blank" rel="noopener noreferrer" style={{ background: '#28a745', color: 'white', textDecoration: 'none', padding: '6px 16px', borderRadius: '4px', fontSize: '14px' }}>View Certificate</a>
+															<button style={{ marginLeft: '10px', background: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', padding: '6px 12px', cursor: 'pointer' }} onClick={() => handleRemoveFile(doc.document_id, 'certificate')}>Remove</button>
+														</div>
+													) : null}
+													<input type="file" accept=".pdf,.jpg,.png" onChange={e => handleEditFile(e, 'certificate')} style={{ marginTop: '8px' }} />
+												</div>
+												<div style={{ marginBottom: '10px' }}>
+													<span style={{ fontWeight: 'bold', color: '#007bff' }}>Letter:</span>
+													{doc.letter_file_url ? (
+														<div style={{ marginTop: '8px' }}>
+															<a href={doc.letter_file_url ? `${FILE_BASE_URL}${doc.letter_file_url}` : '#'} target="_blank" rel="noopener noreferrer" style={{ background: '#28a745', color: 'white', textDecoration: 'none', padding: '6px 16px', borderRadius: '4px', fontSize: '14px' }}>View Letter</a>
+															<button style={{ marginLeft: '10px', background: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', padding: '6px 12px', cursor: 'pointer' }} onClick={() => handleRemoveFile(doc.document_id, 'letter')}>Remove</button>
+														</div>
+													) : null}
+													<input type="file" accept=".pdf,.jpg,.png" onChange={e => handleEditFile(e, 'letter')} style={{ marginTop: '8px' }} />
+												</div>
+												<div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '18px' }}>
+													<button style={{ background: '#007bff', color: 'white', border: 'none', borderRadius: '4px', padding: '10px 22px', cursor: 'pointer', fontWeight: 'bold' }} onClick={() => handleEditSubmit(doc)}>Save</button>
+													<button style={{ background: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', padding: '10px 22px', cursor: 'pointer', fontWeight: 'bold' }} onClick={() => handleDelete(doc.document_id, 'post')}>Delete Post</button>
+												</div>
+											</div>
+										) : (
+											<div>
+												<p style={{ margin: '4px 0', color: '#343a40' }}><strong>Student:</strong> {doc.student_name}</p>
+												<p style={{ margin: '4px 0', color: '#6c757d' }}><strong>Mentor:</strong> {doc.mentor}</p>
+												<div style={{ margin: '8px 0', color: '#343a40', background: '#e7f3ff', padding: '10px', borderRadius: '8px' }}>
+													<strong>Feedback/Evaluation:</strong> {doc.feedback}
+												</div>
+												<div style={{ marginBottom: '10px' }}>
+													<span style={{ fontWeight: 'bold', color: '#007bff' }}>Certificate:</span>
+													{doc.certificate_file_url ? (
+														<div style={{ background: '#f8f9fa', padding: '12px', borderRadius: '8px', border: '1px solid #e9ecef', marginTop: '8px' }}>
+															<a href={doc.certificate_file_url ? `${FILE_BASE_URL}${doc.certificate_file_url}` : '#'} target="_blank" rel="noopener noreferrer" style={{ background: '#28a745', color: 'white', textDecoration: 'none', padding: '6px 16px', borderRadius: '4px', fontSize: '14px' }}>View Certificate</a>
+														</div>
+													) : (
+														<div style={{ color: '#dc3545', marginTop: '8px' }}>No certificate uploaded.</div>
+													)}
+												</div>
+												<div style={{ marginBottom: '10px' }}>
+													<span style={{ fontWeight: 'bold', color: '#007bff' }}>Letter:</span>
+													{doc.letter_file_url ? (
+														<div style={{ background: '#f8f9fa', padding: '12px', borderRadius: '8px', border: '1px solid #e9ecef', marginTop: '8px' }}>
+															<a href={doc.letter_file_url ? `${FILE_BASE_URL}${doc.letter_file_url}` : '#'} target="_blank" rel="noopener noreferrer" style={{ background: '#28a745', color: 'white', textDecoration: 'none', padding: '6px 16px', borderRadius: '4px', fontSize: '14px' }}>View Letter</a>
+														</div>
+													) : (
+														<div style={{ color: '#dc3545', marginTop: '8px' }}>No letter uploaded.</div>
+													)}
+												</div>
+											</div>
+										)}
 									</div>
-								)}
-							</div>
-						))
-					)}
+								))
+							)}
+						</div>
+					</div>
 				</div>
-			</div>
+			)}
 		</div>
 	);
 };
