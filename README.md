@@ -1,6 +1,6 @@
 # 🌐 Untern Internship Project
 
-Aplikasi **manajemen magang** berbasis web dengan arsitektur **MERN-like stack** (React di frontend dan Node.js + Express di backend dengan MySQL).  
+Aplikasi **Untern – Sistem Pencarian dan Manajemen Magang Berbasis Web dengan React dan Node.js menggunakan PostgreSQL**. 
 Proyek ini mendukung pendaftaran mahasiswa & perusahaan, unggah dokumen, posting internship, dan melamar magang secara online.
 
 ---
@@ -53,7 +53,7 @@ Aplikasi sudah dapat diakses di:
 |------------|-----------------|
 | Frontend   | React 18, Vite, React Router, Redux Toolkit, Axios, Recharts, Lucide React |
 | Backend    | Node.js, Express.js, Multer |
-| Database   | MySQL |
+| Database   | PostgreSQL |
 | Autentikasi| JWT, middleware custom |
 | Build Tool | Vite, ESLint |
 
@@ -73,7 +73,7 @@ untern-internship-project/
 │   ├── package.json
 │   └── vite.config.js
 │
-└── server/           # Backend (Node.js + Express + MySQL)
+└── server/           # Backend (Node.js + Express + PostgreSQL)
     ├── server.js
     ├── config/
     │   └── database.js
