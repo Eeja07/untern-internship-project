@@ -5,6 +5,10 @@ Proyek ini mendukung pendaftaran mahasiswa & perusahaan, unggah dokumen, posting
 
 ---
 
+### 🌍 Demo Online
+Aplikasi sudah dapat diakses di:  
+👉 **[untern.eeja.site](https://untern.eeja.site)**
+
 ## 📑 Daftar Isi
 - [Fitur](#-fitur)
 - [Teknologi](#-teknologi)
