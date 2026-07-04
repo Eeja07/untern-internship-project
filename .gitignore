@@ -5,6 +5,9 @@ server/node_modules/
 # Build output
 build/
 dist/
+**/.env
+**/.env.*
+!.env.example
 
 # Environment variables (kredensial sensitif)
 .env
