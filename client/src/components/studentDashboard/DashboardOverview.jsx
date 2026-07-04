@@ -14,11 +14,11 @@ const DashboardOverview = () => {
       setError(null);
       try {
         const token = localStorage.getItem('token');
-        const statsRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/student/dashboard-stats`, {
+        const statsRes = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/student/dashboard-stats`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const statsData = await statsRes.json();
-        const activityRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/student/recent-activity`, {
+        const activityRes = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/student/recent-activity`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const activityData = await activityRes.json();

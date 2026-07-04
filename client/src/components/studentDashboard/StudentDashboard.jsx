@@ -201,7 +201,7 @@ const StudentDashboard = () => {
             backgroundImage: (localProfile?.profile_picture_url || user?.profile_picture_url)
               ? `url(${(localProfile?.profile_picture_url || user?.profile_picture_url).startsWith('http')
                   ? (localProfile?.profile_picture_url || user?.profile_picture_url)
-                  : `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${localProfile?.profile_picture_url || user?.profile_picture_url}`})`
+                  : `${import.meta.env.VITE_API_URL || ''}${localProfile?.profile_picture_url || user?.profile_picture_url}`})`
               : 'none',
             backgroundSize: 'cover',
             backgroundPosition: 'center',

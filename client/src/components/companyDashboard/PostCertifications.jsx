@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { internshipDocumentsAPI } from '../auth/api.jsx';
 import api from '../auth/api.jsx';
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 const FILE_BASE_URL = API_BASE_URL.replace(/\/api$/, '');
 
 const TABS = {

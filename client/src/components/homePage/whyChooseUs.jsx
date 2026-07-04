@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import afi from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/afi.svg';
-import cwp from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/cwp.svg';
-import pio from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/pio.svg';
-import mae from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/mae.svg';
-import typ from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/typ.svg';
-import bytp from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/bytp.svg';
+import afi from '../../assets/afi.svg';
+import cwp from '../../assets/cwp.svg';
+import pio from '../../assets/pio.svg';
+import mae from '../../assets/mae.svg';
+import typ from '../../assets/typ.svg';
+import bytp from '../../assets/bytp.svg';
 
 const WhyChooseUs = ({ onGetStartedClick }) => {
   const { isAuthenticated, user } = useAuth();

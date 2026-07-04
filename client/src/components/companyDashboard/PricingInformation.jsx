@@ -80,7 +80,7 @@ const PricingInformation = () => {
         setPaymentInfo(null);
         setErrorMsg('');
         try {
-            const res = await axios.post('http://localhost:4000/api/pay/midtrans', {
+            const res = await axios.post('/api/pay/midtrans', {
                 amount: plan.name === 'Growth' ? 750000 : plan.name === 'Professional' ? 1250000 : 0,
                 orderId: `order-${Date.now()}`,
                 name: 'Company Name', // Replace with actual company 

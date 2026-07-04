@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import pio from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/pio.svg';
-import mae from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/mae.svg';
-import bytp from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/bytp.svg';
-import arwleft from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/arwleft.svg';
-import arwright from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/arwright.svg';
-import eeja from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/eeja.webp';
+import pio from '../../assets/pio.svg';
+import mae from '../../assets/mae.svg';
+import bytp from '../../assets/bytp.svg';
+import arwleft from '../../assets/arwleft.svg';
+import arwright from '../../assets/arwright.svg';
+import eeja from '../../assets/eeja.webp';
 import { Grid, Star } from 'lucide-react';
 
 const WhatIntern = () => {

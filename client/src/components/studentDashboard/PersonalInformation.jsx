@@ -251,7 +251,7 @@ const PersonalInformation = ({
             {profile?.resume_url && (
               <>
                 <a
-                  href={`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${profile.resume_url}`}
+                  href={`${import.meta.env.VITE_API_URL || ''}${profile.resume_url}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{

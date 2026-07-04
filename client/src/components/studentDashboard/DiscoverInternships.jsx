@@ -73,7 +73,7 @@ const DiscoverInternships = ({ activeTab: propActiveTab }) => {
 
   const fetchFeaturedInternships = async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/featured-internships');
+      const response = await fetch('/api/featured-internships');
       const data = await response.json();
 
       if (data.success) {
@@ -107,7 +107,7 @@ const DiscoverInternships = ({ activeTab: propActiveTab }) => {
         }
       });
 
-      const response = await fetch(`http://localhost:4000/api/internships?${params.toString()}`);
+      const response = await fetch(`/api/internships?${params.toString()}`);
       const data = await response.json();
 
       if (data.success) {
@@ -126,7 +126,7 @@ const DiscoverInternships = ({ activeTab: propActiveTab }) => {
 
   const fetchFilterOptions = async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/internships-filters');
+      const response = await fetch('/api/internships-filters');
       const data = await response.json();
 
       if (data.success) {
@@ -176,7 +176,7 @@ const DiscoverInternships = ({ activeTab: propActiveTab }) => {
         return;
       }
       // Optionally, send captcha token to backend for verification
-      const response = await fetch(`http://localhost:4000/api/internships/${applyId}/apply`, {
+      const response = await fetch(`/api/internships/${applyId}/apply`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${apiToken}`,
@@ -310,7 +310,7 @@ const DiscoverInternships = ({ activeTab: propActiveTab }) => {
                     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
                       {internship.logo_url ? (
                         <img 
-                          src={`http://localhost:4000${internship.logo_url}`}
+                          src={`${internship.logo_url}`}
                           alt={`${internship.company_name} logo`}
                           style={{
                             width: '35px',
@@ -762,7 +762,7 @@ const DiscoverInternships = ({ activeTab: propActiveTab }) => {
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
                           {internship.logo_url ? (
                             <img 
-                              src={`http://localhost:4000${internship.logo_url}`}
+                              src={`${internship.logo_url}`}
                               alt={`${internship.company_name} logo`}
                               style={{
                                 width: '40px',

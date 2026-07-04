@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 // Base URL for API requests
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 // Create axios instance with default configuration
 const api = axios.create({
@@ -735,7 +735,7 @@ export const utils = {
   getFileUrl: (filePath) => {
     if (!filePath) return null;
     if (filePath.startsWith('http')) return filePath;
-    return `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${filePath}`;
+    return `${import.meta.env.VITE_API_URL || ''}${filePath}`;
   }
 };
 

@@ -20,7 +20,7 @@ const CompanyProfile = ({ onProfileSaved }) => {
                 const profileData = response.profile || response.data || response;
                 setCompanyData(profileData);
                 setFormData(profileData);
-                setLogoPreview(profileData.logo_url ? `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${profileData.logo_url}` : '');
+                setLogoPreview(profileData.logo_url ? `${import.meta.env.VITE_API_URL || ''}${profileData.logo_url}` : '');
             } catch (error) {
                 console.error('Error fetching company profile:', error);
             } finally {
@@ -51,7 +51,7 @@ const CompanyProfile = ({ onProfileSaved }) => {
     const handleCancelEdit = () => {
         setIsEditMode(false);
         setFormData(companyData);
-        setLogoPreview(companyData.logo_url ? `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${companyData.logo_url}` : '');
+        setLogoPreview(companyData.logo_url ? `${import.meta.env.VITE_API_URL || ''}${companyData.logo_url}` : '');
         setLogoFile(null);
     };
 
@@ -98,7 +98,7 @@ const CompanyProfile = ({ onProfileSaved }) => {
             const profileData = response.profile || response.data || response;
             setCompanyData(profileData);
             setFormData(profileData);
-            setLogoPreview(profileData.logo_url ? `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${profileData.logo_url}` : '');
+            setLogoPreview(profileData.logo_url ? `${import.meta.env.VITE_API_URL || ''}${profileData.logo_url}` : '');
             setIsEditMode(false);
             if (onProfileSaved) onProfileSaved();
             alert('Profile updated successfully');

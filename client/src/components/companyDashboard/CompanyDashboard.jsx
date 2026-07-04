@@ -210,7 +210,7 @@ const CompanyDashboard = () => {
                         width: '60px',
                         height: '60px',
                         backgroundColor: companyProfile?.logo_url ? 'transparent' : '#007bff',
-                        backgroundImage: companyProfile?.logo_url ? `url(${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${companyProfile.logo_url})` : 'none',
+                        backgroundImage: companyProfile?.logo_url ? `url(${import.meta.env.VITE_API_URL || ''}${companyProfile.logo_url})` : 'none',
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                         borderRadius: '50%',

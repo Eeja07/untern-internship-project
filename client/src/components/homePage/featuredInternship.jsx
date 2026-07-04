@@ -32,7 +32,7 @@ const FeaturedInternships = ({ onForStudentsClick, onClose }) => {
   const fetchFeaturedInternships = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:4000/api/featured-internships');
+      const response = await fetch('/api/featured-internships');
       const data = await response.json();
 
       if (data.success) {
@@ -101,7 +101,7 @@ const FeaturedInternships = ({ onForStudentsClick, onClose }) => {
                         <div className="company-logo">
                           {internship.logo_url ? (
                             <img 
-                              src={`http://localhost:4000${internship.logo_url}`} 
+                              src={`${internship.logo_url}`} 
                               alt={`${internship.company_name} logo`} 
                               style={{ width: '50px', height: '50px', borderRadius: '8px', objectFit: 'cover' }} 
                             />
@@ -166,7 +166,7 @@ const FeaturedInternships = ({ onForStudentsClick, onClose }) => {
                               <div className="company-logo">
                                 {internship.logo_url ? (
                                   <img 
-                                    src={`http://localhost:4000${internship.logo_url}`} 
+                                    src={`${internship.logo_url}`} 
                                     alt={`${internship.company_name} logo`} 
                                     style={{ width: isTablet ? '50px' : '60px', height: isTablet ? '50px' : '60px', borderRadius: '8px', objectFit: 'cover' }} 
                                   />
@@ -229,7 +229,7 @@ const FeaturedInternships = ({ onForStudentsClick, onClose }) => {
                               <div className="company-logo">
                                 {internship.logo_url ? (
                                   <img 
-                                    src={`http://localhost:4000${internship.logo_url}`} 
+                                    src={`${internship.logo_url}`} 
                                     alt={`${internship.company_name} logo`} 
                                     style={{ width: isTablet ? '50px' : '60px', height: isTablet ? '50px' : '60px', borderRadius: '8px', objectFit: 'cover' }} 
                                   />

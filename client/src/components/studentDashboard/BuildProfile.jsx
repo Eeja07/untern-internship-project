@@ -129,7 +129,7 @@ const BuildProfile = ({ onProfileSaved }) => {
         if (profileResponse.profile.profile_picture_url) {
           const imageUrl = profileResponse.profile.profile_picture_url.startsWith('http') 
             ? profileResponse.profile.profile_picture_url
-            : `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${profileResponse.profile.profile_picture_url}`;
+            : `${import.meta.env.VITE_API_URL || ''}${profileResponse.profile.profile_picture_url}`;
           setProfilePicturePreview(imageUrl);
         }
       }
@@ -277,7 +277,7 @@ const BuildProfile = ({ onProfileSaved }) => {
         // Update preview with the new URL
         const newImageUrl = response.profile_picture_url.startsWith('http') 
           ? response.profile_picture_url
-          : `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${response.profile_picture_url}`;
+          : `${import.meta.env.VITE_API_URL || ''}${response.profile_picture_url}`;
         setProfilePicturePreview(newImageUrl);
       }
     } catch (error) {

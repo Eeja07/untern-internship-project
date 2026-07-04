@@ -38,7 +38,7 @@ const ProfileModal = ({ userId, onClose }) => {
     const getFileUrl = (filePath) => {
         if (!filePath) return null;
         if (filePath.startsWith('http')) return filePath;
-        return `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${filePath}`;
+        return `${import.meta.env.VITE_API_URL || ''}${filePath}`;
     };
 
     return (
@@ -463,7 +463,7 @@ const ManageApplicationsByStatus = () => {
                                     onClick={async () => {
                                         try {
                                             const token = localStorage.getItem('token');
-                                            const response = await fetch('http://localhost:4000/api/company/debug-applications', {
+                                            const response = await fetch('/api/company/debug-applications', {
                                                 headers: { 'Authorization': `Bearer ${token}` }
                                             });
                                             const data = await response.json();

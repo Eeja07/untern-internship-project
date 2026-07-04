@@ -1,11 +1,11 @@
 import React from 'react';
-import astra from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/astra.svg';
-import bni from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/bni.svg';
-import garuda from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/garuda.svg';
-import mandiri from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/mandiri.svg';
-import pertamina from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/pertamina.svg';
-import pln from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/pln.svg';
-import telkom from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/telkom.svg'; 
+import astra from '../../assets/astra.svg';
+import bni from '../../assets/bni.svg';
+import garuda from '../../assets/garuda.svg';
+import mandiri from '../../assets/mandiri.svg';
+import pertamina from '../../assets/pertamina.svg';
+import pln from '../../assets/pln.svg';
+import telkom from '../../assets/telkom.svg'; 
 
 const CompanyLogos = () => {
   const companies = [

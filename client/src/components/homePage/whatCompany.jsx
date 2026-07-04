@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 // It's better practice to use relative paths for assets so your project is portable.
 // For example: import pio from '../assets/pio.webp;
-import pio from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/pio.svg';
-import mae from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/mae.svg';
-import bytp from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/bytp.svg';
-import arwleft from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/arwleft.svg';
-import arwright from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/arwright.svg';
-import jeff from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/jeff.svg';
-import eeja from '/home/eeja/Downloads/Github/Untern-webApp-internship-winnicode/client/src/assets/eeja.webp';
+import pio from '../../assets/pio.svg';
+import mae from '../../assets/mae.svg';
+import bytp from '../../assets/bytp.svg';
+import arwleft from '../../assets/arwleft.svg';
+import arwright from '../../assets/arwright.svg';
+import jeff from '../../assets/jeff.svg';
+import eeja from '../../assets/eeja.webp';
 import { Star } from 'lucide-react';
 
 const WhatCompany = () => {
